@@ -1,0 +1,58 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
+
+namespace Остатки.Classes
+{
+	public class Message 
+	{
+		public static List<string> errorsList = new List<string>();
+		public static List<string> infoList = new List<string>();
+		public static void ShowInfo(object data)
+		{
+			ContentDialog errorDialog = new ContentDialog()
+			{
+				Title = "Успешно",
+				Content = data.ToString(),
+				PrimaryButtonText = "ОК"
+			};
+			var errorDialogRusult = errorDialog.ShowAsync();
+		}
+		public static void ShowError(object data)
+		{
+			ContentDialog errorDialog = new ContentDialog()
+			{
+				Title = "Ошибка",
+				Content = data.ToString(),
+				PrimaryButtonText = "ОК"
+			};
+			var errorDialogRusult = errorDialog.ShowAsync();
+		}
+		public static void AllErrors()
+		{
+			if (errorsList.Count != 0)
+			{
+				string data = "";
+				foreach (var item in errorsList)
+				{
+					data += item + "\n";
+				}
+				ShowError(data);
+				errorsList.Clear();
+			}
+			if (infoList.Count != 0)
+			{
+				string data = "";
+				foreach (var item in infoList)
+				{
+					data += item + "\n";
+				}
+				ShowInfo(data);
+				infoList.Clear();
+			}
+		}
+	}
+}
