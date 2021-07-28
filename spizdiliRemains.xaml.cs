@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.UI.Notifications;
 using System.IO;
+using System.Web;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -235,6 +236,74 @@ namespace Остатки
 			// Update the existing notification's data by using tag/group
 			ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
 		}
+
+		private static readonly Regex _tags_ = new Regex(@"<[^>]+?>", RegexOptions.Multiline | RegexOptions.Compiled);
+
+		//add characters that are should not be removed to this regex
+		private static readonly Regex _notOkCharacter_ = new Regex(@"[^\w;&#@.:/\?=|%!() -]", RegexOptions.Compiled);
+
+		public static String UnHtml(String html)
+		{
+			html = HttpUtility.UrlDecode(html);
+			html = HttpUtility.HtmlDecode(html);
+
+			html = RemoveTag(html, "<!--", "-->");
+			html = RemoveTag(html, "<script", "</script>");
+			html = RemoveTag(html, "<style", "</style>");
+
+			//replace matches of these regexes with space
+			html = _tags_.Replace(html, " ");
+			html = _notOkCharacter_.Replace(html, " ");
+			html = SingleSpacedTrim(html);
+
+			return html;
+		}
+
+		private static String RemoveTag(String html, String startTag, String endTag)
+		{
+			Boolean bAgain;
+			do
+			{
+				bAgain = false;
+				Int32 startTagPos = html.IndexOf(startTag, 0, StringComparison.CurrentCultureIgnoreCase);
+				if (startTagPos < 0)
+					continue;
+				Int32 endTagPos = html.IndexOf(endTag, startTagPos + 1, StringComparison.CurrentCultureIgnoreCase);
+				if (endTagPos <= startTagPos)
+					continue;
+				html = html.Remove(startTagPos, endTagPos - startTagPos + endTag.Length);
+				bAgain = true;
+			} while (bAgain);
+			return html;
+		}
+
+		private static String SingleSpacedTrim(String inString)
+		{
+			StringBuilder sb = new StringBuilder();
+			Boolean inBlanks = false;
+			foreach (Char c in inString)
+			{
+				switch (c)
+				{
+					case '\r':
+					case '\n':
+					case '\t':
+					case ' ':
+						if (!inBlanks)
+						{
+							inBlanks = true;
+							sb.Append(' ');
+						}
+						continue;
+					default:
+						inBlanks = false;
+						sb.Append(c);
+						break;
+				}
+			}
+			return sb.ToString().Trim();
+		}
+
 		public void createProductThread(object LinksFromFile)
 		{
 			string tag = "Product";
@@ -295,7 +364,6 @@ namespace Остатки
 			specificationsDict.Add("Глубина в мм", null);
 			specificationsDict.Add("Неудачные ссылки или онлайн", null);
 			specificationsDict.Add("Кол-во потерь", null);
-			int countProeb = 0;
 			foreach (var ProductLink in Links)
 			{
 				List<int> productCount = new List<int>(); // Кол-во
@@ -305,11 +373,9 @@ namespace Остатки
 				string code = getResponse(onePos.ProductLink);
 				while (ocheredOutLinks.Count != 0)
 				{
-					Thread.Sleep(2000);
+					Thread.Sleep(200);
 					code = getResponse(ocheredOutLinks.Dequeue());
 				} 
-				countProeb = ocheredOutProduct.Count;
-				specificationsDict["Кол-во потерь"] = countProeb.ToString();
 				bool kolvoTru = true;
 				Regex regexCount = new Regex(@"stock=""(\w+)""");
 				Regex regexLocation = new Regex(@"<span>Леруа Мерлен \w+");
@@ -393,9 +459,11 @@ namespace Остатки
 						noOpis = true;
 					string OpisCode = "";
 					if (!noOpis)
+					{
 						OpisCode = code.Substring(indexOfStartOpis, indexOfEndOpis - indexOfStartOpis);
+					}	
 					else
-						OpisCode = "--------------";
+						OpisCode = "11111111";
 
 					int indexOfStartImg = code.IndexOf(@"id=""picture-box-id-generated-0""");
 					int indexOfEndImg = code.IndexOf(@".jpg"">");
@@ -519,35 +587,17 @@ namespace Остатки
 
 					if (!noOpis)
 					{
-						OpisCode = OpisCode.Replace("<strong>", "");
-						OpisCode = OpisCode.Replace("</strong>", "");
-						OpisCode = OpisCode.Replace("<p>", "|");
-						OpisCode = OpisCode.Replace("</p>", "|");
-						if (OpisCode.Contains("СКАЧАТЬ ИНСТРУКЦИЮ"))
-						{
-							OpisCode = OpisCode.Replace("СКАЧАТЬ ИНСТРУКЦИЮ", "");
-							while (OpisCode.Contains("<"))
-							{
-								int startIndexDel = OpisCode.IndexOf("<");
-								int endIndexDel = OpisCode.IndexOf(">");
-								OpisCode = OpisCode.Remove(startIndexDel, endIndexDel - startIndexDel + 1);
-							}
-						}
-						if (OpisCode.Replace(" ", "").Replace(".", "").Replace(",", "").Length == 0)
-						{
-							Opisanie = "--------------";
-						}
-						else
-						{
-							string[] opis = OpisCode.Split('|');
-							if (opis[1].Replace(" ", "").Replace(".", "").Replace(",", "").Length == 0)
-								Opisanie = "--------------";
-							else
-								Opisanie = opis[1];
-						}
+						Opisanie = UnHtml(OpisCode);
+						if (Opisanie.Contains("Описание"))
+							Opisanie = Opisanie.Replace("Описание","");
+						if (Opisanie.Contains("СКАЧАТЬ ИНСТРУКЦИЮ"))
+							Opisanie = Opisanie.Replace("СКАЧАТЬ ИНСТРУКЦИЮ", "");
+						if (Opisanie.Contains("Скачать документы сертификации"))
+							Opisanie = Opisanie.Replace("Скачать документы сертификации", "");
+						Opisanie = Opisanie.Trim();
 					}
 					else
-						Opisanie = "--------------";
+						Opisanie = "---------";
 
 					Regex regexImg = new Regex(@"srcset=""([^""]+)""");
 					MatchCollection matchesImg = regexImg.Matches(code);
@@ -655,9 +705,6 @@ namespace Остатки
 				countToApply++;
 				UpdateProgress(Convert.ToDouble(Links.Count), Convert.ToDouble(countToApply));
 			}
-
-
-
 		}
 		public static string RemoveInvalidChars(string file_name)
 		{

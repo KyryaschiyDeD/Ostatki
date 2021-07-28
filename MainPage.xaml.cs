@@ -14,7 +14,7 @@ namespace Остатки
         {
             this.InitializeComponent();
 
-            myFrame.Navigate(typeof(remains));
+            myFrame.Navigate(typeof(remains2));
             TitleTextBlock.Text = "Остатки в 3D";
         }
 
@@ -22,7 +22,7 @@ namespace Остатки
         {
             if (remains.IsSelected)
             {
-                myFrame.Navigate(typeof(remains));
+                myFrame.Navigate(typeof(remains2));
                 TitleTextBlock.Text = "Остатки в 3D";
             }
             else if (add.IsSelected)
