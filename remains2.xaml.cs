@@ -19,6 +19,8 @@ using Windows.Storage;
 using System.Collections.ObjectModel;
 using Windows.UI.Notifications;
 using Microsoft.Toolkit.Uwp.Notifications;
+using System.Threading;
+using System.Threading.Tasks;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -141,7 +143,6 @@ namespace Остатки
             }
 
         }
-
         public void UpdateProgress(double kolvo, double apply)
         {
             // Construct a NotificationData object;
@@ -164,7 +165,28 @@ namespace Остатки
             // Update the existing notification's data by using tag/group
             ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
         }
+        public void UpdateProgressUpdate(double kolvo, double apply)
+        {
+            // Construct a NotificationData object;
+            string tag = "Update";
+            string group = "Lerya";
 
+            // Create NotificationData and make sure the sequence number is incremented
+            /* since last update, or assign 0 for updating regardless of order*/
+            var data = new NotificationData
+            {
+                SequenceNumber = 0
+            };
+
+            // Assign new values
+            // Note that you only need to assign values that changed. In this example
+            // we don't assign progressStatus since we don't need to change it
+            data.Values["myProgressValue"] = (apply / kolvo).ToString().Replace(",", ".");
+            data.Values["progressValueString"] = $"{apply}/{kolvo} товаров";
+
+            // Update the existing notification's data by using tag/group
+            ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
+        }
         public void getRemainsIsBaseThread()
         {
             string tag = "Ostatck";
@@ -201,17 +223,73 @@ namespace Остатки
 
             // Show the toast notification to the user
             ToastNotificationManager.CreateToastNotifier().Show(toast);
-            using (var db = new LiteDatabase($@"{ApplicationData.Current.LocalFolder.Path}/ProductsDB.db"))
+
+            var col = Global.db.GetCollection<Product>("Products");
+            List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+            foreach (var item in allProducts)
             {
-                var col = db.GetCollection<Product>("Products");
-                List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-				foreach (var item in allProducts)
-				{
-                    ProductList1.Add(item);
-                    UpdateProgress(Convert.ToDouble(allProducts.Count), Convert.ToDouble(allProducts.Count - (allProducts.Count - ProductList1.Count)));
-                }
+                ProductList1.Add(item);
+                UpdateProgress(Convert.ToDouble(allProducts.Count), Convert.ToDouble(allProducts.Count - (allProducts.Count - ProductList1.Count)));
+            }
+
+        }
+
+        public void updateAllDataBase()
+		{
+            string tag = "Update";
+            string group = "Lerya";
+
+            // Construct the toast content with data bound fields
+            var content = new ToastContentBuilder()
+                .AddText("Тсссс... Происходит обновление... Не мешай!")
+                .AddVisualChild(new AdaptiveProgressBar()
+                {
+                    Title = "Товар",
+                    Value = new BindableProgressBarValue("myProgressValue"),
+                    ValueStringOverride = new BindableString("progressValueString"),
+                    Status = new BindableString("progressStatus")
+                })
+                .GetToastContent();
+
+            // Generate the toast notification
+            var toast = new ToastNotification(content.GetXml());
+
+            // Assign the tag and group
+            toast.Tag = tag;
+            toast.Group = group;
+
+            // Assign initial NotificationData values
+            // Values must be of type string
+            toast.Data = new NotificationData();
+            toast.Data.Values["progressValue"] = "0";
+            toast.Data.Values["progressValueString"] = "0/0 товаров";
+            toast.Data.Values["progressStatus"] = "Анализируем";
+
+            // Provide sequence number to prevent out-of-order updates, or assign 0 to indicate "always update"
+            toast.Data.SequenceNumber = 0;
+
+            // Show the toast notification to the user
+            ToastNotificationManager.CreateToastNotifier().Show(toast);
+            List<Product> linksProductTXT = new List<Product>();
+            
+                var col = Global.db.GetCollection<Product>("Products");
+                var allList = col.FindAll();
+                linksProductTXT = allList.ToList();
+            
+            Queue<string> ochered = new Queue<string>();
+            foreach (var item in linksProductTXT)
+            {
+                ochered.Enqueue(item.ProductLink);
+            }
+            
+            Task[] tasks2 = new Task[linksProductTXT.Count];
+            for (int i = 0; i < linksProductTXT.Count; i++)
+            {
+                tasks2[i] = Task.Factory.StartNew(() => Product.parseLeryaUpdate(ochered.Dequeue()));
+                UpdateProgressUpdate(linksProductTXT.Count, i);
             }
         }
+
         private void GoToWaitRemains_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -255,8 +333,14 @@ namespace Остатки
         public remains2()
 		{
 			InitializeComponent();
+            Thread thread = new Thread(updateAllDataBase);
+            thread.Start();
+            thread.Join();
+            Thread.Sleep(5000);
             getRemainsIsBaseThread();
-
+            
+            //Thread thread = new Thread(getRemainsIsBaseThread);
+            //thread.Start();
         }
 
     }

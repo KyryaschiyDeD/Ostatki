@@ -25,7 +25,7 @@
 						<TextBlock Margin="20" Text="Подробнее:"/>
 						<TextBlock Text="{x:Bind Name}"/>
 						<TextBlock FontSize="13" Text="{x:Bind NowPrice}"/>
-						<TextBlock FontSize="13" Text="{x:Bind OldPrice}" />
+						<TextBlock FontSize="13" Text="{x:Bind OldPriceCh}" />
 						<TextBlock FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
 					</StackPanel>
 				</DataTemplate>
@@ -58,7 +58,7 @@
 				<controls:DataGridTextColumn 
             Header="Старая цена"
 			Width="SizeToHeader"
-            Binding="{Binding OldPrice}" 
+            Binding="{Binding OldPriceCh}" 
 					Tag="OldPrice">
 					<controls:DataGridTextColumn.ElementStyle>
 						<Style TargetType="TextBlock">

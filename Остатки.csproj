@@ -134,6 +134,7 @@
       <DependentUpon>archiveRemains.xaml</DependentUpon>
     </Compile>
     <Compile Include="Classes\DataBaseJob.cs" />
+    <Compile Include="Classes\Global.cs" />
     <Compile Include="Classes\Message.cs" />
     <Compile Include="Classes\Product.cs" />
     <Compile Include="MainPage.xaml.cs">
