@@ -21,13 +21,47 @@ using Windows.UI.Notifications;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
+using Newtonsoft.Json;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace Остатки
 {
+    public class Item
+    {
+        public int product_id { get; set; }
+        public string offer_id { get; set; }
+        public override string ToString()
+        {
+            return $"product_id: {product_id} offer_id: {offer_id}";
+        }
+    }
+
+    public class Result
+    {
+        public List<Item> items { get; set; }
+        public int total { get; set; }
+        public override string ToString()
+        {
+            return items[0].ToString();
+        }
+    }
+
+    public class Root
+    {
+        public Result result { get; set; }
+
+		public override string ToString()
+		{
+			return result.ToString();
+		}
+	}
+
     public sealed partial class remains2 : Page
 	{
+        static StorageFolder folder = ApplicationData.Current.LocalFolder;
+
         public ObservableCollection<Product> ProductList1 = new ObservableCollection<Product>();
         private void dg_Sorting(object sender, DataGridColumnEventArgs e)
         {
@@ -187,6 +221,42 @@ namespace Остатки
             // Update the existing notification's data by using tag/group
             ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
         }
+
+        private static void PostRequestAsync()
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
+            httpWebRequest.Headers.Add("Client-Id", "104333");
+            httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";//Можно GET
+            string json = @"{
+  ""filter"": {
+    ""visibility"": ""STATE_FAILED""
+  },
+  ""page"": 1,
+  ""page_size"": 318
+}";
+            using (var requestStream = httpWebRequest.GetRequestStream())
+            using (var writer = new StreamWriter(requestStream))
+            {
+                writer.Write(json);
+            }
+            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                //ответ от сервера
+                var result = streamReader.ReadToEnd();
+
+                //Сериализация
+                Root otb = JsonConvert.DeserializeObject<Root>(result);
+               // Message.infoList.Add(result.ToString());
+                Message.infoList.Add("------------");
+                Message.infoList.Add(otb.ToString());
+                Message.infoList.Add("------------");
+            }
+            Message.AllErrors();
+        }
+
         public void getRemainsIsBaseThread()
         {
             string tag = "Ostatck";
@@ -223,15 +293,14 @@ namespace Остатки
 
             // Show the toast notification to the user
             ToastNotificationManager.CreateToastNotifier().Show(toast);
-
-            var col = Global.db.GetCollection<Product>("Products");
-            List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-            foreach (var item in allProducts)
+            
+            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
-                ProductList1.Add(item);
-                UpdateProgress(Convert.ToDouble(allProducts.Count), Convert.ToDouble(allProducts.Count - (allProducts.Count - ProductList1.Count)));
-            }
+                var col = db.GetCollection<Product>("Products");
+                List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+                ProductList1 = new ObservableCollection<Product>(allProducts);
 
+            }
         }
 
         public void updateAllDataBase()
@@ -271,11 +340,12 @@ namespace Остатки
             // Show the toast notification to the user
             ToastNotificationManager.CreateToastNotifier().Show(toast);
             List<Product> linksProductTXT = new List<Product>();
-            
-                var col = Global.db.GetCollection<Product>("Products");
+            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+            {
+                var col = db.GetCollection<Product>("Products");
                 var allList = col.FindAll();
                 linksProductTXT = allList.ToList();
-            
+            }
             Queue<string> ochered = new Queue<string>();
             foreach (var item in linksProductTXT)
             {
@@ -333,12 +403,14 @@ namespace Остатки
         public remains2()
 		{
 			InitializeComponent();
-            Thread thread = new Thread(updateAllDataBase);
-            thread.Start();
-            thread.Join();
-            Thread.Sleep(5000);
+            //updateAllDataBase();
+            // Thread thread = new Thread(updateAllDataBase);
+            //thread.Start();
+            //thread.Join();
+
             getRemainsIsBaseThread();
-            
+
+            //PostRequestAsync();
             //Thread thread = new Thread(getRemainsIsBaseThread);
             //thread.Start();
         }

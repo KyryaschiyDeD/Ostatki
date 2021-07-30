@@ -10,7 +10,8 @@ namespace Остатки.Classes
 {
 	public class Global
 	{
-		public static StorageFolder folder = ApplicationData.Current.LocalFolder;
-		public static LiteDatabase db = new LiteDatabase($@"{folder.Path}/ProductsDB.db");
+		//public static StorageFolder folder = ApplicationData.Current.LocalFolder;
+		
+		//public static LiteDatabase db = new LiteDatabase($@"{folder.Path}/ProductsDB.db");
 	}
 }
