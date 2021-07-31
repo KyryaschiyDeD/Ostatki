@@ -706,6 +706,7 @@ namespace Остатки
 				UpdateProgress(Convert.ToDouble(Links.Count), Convert.ToDouble(countToApply));
 			}
 		}
+
 		public static string RemoveInvalidChars(string file_name)
 		{
 			foreach (Char invalid_char in Path.GetInvalidFileNameChars())
@@ -714,6 +715,7 @@ namespace Остатки
 			}
 			return file_name;
 		}
+
 		public async void doTread()
 		{
 			List<string> Links = new List<string>();
@@ -750,6 +752,7 @@ namespace Остатки
 				}
 			}
 		}
+
 		public async void createProduct_Click(object sender, RoutedEventArgs e)
 		{
 			var picker = new Windows.Storage.Pickers.FileOpenPicker();
@@ -766,6 +769,7 @@ namespace Остатки
 			Thread goFile = new Thread(doTread);
 			goFile.Start();
 		}
+
 		public void getLinksThread()
 		{
 			string tag = "Tovar";
@@ -875,6 +879,7 @@ namespace Остатки
 			Thread getLinks = new Thread(getLinksTreadPerexod);
 			getLinks.Start();
 		}
+
 		private async void formatLinks_Click(object sender, RoutedEventArgs e)
 		{
 			var picker = new Windows.Storage.Pickers.FileOpenPicker();
@@ -912,6 +917,7 @@ namespace Остатки
 			}
 			Message.AllErrors();
 		}
+
 		async void SaveFile(string name, string allData)
 		{
 			var savePicker = new FileSavePicker();
@@ -929,9 +935,5 @@ namespace Остатки
 				await FileIO.WriteTextAsync(new_file, allData);
 			}
 		}
-
-
-
-
 	}
 }

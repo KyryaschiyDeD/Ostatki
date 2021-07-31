@@ -1,5 +1,6 @@
 ﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Остатки.Pages;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -47,7 +48,7 @@ namespace Остатки
             }
             else if (spizdiliRemains.IsSelected)
             {
-                myFrame.Navigate(typeof(spizdiliRemains));
+                myFrame.Navigate(typeof(StealProducts));
                 TitleTextBlock.Text = "Спиздили";
             }
         }
