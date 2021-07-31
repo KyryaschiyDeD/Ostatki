@@ -76,7 +76,15 @@ namespace Остатки.Classes
 		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 YaBrowser/16.11.0.2680 Yowser/2.5 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 YaBrowser/16.10.1.1116 Yowser/2.5 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 YaBrowser/16.11.1.673 Yowser/2.5 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 YaBrowser/16.11.1.676 Yowser/2.5 Safari/537.36"
+		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 YaBrowser/16.11.1.676 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.0.1974 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.0.2033 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.0.2034 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.0.2036 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.1.1003 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 YaBrowser/17.1.1.1005 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 YaBrowser/16.3.0.7146 Yowser/2.5 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 YaBrowser/16.7.1.20936 Yowser/2.5 Safari/537.36"
 		};
 
 		public static string[] proxyIp = {
@@ -87,6 +95,12 @@ namespace Остатки.Classes
 		"82.114.119.81",
 		"178.159.40.19",
 		"109.232.106.236",
+		"91.77.162.117",
+		"85.26.146.169",
+		"176.99.141.78",
+		"62.182.74.207",
+		"193.233.148.216",
+		"217.197.252.154"
 		};
 		public static int[] proxyPort = {
 		8080,
@@ -96,6 +110,12 @@ namespace Остатки.Classes
 		8080,
 		8080,
 		49565,
+		8080,
+		80,
+		5678,
+		4145,
+		5678,
+		4145
 		};
 
 		public static int countOfUserAgent = 0;

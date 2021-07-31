@@ -121,7 +121,6 @@ namespace Остатки.Pages
 
 		public static string getResponse(string uri)
 		{
-
 			string htmlCode = "";
 			HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(uri);
 			proxy_request.Method = "GET";
@@ -131,6 +130,7 @@ namespace Остатки.Pages
 			proxy_request.Proxy = new WebProxy(Global.proxyIp[Global.countproxyIp], Global.proxyPort[Global.countproxyPort]);
 			HttpWebResponse resp = null;
 			string html = "";
+			bool isByll = false;
 			try
 			{
 				resp = proxy_request.GetResponse() as HttpWebResponse;
@@ -139,10 +139,16 @@ namespace Остатки.Pages
 					using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
 						html = sr.ReadToEnd();
 				htmlCode = html.Trim();
+				if (String.IsNullOrEmpty(htmlCode) || htmlCode.Contains("blocked"))
+				{
+					isByll = true;
+					UnRedactLinksQueue.Enqueue(uri);
+				}
 			}
 			catch (Exception)
 			{
-				UnRedactLinksQueue.Enqueue(uri);
+				if (!isByll)
+					UnRedactLinksQueue.Enqueue(uri);
 			}
 			Global.countOfUserAgent++;
 			if (Global.countOfUserAgent > Global.userAgent.Length - 1)

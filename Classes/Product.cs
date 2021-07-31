@@ -191,130 +191,139 @@ namespace Остатки.Classes
 		}
 		public static void parseLeryaUpdate(object ink)
 		{
-			string link = ink.ToString();
-			List<int> productCount = new List<int>(); // Кол-во
-			List<string> productLocation = new List<string>(); // Место
-			Product onePos = new Product();
-			onePos.ProductLink = link;
-			string code = getResponse(link);
-			int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
-			int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
-			string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
-			string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
-
-			// Получаем строку с наименованием, артикулом и ценой
-			Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
-			Regex regexCount = new Regex(@"stock=""(\w+)""");
-			Regex regexLocation = new Regex(@"<span>Леруа Мерлен \w+");
-
-			string nextNameArticleId = "";
-			MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
-			if (matchesArticleNumberName.Count > 0)
+			if (ink != null)
 			{
-				foreach (Match match in matchesArticleNumberName)
+				string link = ink.ToString();
+				List<int> productCount = new List<int>(); // Кол-во
+				List<string> productLocation = new List<string>(); // Место
+				Product onePos = new Product();
+				onePos.ProductLink = link;
+				string code = getResponse(link);
+				int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
+				int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
+				if (indexOfStart >= 0)
 				{
-					nextNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Совпадений не найдено");
-			}
-			// Выделяем только наименование, артикул и цену
-			regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
-			matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
+					string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
+					string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
 
-			string finishNameArticleId = "";
-			if (matchesArticleNumberName.Count > 0)
-			{
-				foreach (Match match in matchesArticleNumberName)
-				{
-					finishNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
-			}
-			// Получаем чисто артикул, наименование и цену
-			regexArticleNumber = new Regex(@""".*?""");
-			matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
 
-			MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
-			MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
-			// Артикл и имя
-			string resultNameArticleId = "";
-			if (matchesArticleNumberName.Count > 0)
-			{
-				foreach (Match match in matchesArticleNumberName)
-				{
-					resultNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
-			}
-			string[] namesAndArticleId = resultNameArticleId.Split('"');
-			// Вносим в переменные 
-			try
-			{
-				onePos.Name = namesAndArticleId[3];
-				onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
-				onePos.ArticleNumberLerya = Convert.ToInt64(namesAndArticleId[1]);
-			}
-			catch (Exception)
-			{
-				Message.errorsList.Add("Наименование, цена и артикул в неправильном формате!!!");
-			}
 
-			// Кол-во
-			if (matchesCount.Count > 0)
-			{
-				foreach (Match match in matchesCount)
-				{
-					string[] digits = Regex.Split(match.Value, @"\D+");
-					foreach (string value in digits)
+
+					// Получаем строку с наименованием, артикулом и ценой
+					Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
+					Regex regexCount = new Regex(@"stock=""(\w+)""");
+					Regex regexLocation = new Regex(@"<span>Леруа Мерлен \w+");
+
+					string nextNameArticleId = "";
+					MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
+					if (matchesArticleNumberName.Count > 0)
 					{
-						int number;
-						if (int.TryParse(value, out number))
+						foreach (Match match in matchesArticleNumberName)
 						{
-							productCount.Add(number);
+							nextNameArticleId += match;
 						}
 					}
+					else
+					{
+						Message.errorsList.Add("Совпадений не найдено");
+					}
+					// Выделяем только наименование, артикул и цену
+					regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
+
+					string finishNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							finishNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+					}
+					// Получаем чисто артикул, наименование и цену
+					regexArticleNumber = new Regex(@""".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
+
+					MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
+					MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
+					// Артикл и имя
+					string resultNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							resultNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+					}
+					string[] namesAndArticleId = resultNameArticleId.Split('"');
+					// Вносим в переменные 
+					try
+					{
+						onePos.Name = namesAndArticleId[3];
+						onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
+						onePos.ArticleNumberLerya = Convert.ToInt64(namesAndArticleId[1]);
+					}
+					catch (Exception)
+					{
+						Message.errorsList.Add("Наименование, цена и артикул в неправильном формате!!!");
+					}
+
+					// Кол-во
+					if (matchesCount.Count > 0)
+					{
+						foreach (Match match in matchesCount)
+						{
+							string[] digits = Regex.Split(match.Value, @"\D+");
+							foreach (string value in digits)
+							{
+								int number;
+								if (int.TryParse(value, out number))
+								{
+									productCount.Add(number);
+								}
+							}
+						}
+
+					}
+					else
+					{
+						Message.errorsList.Add("Не удалось найти и загрузить остатки!!!");
+					}
+					// Место
+					if (matchesLocation.Count > 0)
+					{
+						foreach (Match match in matchesLocation)
+						{
+							string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+							productLocation.Add(s2[2]);
+						}
+
+					}
+					else
+					{
+						Message.errorsList.Add("Не удалось найти и загрузить местоположение!!!");
+					}
+
+					foreach (var item in productLocation)
+					{
+						if (whiteList.Contains(item))
+							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
+						else
+						if (blackList.Contains(item))
+							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
+					}
+					lock (locker)
+					{
+						DataBaseJob.UpdateOldProduct(onePos);
+					}
 				}
-
-			}
-			else
-			{
-				Message.errorsList.Add("Не удалось найти и загрузить остатки!!!");
-			}
-			// Место
-			if (matchesLocation.Count > 0)
-			{
-				foreach (Match match in matchesLocation)
-				{
-					string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-					productLocation.Add(s2[2]);
-				}
-
-			}
-			else
-			{
-				Message.errorsList.Add("Не удалось найти и загрузить местоположение!!!");
-			}
-
-			foreach (var item in productLocation)
-			{
-				if (whiteList.Contains(item))
-					onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
-				else
-				if (blackList.Contains(item))
-					onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
-			}
-			lock (locker)
-			{
-				DataBaseJob.UpdateOldProduct(onePos);
 			}
 		}
 		public override string ToString()

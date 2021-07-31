@@ -404,11 +404,11 @@ namespace Остатки
 		{
 			InitializeComponent();
             //updateAllDataBase();
-            // Thread thread = new Thread(updateAllDataBase);
-            //thread.Start();
-            //thread.Join();
+            //Thread thread = new Thread(updateAllDataBase);
+           // thread.Start();
+           //thread.Join();
 
-            getRemainsIsBaseThread();
+           getRemainsIsBaseThread();
 
             //PostRequestAsync();
             //Thread thread = new Thread(getRemainsIsBaseThread);
