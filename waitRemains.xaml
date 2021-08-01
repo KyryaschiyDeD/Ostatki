@@ -4,11 +4,132 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Остатки"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls" xmlns:local1="using:Остатки.Classes"
+	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+	<Grid>
+		<controls:DataGrid x:Name="dataGridProduct" 
+						   IsReadOnly ="True"
+      Margin="12"
+    AutoGenerateColumns="False"		 
+	CanUserReorderColumns="True" 
+	CanUserResizeColumns="True"
+	CanUserSortColumns="True"
+	Sorting="dg_Sorting"
+    ItemsSource="{x:Bind ProductListWait}" >
+			<controls:DataGrid.RowDetailsTemplate>
+				<DataTemplate x:DataType="local1:Product">
 
-    </Grid>
+					<Grid>
+						<!-- Строки -->
+						<Grid.RowDefinitions>
+							<RowDefinition/>
+							<RowDefinition/>
+							<RowDefinition/>
+							<RowDefinition/>
+						</Grid.RowDefinitions>
+
+						<!-- Столбцы -->
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition/>
+							<ColumnDefinition Width="150"/>
+						</Grid.ColumnDefinitions>
+
+						<!-- Размещаем объекты -->
+						<StackPanel Margin="20,10" Padding="5" Spacing="3">
+							<TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind Name}"/>
+							<!--<TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Text="{x:Bind NowPrice}"/>
+							<TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Text="{x:Bind OldPriceCh}" />-->
+							<TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
+						</StackPanel>
+						<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
+							<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>-->
+							<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE850;" x:Name="GoToWaitRemains" HorizontalAlignment="Center" Click="GoToWaitRemains_Click"/>-->
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE8B7;" x:Name="GoToArchiveRemains" HorizontalAlignment="Center" Click="GoToArchiveRemains_Click"/>
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE74D;" x:Name="GoToDelete" HorizontalAlignment="Center"  Click="GoToDelete_Click"/>
+						</StackPanel>
+					</Grid>
+				</DataTemplate>
+			</controls:DataGrid.RowDetailsTemplate>
+			<controls:DataGrid.Columns>
+				<controls:DataGridTextColumn 
+            Header="Наименование" 
+            Width="360"
+            Binding="{Binding Name}" 
+            FontSize="20" 
+					Tag="Name">
+
+				</controls:DataGridTextColumn>
+
+
+				<controls:DataGridTextColumn 
+            Header="Цена" 
+            Width="SizeToHeader"
+            Binding="{Binding NowPrice}" 
+            FontSize="20" 
+					Tag="NowPrice">
+					<controls:DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+						</Style>
+					</controls:DataGridTextColumn.ElementStyle>
+				</controls:DataGridTextColumn>
+
+
+				<controls:DataGridTextColumn 
+            Header="Старая цена"
+			Width="SizeToHeader"
+            Binding="{Binding OldPriceCh}" 
+					Tag="OldPrice">
+					<controls:DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+						</Style>
+					</controls:DataGridTextColumn.ElementStyle>
+				</controls:DataGridTextColumn>
+
+
+				<controls:DataGridTextColumn 
+            Header="Артикул" 
+            Width="SizeToHeader"
+            Binding="{Binding ArticleNumberLerya}" 
+					 Tag="ArticleNumberLerya">
+					<controls:DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+						</Style>
+					</controls:DataGridTextColumn.ElementStyle>
+				</controls:DataGridTextColumn>
+
+
+				<controls:DataGridTextColumn 
+            Header="Отстаки" 
+            Width="SizeToHeader"
+            Binding="{Binding RemainsWhite}" 
+					 Tag="RemainsWhite">
+					<controls:DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+						</Style>
+					</controls:DataGridTextColumn.ElementStyle>
+				</controls:DataGridTextColumn>
+
+
+				<controls:DataGridTextColumn 
+            Header="Отстаки в Жопе" 
+            Width="SizeToHeader"
+            Binding="{Binding RemainsBlack}" 
+					Tag="RemainsBlack">
+					<controls:DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+						</Style>
+					</controls:DataGridTextColumn.ElementStyle>
+				</controls:DataGridTextColumn>
+
+
+			</controls:DataGrid.Columns>
+		</controls:DataGrid>
+	</Grid>
 </Page>

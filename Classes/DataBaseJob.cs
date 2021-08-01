@@ -5,6 +5,27 @@ namespace Остатки.Classes
 {
 	public class DataBaseJob
 	{
+		public static void RemainsToWait(Product product)
+		{
+			var folder = ApplicationData.Current.LocalFolder;
+			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+			{
+				var wait = db.GetCollection<Product>("ProductsWait");
+				var online = db.GetCollection<Product>("Products");
+				var proverk = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null)
+				{
+					wait.Insert(product);
+					online.Delete(product.Id);
+					Message.infoList.Add("Товар успешно перемещён в ожидание!!!");
+				}
+				else
+				{
+					Message.errorsList.Add("Данный товар уже в ожидании!!!");
+				}
+
+			}
+		}
 		public static void AddNewProduct(Product product)
 		{
 			var folder = ApplicationData.Current.LocalFolder;

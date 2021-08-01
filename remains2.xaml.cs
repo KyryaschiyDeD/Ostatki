@@ -24,8 +24,6 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 
-// Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Остатки
 {
     public class Item
@@ -347,28 +345,32 @@ namespace Остатки
                 linksProductTXT = allList.ToList();
             }
             Queue<string> ochered = new Queue<string>();
-            foreach (var item in linksProductTXT)
+           /* foreach (var item in linksProductTXT)
             {
                 ochered.Enqueue(item.ProductLink);
-            }
-            
+            } */
+            ochered = new Queue<string>(linksProductTXT.ConvertAll(
+            new Converter<Product, string>(PointFToPoint)));
             Task[] tasks2 = new Task[linksProductTXT.Count];
             for (int i = 0; i < linksProductTXT.Count; i++)
             {
                 tasks2[i] = Task.Factory.StartNew(() => Product.parseLeryaUpdate(ochered.Dequeue()));
                 UpdateProgressUpdate(linksProductTXT.Count, i);
             }
+            Task.WaitAll(tasks2);
         }
-
+        public static string PointFToPoint(Product pf)
+        {
+            return pf.ProductLink;
+        }
         private void GoToWaitRemains_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             if (button == null)
                 return;
-
             var item = button.DataContext as Product;
-            Message.infoList.Add($"Ждём снова {item.Name}");
-            Message.AllErrors();
+            DataBaseJob.RemainsToWait(item);
+            ProductList1.Remove(item);
         }
         private void GoToArchiveRemains_Click(object sender, RoutedEventArgs e)
         {
@@ -390,30 +392,30 @@ namespace Остатки
             Message.infoList.Add($"Удаляем нафиг {item.Name}");
             Message.AllErrors();
         }
-        private void GoToInfo_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as Button;
-            if (button == null)
-                return;
+        //private void GoToInfo_Click(object sender, RoutedEventArgs e)
+        //{
+        //    var button = sender as Button;
+        //    if (button == null)
+        //        return;
 
-            var item = button.DataContext as Product;
-            Message.infoList.Add($"Показываем инфу {item.Name}");
-            Message.AllErrors();
-        }
+        //    var item = button.DataContext as Product;
+        //    Message.infoList.Add($"Показываем инфу {item.Name}");
+        //    Message.AllErrors();
+        //}
         public remains2()
 		{
 			InitializeComponent();
             //updateAllDataBase();
             //Thread thread = new Thread(updateAllDataBase);
-           // thread.Start();
-           //thread.Join();
+            //thread.Start();
+            //thread.Join();
 
-           getRemainsIsBaseThread();
+            getRemainsIsBaseThread();
 
             //PostRequestAsync();
             //Thread thread = new Thread(getRemainsIsBaseThread);
             //thread.Start();
         }
 
-    }
+	}
 }

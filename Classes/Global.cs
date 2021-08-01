@@ -11,6 +11,8 @@ namespace Остатки.Classes
 	public class Global
 	{
 
+		public static StorageFolder folder = ApplicationData.Current.LocalFolder;
+
 		public static string[] whiteList = { "Алтуфьево", "Мытищи", "Зеленоград", "ЗИЛ", "Люберцы", "Каширское",
 			"Варшавское", "Лефортово", "Рязанский", "Косино", "Сокольники", "Красногорск", "Химки" };
 		public static string[] blackList = { "Пушкино", "Троицк", "Интернет-магазин МСК", "Истра", "Климовск", "Киевское",

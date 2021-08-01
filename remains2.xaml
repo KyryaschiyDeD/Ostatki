@@ -12,22 +12,46 @@
     <Grid>
 		<controls:DataGrid x:Name="dataGridProduct" 
 						   IsReadOnly ="True"
-      Margin="12"
-    AutoGenerateColumns="False"		 
-	CanUserReorderColumns="True" 
-	CanUserResizeColumns="True"
-	CanUserSortColumns="True"
-	Sorting="dg_Sorting"
-    ItemsSource="{x:Bind ProductList1}" >
+						   Margin="12"
+						   AutoGenerateColumns="False"		 
+						   CanUserReorderColumns="True" 
+						   CanUserResizeColumns="True"
+						   CanUserSortColumns="True"
+						   Sorting="dg_Sorting"
+						   ItemsSource="{x:Bind ProductList1}" 
+						   >
 			<controls:DataGrid.RowDetailsTemplate>
 				<DataTemplate x:DataType="local:Product">
-					<StackPanel Margin="20,10" Padding="5" Spacing="3">
-						<TextBlock Margin="20" Text="Подробнее:"/>
-						<TextBlock Text="{x:Bind Name}"/>
-						<TextBlock FontSize="13" Text="{x:Bind NowPrice}"/>
-						<TextBlock FontSize="13" Text="{x:Bind OldPriceCh}" />
-						<TextBlock FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
-					</StackPanel>
+					
+					<Grid>
+						<!-- Строки -->
+						<Grid.RowDefinitions>
+							<RowDefinition/>
+							<RowDefinition/>
+							<RowDefinition/>
+							<RowDefinition/>
+						</Grid.RowDefinitions>
+
+						<!-- Столбцы -->
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition/>
+							<ColumnDefinition Width="150"/>
+						</Grid.ColumnDefinitions>
+
+						<!-- Размещаем объекты -->
+						<StackPanel Margin="20,10" Padding="5" Spacing="3">
+							<TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind Name}"/>
+							<!--<TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Text="{x:Bind NowPrice}"/>
+							<TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Text="{x:Bind OldPriceCh}" />-->
+							<TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
+						</StackPanel>
+						<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
+							<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>-->
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE850;" x:Name="GoToWaitRemains" HorizontalAlignment="Center" Click="GoToWaitRemains_Click"/>
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE8B7;" x:Name="GoToArchiveRemains" HorizontalAlignment="Center" Click="GoToArchiveRemains_Click"/>
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE74D;" x:Name="GoToDelete" HorizontalAlignment="Center"  Click="GoToDelete_Click"/>
+						</StackPanel>
+					</Grid>
 				</DataTemplate>
 			</controls:DataGrid.RowDetailsTemplate>
 			<controls:DataGrid.Columns>
@@ -105,42 +129,7 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				<controls:DataGridTemplateColumn>
-					<controls:DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>
-							</StackPanel>
-						</DataTemplate>
-					</controls:DataGridTemplateColumn.CellTemplate>
-				</controls:DataGridTemplateColumn>
-				<controls:DataGridTemplateColumn>
-					<controls:DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE850;" x:Name="GoToWaitRemains" HorizontalAlignment="Center" Click="GoToWaitRemains_Click"/>
-							</StackPanel>
-						</DataTemplate>
-					</controls:DataGridTemplateColumn.CellTemplate>
-				</controls:DataGridTemplateColumn>
-				<controls:DataGridTemplateColumn>
-					<controls:DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE8B7;" x:Name="GoToArchiveRemains" HorizontalAlignment="Center" Click="GoToArchiveRemains_Click"/>
-							</StackPanel>
-						</DataTemplate>
-					</controls:DataGridTemplateColumn.CellTemplate>
-				</controls:DataGridTemplateColumn>
-				<controls:DataGridTemplateColumn>
-					<controls:DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE74D;" x:Name="GoToDelete" HorizontalAlignment="Center"  Click="GoToDelete_Click"/>
-							</StackPanel>
-						</DataTemplate>
-					</controls:DataGridTemplateColumn.CellTemplate>
-				</controls:DataGridTemplateColumn>
+				
 
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>
