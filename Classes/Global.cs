@@ -13,10 +13,10 @@ namespace Остатки.Classes
 
 		public static StorageFolder folder = ApplicationData.Current.LocalFolder;
 
-		public static string[] whiteList = { "Алтуфьево", "Мытищи", "Зеленоград", "ЗИЛ", "Люберцы", "Каширское",
-			"Варшавское", "Лефортово", "Рязанский", "Косино", "Сокольники", "Красногорск", "Химки" };
-		public static string[] blackList = { "Пушкино", "Троицк", "Интернет-магазин МСК", "Истра", "Климовск", "Киевское",
-			"Домодедово", "Шолохово", "Жуковский", "Новая", "Юдино" };
+		public static List<int> whiteList = new List<int>() { 4, 2, 35, 117, 43, 49,
+			143, 20, 26, 45, 6, 3, 5 };
+		public static List<int> blackList = new List<int>() { 65, 86, 62, 122, 22, 51,
+			114, 40, 153, 32, 56 };
 
 		public static string[] userAgent = {
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36",

@@ -6,17 +6,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 
 namespace Остатки.Classes
 {
 	public class Product
 	{
-		static string[] whiteList = { "Алтуфьево", "Мытищи", "Зеленоград", "ЗИЛ", "Люберцы", "Каширское",
-			"Варшавское", "Лефортово", "Рязанский", "Косино", "Сокольники", "Красногорск", "Химки" };
-		static string[] blackList = { "Пушкино", "Троицк", "Интернет-магазин МСК", "Истра", "Климовск", "Киевское",
-			"Домодедово", "Шолохово", "Жуковский", "Новая", "Юдино" };
-
 		static object locker = new object();
 
 		public Guid Id { get; set; }
@@ -65,7 +61,7 @@ namespace Остатки.Classes
 		{
 			string link = ink.ToString();
 			List<int> productCount = new List<int>(); // Кол-во
-			List<string> productLocation = new List<string>(); // Место
+			List<int> productLocation = new List<int>(); // Место
 			Product onePos = new Product();
 			onePos.ProductLink = link;
 			string code = getResponse(link);
@@ -148,7 +144,7 @@ namespace Остатки.Classes
 					string[] digits = Regex.Split(match.Value, @"\D+");
 					foreach (string value in digits)
 					{
-						int number;
+						int number = 0;
 						if (int.TryParse(value, out number))
 						{
 							productCount.Add(number);
@@ -166,45 +162,57 @@ namespace Остатки.Classes
 			{
 				foreach (Match match in matchesLocation)
 				{
-					string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-					productLocation.Add(s2[2]);
+					string[] digits = Regex.Split(match.Value, @"\D+");
+					foreach (string value in digits)
+					{
+						int number;
+						if (int.TryParse(value, out number))
+						{
+							productLocation.Add(number);
+						}
+					}
+					//string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+					//productLocation.Add(match.Value);
 				}
 
-			}
-			else
-			{
-				Message.errorsList.Add("Не удалось найти и загрузить местоположение!!!");
 			}
 
 			foreach (var item in productLocation)
 			{
-				if (whiteList.Contains(item))
+				if (Global.whiteList.Contains(item))
+
 					onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
+
+
 				else
-				if (blackList.Contains(item))
+				if (Global.blackList.Contains(item))
+
 					onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
+
 			}
 			lock (locker)
 			{
 				DataBaseJob.AddNewProduct(onePos);
 			}
 		}
-		public static void parseLeryaUpdate(object ink)
+		public async static void parseLeryaUpdate(object ink)
 		{
 			if (ink != null)
 			{
 				string link = ink.ToString();
 				List<int> productCount = new List<int>(); // Кол-во
-				List<string> productLocation = new List<string>(); // Место
+				List<int> productLocation = new List<int>(); // Место
 				Product onePos = new Product();
 				onePos.ProductLink = link;
+				onePos.RemainsWhite = 0;
+				onePos.RemainsBlack = 0;
 				string code = getResponse(link);
 				int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
 				int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
 				if (indexOfStart >= 0)
 				{
 					string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
-					string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
+					//string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
 
 
 
@@ -212,7 +220,7 @@ namespace Остатки.Classes
 					// Получаем строку с наименованием, артикулом и ценой
 					Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
 					Regex regexCount = new Regex(@"stock=""(\w+)""");
-					Regex regexLocation = new Regex(@"<span>Леруа Мерлен \w+");
+					Regex regexLocation = new Regex(@"store-code=""(\w+)""");
 
 					string nextNameArticleId = "";
 					MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
@@ -301,8 +309,17 @@ namespace Остатки.Classes
 					{
 						foreach (Match match in matchesLocation)
 						{
-							string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-							productLocation.Add(s2[2]);
+							string[] digits = Regex.Split(match.Value, @"\D+");
+							foreach (string value in digits)
+							{
+								int number;
+								if (int.TryParse(value, out number))
+								{
+									productLocation.Add(number);
+								}
+							}
+							//string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+							//productLocation.Add(match.Value);
 						}
 
 					}
@@ -313,12 +330,13 @@ namespace Остатки.Classes
 
 					foreach (var item in productLocation)
 					{
-						if (whiteList.Contains(item))
+						if (Global.whiteList.Contains(item))
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 						else
-						if (blackList.Contains(item))
+						if (Global.blackList.Contains(item))
 							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 					}
+
 					lock (locker)
 					{
 						DataBaseJob.UpdateOldProduct(onePos);

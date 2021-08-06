@@ -251,7 +251,7 @@ namespace Остатки.Pages
 			while (HtmlQueue.Count != 0)
 			{
 				List<int> productCount = new List<int>(); // Кол-во
-				List<string> productLocation = new List<string>(); // Место
+				List<int> productLocation = new List<int>(); // Место
 				Product onePos = new Product();
 				onePos.ProductLink = LinksQueue.Dequeue();
 				string code = HtmlQueue.Dequeue();
@@ -301,8 +301,17 @@ namespace Остатки.Pages
 				{
 					foreach (Match match in matchesLocation)
 					{
-						string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-						productLocation.Add(s2[2]);
+						string[] digits = Regex.Split(match.Value, @"\D+");
+						foreach (string value in digits)
+						{
+							int number;
+							if (int.TryParse(value, out number))
+							{
+								productLocation.Add(number);
+							}
+						}
+						//string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+						//productLocation.Add(match.Value);
 					}
 
 				}
@@ -473,6 +482,8 @@ namespace Остатки.Pages
 							Opisanie = Opisanie.Replace("СКАЧАТЬ ИНСТРУКЦИЮ", "");
 						if (Opisanie.Contains("Скачать документы сертификации"))
 							Opisanie = Opisanie.Replace("Скачать документы сертификации", "");
+						if (Opisanie.Contains("СКАЧАТЬ ПРАВИЛА ЭКСПЛУАТАЦИИ"))
+							Opisanie = Opisanie.Replace("СКАЧАТЬ ПРАВИЛА ЭКСПЛУАТАЦИИ", "");
 						Opisanie = Opisanie.Trim();
 					}
 					else
@@ -543,7 +554,10 @@ namespace Остатки.Pages
 
 					string[] namesAndArticleId = resultNameArticleId.Split('"');
 					// Вносим в переменные 
-
+					if (namesAndArticleId[3].Contains("»"))
+						namesAndArticleId[3].Replace("»","");
+					if (namesAndArticleId[3].Contains("«"))
+						namesAndArticleId[3].Replace("«", "");
 					specificationsDict["Наименование"] += namesAndArticleId[3] + "\n";
 					specificationsDict["Артикул"] += namesAndArticleId[1] + "\n";
 

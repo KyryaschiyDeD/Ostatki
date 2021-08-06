@@ -55,7 +55,7 @@ namespace Остатки
 			return result.ToString();
 		}
 	}
-
+    
     public sealed partial class remains2 : Page
 	{
         static StorageFolder folder = ApplicationData.Current.LocalFolder;
@@ -152,14 +152,16 @@ namespace Остатки
                     if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
-                                                                                        orderby item.OldPrice ascending
+                                                                                        where item.OldPrice.Count != 0
+                                                                                        orderby item.OldPrice[item.OldPrice.Count-1] ascending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Ascending;
                     }
                     else
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
-                                                                                        orderby item.OldPrice descending
+                                                                                        where item.OldPrice.Count != 0
+                                                                                        orderby item.OldPrice[item.OldPrice.Count - 1] descending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Descending;
                     }
@@ -174,6 +176,20 @@ namespace Остатки
                     }
             }
 
+        }
+        private void rankLowFilter_Click(object sender, RoutedEventArgs e)
+        {
+            ObservableCollection<Product> tmpFilterProduct;
+            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
+                                                                 where item.Name.StartsWith(FindingTextBox.Text)
+                                                                 select item);
+            long myLong;
+            bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
+            if (tmpFilterProduct.Count == 0 && isNumerical)
+                tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
+                                                                     where item.ArticleNumberLerya == myLong
+                                                                     select item);
+            dataGridProduct.ItemsSource = tmpFilterProduct;
         }
         public void UpdateProgress(double kolvo, double apply)
         {
@@ -257,47 +273,11 @@ namespace Остатки
 
         public void getRemainsIsBaseThread()
         {
-            string tag = "Ostatck";
-            string group = "Lerya";
-
-            // Construct the toast content with data bound fields
-            var content = new ToastContentBuilder()
-                .AddText("Загружаем... Много загружаем...")
-                .AddVisualChild(new AdaptiveProgressBar()
-                {
-                    Title = "Товар",
-                    Value = new BindableProgressBarValue("myProgressValue"),
-                    ValueStringOverride = new BindableString("progressValueString"),
-                    Status = new BindableString("progressStatus")
-                })
-                .GetToastContent();
-
-            // Generate the toast notification
-            var toast = new ToastNotification(content.GetXml());
-
-            // Assign the tag and group
-            toast.Tag = tag;
-            toast.Group = group;
-
-            // Assign initial NotificationData values
-            // Values must be of type string
-            toast.Data = new NotificationData();
-            toast.Data.Values["progressValue"] = "0";
-            toast.Data.Values["progressValueString"] = "0/0 товаров";
-            toast.Data.Values["progressStatus"] = "Грузим...";
-
-            // Provide sequence number to prevent out-of-order updates, or assign 0 to indicate "always update"
-            toast.Data.SequenceNumber = 0;
-
-            // Show the toast notification to the user
-            ToastNotificationManager.CreateToastNotifier().Show(toast);
-            
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
                 List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
                 ProductList1 = new ObservableCollection<Product>(allProducts);
-
             }
         }
 
@@ -351,13 +331,31 @@ namespace Остатки
             } */
             ochered = new Queue<string>(linksProductTXT.ConvertAll(
             new Converter<Product, string>(PointFToPoint)));
+            
+
+    //        Product OneVaza = new Product();
+    //        linksProductTXT.Clear();
+    //        using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+    //        {
+    //            var col = db.GetCollection<Product>("Products");
+    //            var allList = col.FindAll();
+				//foreach (var item in allList)
+				//{
+    //                if (item.ArticleNumberLerya == (long)82128216)
+    //                    linksProductTXT.Add(item);
+    //            }
+    //        }
+            
+            
+    //        ochered.Clear();
+    //        ochered.Enqueue(@"https://leroymerlin.ru/product/kashpo-dlya-orhidey-nina-glass-15-2-h15-2-sm-v1-3-l-steklo-prozrachnyy-82128216/");
             Task[] tasks2 = new Task[linksProductTXT.Count];
             for (int i = 0; i < linksProductTXT.Count; i++)
             {
                 tasks2[i] = Task.Factory.StartNew(() => Product.parseLeryaUpdate(ochered.Dequeue()));
                 UpdateProgressUpdate(linksProductTXT.Count, i);
             }
-            Task.WaitAll(tasks2);
+            Task.WaitAll(tasks2); 
         }
         public static string PointFToPoint(Product pf)
         {
@@ -392,16 +390,7 @@ namespace Остатки
             Message.infoList.Add($"Удаляем нафиг {item.Name}");
             Message.AllErrors();
         }
-        //private void GoToInfo_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var button = sender as Button;
-        //    if (button == null)
-        //        return;
 
-        //    var item = button.DataContext as Product;
-        //    Message.infoList.Add($"Показываем инфу {item.Name}");
-        //    Message.AllErrors();
-        //}
         public remains2()
 		{
 			InitializeComponent();
@@ -417,5 +406,5 @@ namespace Остатки
             //thread.Start();
         }
 
-	}
+    }
 }

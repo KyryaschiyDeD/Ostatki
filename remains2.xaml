@@ -5,14 +5,27 @@
     xmlns:local="using:Остатки.Classes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    mc:Ignorable="d"
+	xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls" xmlns:muxc="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
+	<Grid>
+		<CommandBar
+			IsOpen="True"
+			IsSticky="True" 
+			DefaultLabelPosition="Right"
+			Content="">
+			<AppBarElementContainer>
+				<TextBox Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
+			</AppBarElementContainer>
+			<!-- <AppBarButton
+				Icon="Find"
+				
+				Click="rankLowFilter_Click"
+				/> -->
+		</CommandBar>
 		<controls:DataGrid x:Name="dataGridProduct" 
 						   IsReadOnly ="True"
-						   Margin="12"
+						   Margin="0,40,0,0"
 						   AutoGenerateColumns="False"		 
 						   CanUserReorderColumns="True" 
 						   CanUserResizeColumns="True"
@@ -22,7 +35,7 @@
 						   >
 			<controls:DataGrid.RowDetailsTemplate>
 				<DataTemplate x:DataType="local:Product">
-					
+
 					<Grid>
 						<!-- Строки -->
 						<Grid.RowDefinitions>
@@ -40,9 +53,15 @@
 
 						<!-- Размещаем объекты -->
 						<StackPanel Margin="20,10" Padding="5" Spacing="3">
-							<TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind Name}"/>
+							<!--<muxc:MenuBarItem Title="{x:Bind Name}">
+								<MenuFlyoutItem Text="Скопировать..."/>
+							</muxc:MenuBarItem>
+							<TextBlock  Grid.Row="0" Grid.Column="0" Text="{x:Bind Name}"/>-->
 							<!--<TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Text="{x:Bind NowPrice}"/>
-							<TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Text="{x:Bind OldPriceCh}" />-->
+							<TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Text="{x:Bind OldPriceCh}" /> -->
+							<!--<muxc:MenuBarItem Title="{x:Bind ArticleNumberLerya}">
+								<MenuFlyoutItem Text="Скопировать"/>
+							</muxc:MenuBarItem>-->
 							<TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
 						</StackPanel>
 						<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
@@ -63,8 +82,8 @@
 					Tag="Name">
 
 				</controls:DataGridTextColumn>
-				
-				
+
+
 				<controls:DataGridTextColumn 
             Header="Цена" 
             Width="SizeToHeader"
@@ -77,8 +96,8 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
-				
+
+
 				<controls:DataGridTextColumn 
             Header="Старая цена"
 			Width="SizeToHeader"
@@ -90,8 +109,8 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
-				
+
+
 				<controls:DataGridTextColumn 
             Header="Артикул" 
             Width="SizeToHeader"
@@ -103,8 +122,8 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
-				
+
+
 				<controls:DataGridTextColumn 
             Header="Отстаки" 
             Width="SizeToHeader"
@@ -116,8 +135,8 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
-				
+
+
 				<controls:DataGridTextColumn 
             Header="Отстаки в Жопе" 
             Width="SizeToHeader"
@@ -129,7 +148,7 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
+
 
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>

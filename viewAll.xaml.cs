@@ -25,6 +25,7 @@ namespace Остатки
 		public viewAll()
 		{
 			this.InitializeComponent();
+			
 		}
 	}
 }
