@@ -51,6 +51,11 @@ namespace Остатки
                 myFrame.Navigate(typeof(StealProducts));
                 TitleTextBlock.Text = "Спиздили";
             }
+            else if (EditingBalancesAndPrices.IsSelected)
+            {
+                myFrame.Navigate(typeof(EditingBalancesAndPrices));
+                TitleTextBlock.Text = "Обновление остатков и цены";
+            }
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)

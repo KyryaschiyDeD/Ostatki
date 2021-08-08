@@ -1,6 +1,9 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
+﻿using LiteDB;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -27,6 +30,18 @@ using Остатки.Classes;
 
 namespace Остатки.Pages
 {
+	
+
+	public class Result
+	{
+		public List<ItemProsuctOfferIDs> items { get; set; }
+		public int total { get; set; }
+	}
+
+	public class Root
+	{
+		public Result result { get; set; }
+	}
 	/// <summary>
 	/// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
 	/// </summary>
@@ -259,7 +274,7 @@ namespace Остатки.Pages
 				//string code = getResponse(onePos.ProductLink);
 				bool kolvoTru = true;
 				Regex regexCount = new Regex(@"stock=""(\w+)""");
-				Regex regexLocation = new Regex(@"<span>Леруа Мерлен \w+");
+				Regex regexLocation = new Regex(@"store-code=""(\w+)""");
 				string countLocaionCode = "";
 				try
 				{
@@ -293,6 +308,7 @@ namespace Остатки.Pages
 				else
 				{
 					kolvoTru = false;
+					specificationsDict["Неудачные ссылки или онлайн"] += onePos.ProductLink + "\n";
 				}
 
 				bool locationTrue = true;
@@ -336,7 +352,7 @@ namespace Остатки.Pages
 					onePos.RemainsBlack = 0;
 					onePos.RemainsWhite = 0;
 				}
-				if (onePos.RemainsWhite > 10)
+				if (onePos.RemainsWhite >= 10)
 				{
 					int indexOfStartOpis = code.IndexOf("<h2>Описание<");
 					int indexOfEndOpis = code.IndexOf("</uc-pdp-section-vlimited>");
@@ -694,7 +710,7 @@ namespace Остатки.Pages
 					StorageFile myFile = await SaveFolder.GetFileAsync(RemoveInvalidChars(item.Key) + ".txt");
 					string data = item.Value;
 					if (String.IsNullOrEmpty(data))
-						data = "--------";
+						data = "--------------";
 					await FileIO.WriteTextAsync(myFile, data);
 				}
 			}
@@ -735,6 +751,84 @@ namespace Остатки.Pages
 		private void StealProducts_Click(object sender, RoutedEventArgs e)
 		{
 			GetLinks();
+		}
+
+		private static Root PostRequestAsync(int pageOzon)
+		{
+			var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
+			httpWebRequest.Headers.Add("Client-Id", "104333");
+			httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
+			httpWebRequest.ContentType = "application/json";
+			httpWebRequest.Method = "POST";
+			string json = @"{
+  ""filter"": {
+
+	""visibility"": ""VISIBLE""
+  },
+  ""page"": "+$"{pageOzon}"+@",
+  ""page_size"": 1000
+}";
+			using (var requestStream = httpWebRequest.GetRequestStream())
+			using (var writer = new StreamWriter(requestStream))
+			{
+				writer.Write(json);
+			}
+			var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+			using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+			{
+				//ответ от сервера
+				var result = streamReader.ReadToEnd();
+
+				//Сериализация
+				return JsonConvert.DeserializeObject<Root>(result);
+			}
+		}
+
+		private void CheckingAndReconciliationOfArticles_Click(object sender, RoutedEventArgs e)
+		{
+			List<ItemProsuctOfferIDs> AllErrorsProduct = new List<ItemProsuctOfferIDs>();
+			List<Product> allProducts = new List<Product>();
+			List<Product> allProductsUpdate = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+			}
+
+			for (int i = 1; i <= 3; i++)
+			{
+				//Thread.Sleep(5000);
+				List<ItemProsuctOfferIDs> items = PostRequestAsync(i).result.items;
+				foreach (var item in items)
+				{
+					Product OneProduct = null;
+					try
+					{
+						OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item.offer_id));
+					}
+					catch (Exception)
+					{
+						OneProduct = null;
+					}
+					if (OneProduct != null)
+					{
+						OneProduct.ArticleNumberOzon = Convert.ToInt64(item.product_id);
+						OneProduct.ArticleError = false;
+						allProductsUpdate.Add(OneProduct);
+					}
+					else
+					{
+						AllErrorsProduct.Add(item);
+					}
+					//writeToTxtExperiense += $"Наш артикул: {item.offer_id}  Озон артикул: {item.product_id}\n";
+				}
+			}
+			DataBaseJob.UpdateList(allProductsUpdate);
+			DataBaseJob.ErrorArticle(AllErrorsProduct);
+			//StorageFile helloFile = await Global.folder.CreateFileAsync("hello.txt",
+			//									CreationCollisionOption.ReplaceExisting);
+
+			//await FileIO.WriteTextAsync(helloFile, writeToTxtExperiense);
 		}
 	}
 }

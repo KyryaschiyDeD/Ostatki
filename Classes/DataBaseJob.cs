@@ -1,10 +1,26 @@
 ﻿using LiteDB;
+using System;
+using System.Collections.Generic;
 using Windows.Storage;
 
 namespace Остатки.Classes
 {
 	public class DataBaseJob
 	{
+		public static void ErrorArticle(List<ItemProsuctOfferIDs> articleOzon)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ErrorArticle.db"))
+			{
+				var col = db.GetCollection<ErrorsArticle>("ErrorArticle");
+				foreach (var item in articleOzon)
+				{
+					var proverk = col.FindOne(x => x.OfferId == item.offer_id);
+					if (proverk == null)
+						col.Insert(new ErrorsArticle { OfferId = item.offer_id, ProductId = Convert.ToInt64(item.product_id) });
+				}
+				
+			}
+		}
 		public static void RemainsToWait(Product product)
 		{
 			var folder = ApplicationData.Current.LocalFolder;
@@ -34,18 +50,27 @@ namespace Остатки.Classes
 				var col = db.GetCollection<Product>("Products");
 				var proverk = col.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
 				if (proverk == null)
-				{
 					col.Insert(product);
-					Message.infoList.Add("Товар добавлен!!!");
-				}
-				else
-				{
-					Message.errorsList.Add("Данный товар уже добавлен!!!");
-				}
-
 			}
 		}
-		public static void UpdateOldProduct(Product product)
+
+		public static void UpdateList(List<Product> product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				foreach (var item in product)
+				{
+					var proverk = col.FindOne(x => x.ArticleNumberLerya == item.ArticleNumberLerya);
+					if (proverk != null)
+					{
+						proverk = item;
+						col.Update(proverk);
+					}
+				}
+			}
+		}
+		public static void UpdateRemainsOldProduct(Product product)
 		{
 			var folder = ApplicationData.Current.LocalFolder;
 			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))

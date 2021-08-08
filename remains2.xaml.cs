@@ -26,35 +26,6 @@ using Newtonsoft.Json;
 
 namespace Остатки
 {
-    public class Item
-    {
-        public int product_id { get; set; }
-        public string offer_id { get; set; }
-        public override string ToString()
-        {
-            return $"product_id: {product_id} offer_id: {offer_id}";
-        }
-    }
-
-    public class Result
-    {
-        public List<Item> items { get; set; }
-        public int total { get; set; }
-        public override string ToString()
-        {
-            return items[0].ToString();
-        }
-    }
-
-    public class Root
-    {
-        public Result result { get; set; }
-
-		public override string ToString()
-		{
-			return result.ToString();
-		}
-	}
     
     public sealed partial class remains2 : Page
 	{
@@ -191,6 +162,14 @@ namespace Остатки
                                                                      select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
+        private void Article_Click(object sender, RoutedEventArgs e)
+        {
+            ObservableCollection<Product> tmpFilterProduct;
+            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
+                                                                 where item.ArticleNumberOzon == 0
+                                                                 select item);
+            dataGridProduct.ItemsSource = tmpFilterProduct;
+        }
         public void UpdateProgress(double kolvo, double apply)
         {
             // Construct a NotificationData object;
@@ -236,41 +215,6 @@ namespace Остатки
             ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
         }
 
-        private static void PostRequestAsync()
-        {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
-            httpWebRequest.Headers.Add("Client-Id", "104333");
-            httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
-            httpWebRequest.ContentType = "application/json";
-            httpWebRequest.Method = "POST";//Можно GET
-            string json = @"{
-  ""filter"": {
-    ""visibility"": ""STATE_FAILED""
-  },
-  ""page"": 1,
-  ""page_size"": 318
-}";
-            using (var requestStream = httpWebRequest.GetRequestStream())
-            using (var writer = new StreamWriter(requestStream))
-            {
-                writer.Write(json);
-            }
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                //ответ от сервера
-                var result = streamReader.ReadToEnd();
-
-                //Сериализация
-                Root otb = JsonConvert.DeserializeObject<Root>(result);
-               // Message.infoList.Add(result.ToString());
-                Message.infoList.Add("------------");
-                Message.infoList.Add(otb.ToString());
-                Message.infoList.Add("------------");
-            }
-            Message.AllErrors();
-        }
-
         public void getRemainsIsBaseThread()
         {
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
@@ -286,7 +230,6 @@ namespace Остатки
             string tag = "Update";
             string group = "Lerya";
 
-            // Construct the toast content with data bound fields
             var content = new ToastContentBuilder()
                 .AddText("Тсссс... Происходит обновление... Не мешай!")
                 .AddVisualChild(new AdaptiveProgressBar()
@@ -298,24 +241,22 @@ namespace Остатки
                 })
                 .GetToastContent();
 
-            // Generate the toast notification
+            
             var toast = new ToastNotification(content.GetXml());
 
-            // Assign the tag and group
             toast.Tag = tag;
             toast.Group = group;
 
-            // Assign initial NotificationData values
-            // Values must be of type string
+            
             toast.Data = new NotificationData();
             toast.Data.Values["progressValue"] = "0";
             toast.Data.Values["progressValueString"] = "0/0 товаров";
             toast.Data.Values["progressStatus"] = "Анализируем";
 
-            // Provide sequence number to prevent out-of-order updates, or assign 0 to indicate "always update"
+            
             toast.Data.SequenceNumber = 0;
 
-            // Show the toast notification to the user
+            
             ToastNotificationManager.CreateToastNotifier().Show(toast);
             List<Product> linksProductTXT = new List<Product>();
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
@@ -325,30 +266,10 @@ namespace Остатки
                 linksProductTXT = allList.ToList();
             }
             Queue<string> ochered = new Queue<string>();
-           /* foreach (var item in linksProductTXT)
-            {
-                ochered.Enqueue(item.ProductLink);
-            } */
+            
             ochered = new Queue<string>(linksProductTXT.ConvertAll(
             new Converter<Product, string>(PointFToPoint)));
             
-
-    //        Product OneVaza = new Product();
-    //        linksProductTXT.Clear();
-    //        using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
-    //        {
-    //            var col = db.GetCollection<Product>("Products");
-    //            var allList = col.FindAll();
-				//foreach (var item in allList)
-				//{
-    //                if (item.ArticleNumberLerya == (long)82128216)
-    //                    linksProductTXT.Add(item);
-    //            }
-    //        }
-            
-            
-    //        ochered.Clear();
-    //        ochered.Enqueue(@"https://leroymerlin.ru/product/kashpo-dlya-orhidey-nina-glass-15-2-h15-2-sm-v1-3-l-steklo-prozrachnyy-82128216/");
             Task[] tasks2 = new Task[linksProductTXT.Count];
             for (int i = 0; i < linksProductTXT.Count; i++)
             {

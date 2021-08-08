@@ -11,6 +11,17 @@ using Windows.UI.Xaml.Controls;
 
 namespace Остатки.Classes
 {
+	public class ItemProsuctOfferIDs
+	{
+		public int product_id { get; set; }
+		public string offer_id { get; set; }
+	}
+	public class ErrorsArticle
+	{
+		public Guid Id { get; set; }
+		public string OfferId { get; set; }
+		public long ProductId { get; set; }
+	}
 	public class Product
 	{
 		static object locker = new object();
@@ -36,7 +47,9 @@ namespace Остатки.Classes
 					return Convert.ToDouble(0);
 			}
 		}
-
+		public bool NewPriceIsSave { get; set; } // Изменён ли на Озон новый ценник
+		public bool ArticleError { get; set; } // Существует ли артикул на Озон у нас в БД
+		public bool ArticleErrorIgnore { get; set; } // Игнорируем ли мы конфликт
 		public List<double> OldPrice { get; set; } = new List<double>(); // Цена Леруа цена была
 		public List<DateTime> DateOldPrice { get; set; } = new List<DateTime>();
 
@@ -195,7 +208,7 @@ namespace Остатки.Classes
 				DataBaseJob.AddNewProduct(onePos);
 			}
 		}
-		public async static void parseLeryaUpdate(object ink)
+		public static void parseLeryaUpdate(object ink)
 		{
 			if (ink != null)
 			{
@@ -339,7 +352,7 @@ namespace Остатки.Classes
 
 					lock (locker)
 					{
-						DataBaseJob.UpdateOldProduct(onePos);
+						DataBaseJob.UpdateRemainsOldProduct(onePos);
 					}
 				}
 			}

@@ -11,6 +11,7 @@
     <Grid>
 		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Button Content="Спиздить" CornerRadius="15" Width="400" x:Name="StealProductsButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProducts_Click"/>
+			<Button Content="Проверка и сверка артикулов" CornerRadius="15" Width="400" x:Name="CheckingAndReconciliationOfArticles" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="CheckingAndReconciliationOfArticles_Click"/>
 			<TextBlock x:Name="textBlock1" />
 		</StackPanel>
 	</Grid>
