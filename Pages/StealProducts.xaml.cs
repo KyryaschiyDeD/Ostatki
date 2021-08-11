@@ -162,7 +162,7 @@ namespace Остатки.Pages
 			}
 			catch (Exception)
 			{
-				if (!isByll)
+				if (isByll || resp == null)
 					UnRedactLinksQueue.Enqueue(uri);
 			}
 			Global.countOfUserAgent++;
@@ -276,14 +276,9 @@ namespace Остатки.Pages
 				Regex regexCount = new Regex(@"stock=""(\w+)""");
 				Regex regexLocation = new Regex(@"store-code=""(\w+)""");
 				string countLocaionCode = "";
-				try
-				{
+				if (code.IndexOf("<uc-elbrus-pdp-stocks-list") != -1)
 					countLocaionCode = code.Substring(code.IndexOf("<uc-elbrus-pdp-stocks-list"), code.IndexOf("</uc-elbrus-pdp-stocks-list") - code.IndexOf("<uc-elbrus-pdp-stocks-list"));
-				}
-				catch (Exception)
-				{
-					//Result.Text = code;
-				}
+
 
 				MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
 				MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
@@ -294,16 +289,13 @@ namespace Остатки.Pages
 					foreach (Match match in matchesCount)
 					{
 						string[] digits = Regex.Split(match.Value, @"\D+");
-						foreach (string value in digits)
+
+						int number;
+						if (int.TryParse(digits[1], out number))
 						{
-							int number;
-							if (int.TryParse(value, out number))
-							{
-								productCount.Add(number);
-							}
+							productCount.Add(number);
 						}
 					}
-
 				}
 				else
 				{
@@ -334,8 +326,6 @@ namespace Остатки.Pages
 				else
 				{
 					locationTrue = false;
-					onlyOnline++;
-					specificationsDict["Неудачные ссылки или онлайн"] += onePos.ProductLink + "\n";
 				}
 
 				if (locationTrue && kolvoTru)

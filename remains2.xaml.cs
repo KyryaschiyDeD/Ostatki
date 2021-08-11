@@ -317,7 +317,7 @@ namespace Остатки
 			InitializeComponent();
             //updateAllDataBase();
             //Thread thread = new Thread(updateAllDataBase);
-            //thread.Start();
+            //.Start();
             //thread.Join();
 
             getRemainsIsBaseThread();
