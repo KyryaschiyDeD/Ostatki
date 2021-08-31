@@ -131,8 +131,31 @@ namespace Остатки
 
         }
 
-        public ObservableCollection<Product> ProductListWait = new ObservableCollection<Product>();
 
+        public ObservableCollection<Product> ProductListWait = new ObservableCollection<Product>();
+        private void GoToMainRemains_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null)
+                return;
+            var item = button.DataContext as Product;
+            DataBaseJob.WaitToRemains(item);
+            ProductListWait.Remove(item);
+        }
+        private void rankLowFilter_Click(object sender, RoutedEventArgs e)
+        {
+            ObservableCollection<Product> tmpFilterProduct;
+            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListWait
+                                                                 where item.Name.Contains(FindingTextBox.Text)
+                                                                 select item);
+            long myLong;
+            bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
+            if (tmpFilterProduct.Count == 0 && isNumerical)
+                tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListWait
+                                                                     where item.ArticleNumberLerya == myLong
+                                                                     select item);
+            dataGridProduct.ItemsSource = tmpFilterProduct;
+        }
         public void getRemainsWaitIsBaseThread()
         {
             using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))

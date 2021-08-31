@@ -9,6 +9,15 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
 	<Grid>
+		<CommandBar
+			IsOpen="True"
+			IsSticky="True" 
+			DefaultLabelPosition="Right"
+			Content="">
+			<AppBarElementContainer>
+				<TextBox Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
+			</AppBarElementContainer>
+		</CommandBar>
 		<controls:DataGrid x:Name="dataGridProduct" 
 						   IsReadOnly ="True"
       Margin="12"
@@ -45,7 +54,7 @@
 						</StackPanel>
 						<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
 							<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>-->
-							<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE850;" x:Name="GoToWaitRemains" HorizontalAlignment="Center" Click="GoToWaitRemains_Click"/>-->
+							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE859;" x:Name="GoToMainRemains" HorizontalAlignment="Center" Click="GoToMainRemains_Click"/>
 							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE8B7;" x:Name="GoToArchiveRemains" HorizontalAlignment="Center" Click="GoToArchiveRemains_Click"/>
 							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE74D;" x:Name="GoToDelete" HorizontalAlignment="Center"  Click="GoToDelete_Click"/>
 						</StackPanel>

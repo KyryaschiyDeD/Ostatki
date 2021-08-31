@@ -1,6 +1,9 @@
 ﻿using LiteDB;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace Остатки.Classes
@@ -23,8 +26,7 @@ namespace Остатки.Classes
 		}
 		public static void RemainsToWait(Product product)
 		{
-			var folder = ApplicationData.Current.LocalFolder;
-			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 			{
 				var wait = db.GetCollection<Product>("ProductsWait");
 				var online = db.GetCollection<Product>("Products");
@@ -33,13 +35,30 @@ namespace Остатки.Classes
 				{
 					wait.Insert(product);
 					online.Delete(product.Id);
-					Message.infoList.Add("Товар успешно перемещён в ожидание!!!");
 				}
 				else
 				{
-					Message.errorsList.Add("Данный товар уже в ожидании!!!");
+					online.Delete(product.Id);
 				}
-
+			}
+		}
+		public static void WaitToRemains(Product product)
+		{
+			var folder = ApplicationData.Current.LocalFolder;
+			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+			{
+				var wait = db.GetCollection<Product>("ProductsWait");
+				var online = db.GetCollection<Product>("Products");
+				var proverk = online.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null)
+				{
+					online.Insert(product);
+					wait.Delete(product.Id);
+				}
+				else
+				{
+					wait.Delete(product.Id);
+				}
 			}
 		}
 		public static void AddNewProduct(Product product)
@@ -48,8 +67,10 @@ namespace Остатки.Classes
 			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
 			{
 				var col = db.GetCollection<Product>("Products");
+				var wait = db.GetCollection<Product>("ProductsWait");
 				var proverk = col.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
-				if (proverk == null)
+				var proverkWait = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null && proverkWait == null)
 					col.Insert(product);
 			}
 		}
@@ -93,6 +114,81 @@ namespace Остатки.Classes
 					proverk.DateOldPrice.Add(System.DateTime.Now);
 				}
 				col.Update(proverk);
+			}
+		}
+		public static void UpdateOneProduct(Product product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				var proverk = col.FindOne(x => x.Id == product.Id);
+				proverk.ArticleNumberUnic = product.ArticleNumberUnic;
+				col.Update(proverk);
+			}
+		}
+
+		public static void SaveNewRemains(ConcurrentQueue<Product> NewRemaintProductLerya)
+		{
+			List<Product> lstPr = new List<Product>();
+			List<Product> UpdateWait = new List<Product>();
+			List<Product> UpdateOnline = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var online = db.GetCollection<Product>("Products");
+				var wait = db.GetCollection<Product>("ProductsWait");
+				int kollvo = NewRemaintProductLerya.Count();
+				Action action = () =>
+				{
+					while (!NewRemaintProductLerya.IsEmpty)
+					{
+						Product OneProduct;
+						NewRemaintProductLerya.TryDequeue(out OneProduct);
+						try
+						{
+							var proverk = online.FindOne(x => x.ArticleNumberLerya == OneProduct.ArticleNumberLerya);
+							bool ItsWait = false;
+							if (proverk == null)
+							{
+								proverk = wait.FindOne(x => x.ArticleNumberLerya == OneProduct.ArticleNumberLerya);
+								ItsWait = true;
+							}
+							proverk.DateHistoryRemains.Add(DateTime.Now);
+
+							proverk.HistoryRemainsWhite.Add(proverk.RemainsWhite);
+							proverk.RemainsWhite = OneProduct.RemainsWhite;
+
+							proverk.HistoryRemainsBlack.Add(proverk.RemainsBlack);
+							proverk.RemainsBlack = OneProduct.RemainsBlack;
+
+							proverk.DateHistoryRemains = OneProduct.DateHistoryRemains;
+
+							if (OneProduct.NowPrice != proverk.NowPrice)
+							{
+								proverk.OldPrice.Add(proverk.NowPrice);
+								proverk.NowPrice = OneProduct.NowPrice;
+								proverk.DateOldPrice.Add(System.DateTime.Now);
+							}
+							if (ItsWait)
+							{
+								wait.Update(proverk);
+							}
+							else
+								online.Update(proverk);
+						}
+						catch (Exception)
+						{
+
+						}
+						
+							
+						
+						remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
+					}
+				};
+				Parallel.Invoke(action, action, action, action, action, action,
+					action, action, action, action, action, action,
+					action, action, action, action, action, action,
+					action, action, action, action, action, action);
 			}
 		}
 	}

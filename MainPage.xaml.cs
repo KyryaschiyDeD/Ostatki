@@ -1,5 +1,6 @@
 ﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Остатки.Classes;
 using Остатки.Pages;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
@@ -14,6 +15,8 @@ namespace Остатки
         public MainPage()
         {
             this.InitializeComponent();
+
+            Global.GetWhiteBlackShops();
 
             myFrame.Navigate(typeof(remains2));
             TitleTextBlock.Text = "Остатки в 3D";
@@ -33,7 +36,7 @@ namespace Остатки
             }
             else if (viewAll.IsSelected)
             {
-                myFrame.Navigate(typeof(viewAll));
+                myFrame.Navigate(typeof(Settings));
                 TitleTextBlock.Text = "Настройки";
             }
             else if (waitRemains.IsSelected)

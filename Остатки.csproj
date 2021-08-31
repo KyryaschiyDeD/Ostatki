@@ -138,15 +138,34 @@
     <Compile Include="Classes\HTMLJob.cs" />
     <Compile Include="Classes\Message.cs" />
     <Compile Include="Classes\Product.cs" />
+    <Compile Include="Classes\ProductJobs.cs" />
+    <Compile Include="Classes\ShopWhiteOrBlack.cs" />
+    <Compile Include="Classes\ShopWhiteOrBlackJob.cs" />
     <Compile Include="Classes\Test.cs" />
+    <Compile Include="Classes\WebJob.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\EditingBalancesAndPrices.xaml.cs">
       <DependentUpon>EditingBalancesAndPrices.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\SettingPages\AddUnicArticle.xaml.cs">
+      <DependentUpon>AddUnicArticle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SettingPages\AddWhiteOrBlackStore.xaml.cs">
+      <DependentUpon>AddWhiteOrBlackStore.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SettingPages\ManagementApiKeys.xaml.cs">
+      <DependentUpon>ManagementApiKeys.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\StealProducts.xaml.cs">
       <DependentUpon>StealProducts.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\StealProducts_2_0.xaml.cs">
+      <DependentUpon>StealProducts_2_0.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="remains2.xaml.cs">
@@ -198,7 +217,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\SettingPages\AddUnicArticle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SettingPages\AddWhiteOrBlackStore.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SettingPages\ManagementApiKeys.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\StealProducts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\StealProducts_2_0.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -231,6 +270,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.DataGrid">
       <Version>7.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="morelinq">
+      <Version>3.3.2</Version>
     </PackageReference>
     <PackageReference Include="OpenQA.Selenium.Winium">
       <Version>1.0.0.4</Version>

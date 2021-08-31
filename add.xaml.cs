@@ -55,7 +55,7 @@ namespace Остатки
 		{
 			link.Text.Replace(" ", "");
 			if (link.Text.Length != 0)
-				Product.parseLerya(link.Text);
+				ProductJobs.parseLerya(link.Text);
 			else
 				Message.errorsList.Add("Вы ввели пустую строку!");
 			link.Text = "";
@@ -98,16 +98,18 @@ namespace Остатки
 
 			// Show the toast notification to the user
 			ToastNotificationManager.CreateToastNotifier().Show(toast);
-			IList<string> linksProductTXT = await FileIO.ReadLinesAsync(file);
-			foreach (var item in linksProductTXT)
+			//IList<string> linksProductTXT = await FileIO.ReadLinesAsync(file);
+			ochered = new Queue<string>(await FileIO.ReadLinesAsync(file));
+			/*foreach (var item in linksProductTXT)
 			{
 				ochered.Enqueue(item);
-			}
-			Task[] tasks2 = new Task[linksProductTXT.Count];
-			for (int i = 0; i < linksProductTXT.Count; i++)
+			} */
+			Task[] tasks2 = new Task[ochered.Count];
+			int allCount = ochered.Count;
+			for (int i = 0; i < allCount; i++)
 			{
-				tasks2[i] = Task.Factory.StartNew(() => Product.parseLerya(ochered.Dequeue()));
-				UpdateProgress(linksProductTXT.Count, i);
+				tasks2[i] = Task.Factory.StartNew(() => ProductJobs.parseLerya(ochered.Dequeue()));
+				UpdateProgress(allCount, i+1);
 			}
 			//Task.WaitAll(tasks2);
 

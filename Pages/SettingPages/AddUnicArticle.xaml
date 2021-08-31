@@ -1,0 +1,19 @@
+﻿<Page
+    x:Class="Остатки.Pages.SettingPages.AddUnicArticle"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Остатки.Pages.SettingPages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+		<StackPanel  HorizontalAlignment="Center" VerticalAlignment="Center">
+			<TextBox FontSize="25" Width="400" x:Name="Names" Margin="10"></TextBox>
+			<TextBox FontSize="25" Width="400" x:Name="ArticleLeroy" Margin="5"></TextBox>
+			<TextBox CornerRadius="15" Width="400" PlaceholderText="Наш артикул Озон:" x:Name="ArticleUnicOzon" Margin="10"></TextBox>
+			<Button Content="Сохранить" CornerRadius="15" Width="400" x:Name="GoSaveUnicArticle" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="GoSaveUnicArticle_Click"/>
+		</StackPanel>
+    </Grid>
+</Page>

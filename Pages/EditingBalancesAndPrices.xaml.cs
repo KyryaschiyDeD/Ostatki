@@ -22,7 +22,9 @@ namespace Остатки.Pages
 																				 where (item.OldPrice.Count != 0 && !item.NewPriceIsSave)
 																				 orderby item.OldPrice[item.OldPrice.Count - 1] ascending
 																				 select item);
-				
+				ProductListDataBase = new ObservableCollection<Product>(allProductsTMP);
+
+
 			}
 		}
 	}
