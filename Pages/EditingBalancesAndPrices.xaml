@@ -69,9 +69,9 @@
 
 
 				<controls:DataGridTextColumn 
-            Header="Отстаки" 
+            Header="Вес" 
             Width="SizeToHeader"
-            Binding="{Binding RemainsWhite}" 
+            Binding="{Binding Weight}" 
 					 Tag="RemainsWhite">
 					<controls:DataGridTextColumn.ElementStyle>
 						<Style TargetType="TextBlock">

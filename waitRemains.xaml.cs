@@ -176,10 +176,9 @@ namespace Остатки
             var button = sender as Button;
             if (button == null)
                 return;
-
             var item = button.DataContext as Product;
-            Message.infoList.Add($"В архив {item.Name}");
-            Message.AllErrors();
+            DataBaseJob.WaitToArchive(item);
+            ProductListWait.Remove(item);
         }
         private void GoToDelete_Click(object sender, RoutedEventArgs e)
         {

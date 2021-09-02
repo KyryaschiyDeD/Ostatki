@@ -127,6 +127,22 @@ namespace Остатки
                         e.Column.SortDirection = DataGridSortDirection.Descending;
                     }
                     break;
+                case "FuncTemplate":
+                    if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
+                    {
+                        dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
+                                                                                        orderby item.RemainsWhite ascending
+                                                                                        select item);
+                        e.Column.SortDirection = DataGridSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
+                                                                                        orderby item.RemainsWhite descending
+                                                                                        select item);
+                        e.Column.SortDirection = DataGridSortDirection.Descending;
+                    }
+                    break;
             }
             foreach (var dgColumn in dataGridProduct.Columns)
             {
@@ -157,6 +173,7 @@ namespace Остатки
                                                                      select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
+
         private void Article_Click(object sender, RoutedEventArgs e)
         {
             ObservableCollection<Product> tmpFilterProduct;
@@ -165,7 +182,12 @@ namespace Остатки
                                                                  select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
-
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            Thread thread = new Thread(UpdateAllDataBaseLerya);
+            thread.Start();
+            thread.Join();
+        }
         public void UpdateProgress(double kolvo, double apply)
         {
             // Construct a NotificationData object;
@@ -253,6 +275,7 @@ namespace Остатки
                 return;
             var item = button.DataContext as Product;
             ProductJobs.parseLeryaUpdate(item.ProductLink);
+            ProductJobs.UpdateOneProduct();
         }
         private void GoToWaitRemains_Click(object sender, RoutedEventArgs e)
         {
@@ -268,10 +291,9 @@ namespace Остатки
             var button = sender as Button;
             if (button == null)
                 return;
-
             var item = button.DataContext as Product;
-            Message.infoList.Add($"В архив {item.Name}");
-            Message.AllErrors();
+            DataBaseJob.RemainsToArchive(item);
+            ProductList1.Remove(item);
         }
         private void GoToDelete_Click(object sender, RoutedEventArgs e)
         {
@@ -393,11 +415,6 @@ namespace Остатки
             //Thread thread = new Thread(updateAllDataBase);
             //thread.Start();
             //thread.Join();
-
-            Thread thread = new Thread(UpdateAllDataBaseLerya);
-            thread.Start();
-            thread.Join();
-
 
             getRemainsIsBaseThread();
             //PostRequestAsync();

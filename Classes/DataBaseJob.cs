@@ -61,6 +61,62 @@ namespace Остатки.Classes
 				}
 			}
 		}
+		public static void ArchiveToRemains(Product product)
+		{
+			var folder = ApplicationData.Current.LocalFolder;
+			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+			{
+				var archive = db.GetCollection<Product>("ProductsArchive");
+				var online = db.GetCollection<Product>("Products");
+				var proverk = online.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null)
+				{
+					online.Insert(product);
+					archive.Delete(product.Id);
+				}
+				else
+				{
+					archive.Delete(product.Id);
+				}
+			}
+		}
+		
+		public static void RemainsToArchive(Product product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var wait = db.GetCollection<Product>("ProductsArchive");
+				var online = db.GetCollection<Product>("Products");
+				var proverk = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null)
+				{
+					wait.Insert(product);
+					online.Delete(product.Id);
+				}
+				else
+				{
+					online.Delete(product.Id);
+				}
+			}
+		}
+		public static void WaitToArchive(Product product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var archive = db.GetCollection<Product>("ProductsArchive");
+				var wait = db.GetCollection<Product>("ProductsWait");
+				var proverk = archive.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				if (proverk == null)
+				{
+					archive.Insert(product);
+					wait.Delete(product.Id);
+				}
+				else
+				{
+					wait.Delete(product.Id);
+				}
+			}
+		}
 		public static void AddNewProduct(Product product)
 		{
 			var folder = ApplicationData.Current.LocalFolder;
@@ -161,6 +217,8 @@ namespace Остатки.Classes
 							proverk.RemainsBlack = OneProduct.RemainsBlack;
 
 							proverk.DateHistoryRemains = OneProduct.DateHistoryRemains;
+
+							proverk.Weight = OneProduct.Weight;
 
 							if (OneProduct.NowPrice != proverk.NowPrice)
 							{

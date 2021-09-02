@@ -36,6 +36,7 @@ namespace Остатки.Classes
 					return Convert.ToDouble(0);
 			}
 		}
+		public double Weight { get; set; } // Вес
 		public bool NewPriceIsSave { get; set; } // Изменён ли на Озон новый ценник
 		public bool ArticleError { get; set; } // Существует ли артикул на Озон у нас в БД
 		public bool ArticleErrorIgnore { get; set; } // Игнорируем ли мы конфликт

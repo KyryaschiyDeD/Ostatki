@@ -380,8 +380,6 @@ namespace Остатки.Classes
 									productLocation.Add(number);
 								}
 							}
-							//string[] s2 = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-							//productLocation.Add(match.Value);
 						}
 
 					}
@@ -404,12 +402,61 @@ namespace Остатки.Classes
 							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 						remainsDictionary.Add(item, productCount.ElementAt(productLocation.IndexOf(item)));
 					}
+
+					string XaractCode = code.Substring(code.IndexOf(@"<dl class=""def-list"">"), code.IndexOf("</dl>") - code.IndexOf(@"<dl class=""def-list"">"));
+
+					Regex regexXaracterName = new Regex(@"<dt class=""def-list__term"">(.)*>");
+					MatchCollection xaracterName = regexXaracterName.Matches(XaractCode);
+
+					Regex regexXaracterText = new Regex(@"<dd class=""def-list__definition"">([^""]+)<\/dd>");
+					MatchCollection xaracterText = regexXaracterText.Matches(XaractCode);
+
+					List<string> xaracterNameList = new List<string>();
+
+					List<string> xaracterTextList = new List<string>();
+					bool massa = false;
+					for (int i = 0; i < xaracterName.Count(); i++)
+					{
+						int start1 = xaracterName[i].ToString().IndexOf(@"<dt class=""def-list__term"">");
+						int start2 = xaracterText[i].ToString().IndexOf(@"<dd class=""def-list__definition"">");
+						int end1 = xaracterName[i].ToString().IndexOf("</dt>");
+						int end2 = xaracterText[i].ToString().IndexOf("</dd>");
+						xaracterNameList.Add(xaracterName[i].ToString().Replace(@"<dt class=""def-list__term"">", "").Replace("</dt>", ""));
+						xaracterTextList.Add(xaracterText[i].ToString().Replace(@"<dd class=""def-list__definition"">", "").Replace("</dd>", "").Replace("\n", ""));
+					}
+
+					for (int i = 0; i < xaracterNameList.Count; i++)
+					{
+						if (xaracterNameList[i].StartsWith("Вес") || xaracterTextList[i].StartsWith("вес"))
+						{
+							massa = true;
+							if (xaracterNameList[i].Contains("кг"))
+							{
+								onePos.Weight = Convert.ToDouble(xaracterTextList[i].Replace(".", ",")) * 1000;
+							}
+							else
+							if (xaracterNameList[i].Contains("г"))
+							{
+								onePos.Weight = Convert.ToDouble(xaracterTextList[i].Replace(".", ","));
+							}
+						}
+					}
+					if (!massa)
+						onePos.Weight = 5000;
 					onePos.remainsDictionary = remainsDictionary;
 					NewRemaintProductLerya.Enqueue(onePos);
 				}
 
 			}
 			
+		}
+
+		public static void UpdateOneProduct()
+		{
+			if (NewRemaintProductLerya.Count != 0)
+			{
+				DataBaseJob.SaveNewRemains(NewRemaintProductLerya);
+			}
 		}
 
 
