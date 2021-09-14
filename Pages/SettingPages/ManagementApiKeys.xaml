@@ -4,11 +4,51 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Остатки.Pages.SettinPages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+	<!--<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+		<StackPanel Grid.Column="0" MinWidth="400" Margin="0,100,0,0">
 
-    </Grid>
+			<TextBox x:Name="ClientId" PlaceholderText="Client Id" Margin="10" HorizontalAlignment="Center" MinWidth="300" />
+			<TextBox x:Name="APIKey" PlaceholderText="API key" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
+			<Button x:Name="AddNewApiKey" Content="Добавить" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="AddNewApiKey_Click"/>
+		</StackPanel>
+		<controls:DataGrid x:Name="dataGridWhiteOrBlackShop" 
+						   IsReadOnly ="True"
+						   Margin="0,10,0,50"
+						   AutoGenerateColumns="False"		 
+						   CanUserReorderColumns="True" 
+						   CanUserResizeColumns="True"
+						   CanUserSortColumns="True"
+							   MinWidth="400"
+							   Grid.Column="1" HorizontalAlignment="Center"
+						   ItemsSource="{x:Bind ApiList}" 
+						   >
+			<controls:DataGrid.Columns>
+				<controls:DataGridTextColumn 
+						Header="Наименование"
+						Width="250"
+						Binding="{Binding Name}" 
+						FontSize="20" />
+
+				<controls:DataGridTextColumn 
+						Header="Код"
+						Width="75"
+						Binding="{Binding Code}" 
+						FontSize="20" />
+
+				<controls:DataGridCheckBoxColumn 
+						Header="Ч/Б"
+						Width="75"
+						Binding="{Binding ShopType}" 
+						 />
+			</controls:DataGrid.Columns>
+		</controls:DataGrid>
+	</Grid>-->
 </Page>

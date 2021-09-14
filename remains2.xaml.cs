@@ -14,10 +14,26 @@ using System.Threading.Tasks;
 using MoreLinq;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Остатки
 {
-	public sealed partial class remains2 : Page
+    public class ProductsIdsss
+    {
+        [JsonProperty("product_id")]
+        public List<long> product_id { get; set; }
+    }
+    public class Susseess
+    {
+        public bool result { get; set; }
+        public int code { get; set; }
+        public string message { get; set; }
+        public List<object> details { get; set; }
+    }
+
+    public sealed partial class remains2 : Page
 	{
         static StorageFolder folder = ApplicationData.Current.LocalFolder;
 
@@ -188,6 +204,68 @@ namespace Остатки
             thread.Start();
             thread.Join();
         }
+
+
+
+        private static Susseess PostRequestAsync(ProductsIdsss pageOzon)
+        {
+            var jsort = JsonConvert.SerializeObject(pageOzon);
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/archive");
+            httpWebRequest.Headers.Add("Client-Id", "104333");
+            httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";
+            string json = @"{
+    ""product_id"": [ "+ pageOzon + "] }";
+            using (var requestStream = httpWebRequest.GetRequestStream())
+            using (var writer = new StreamWriter(requestStream))
+            {
+                writer.Write(jsort);
+            }
+            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                //ответ от сервера
+                var result = streamReader.ReadToEnd();
+
+                //Сериализация
+                return JsonConvert.DeserializeObject<Susseess>(result);
+            }
+        }
+
+        private void GoArchiveOOO_Click(object sender, RoutedEventArgs e)
+        {
+            List<Product> allProducts = new List<Product>();
+            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+            {
+                var col = db.GetCollection<Product>("Products");
+                allProducts = col.Query().Where(x => x.RemainsWhite == 0).ToList();
+            }
+            string ozonID = "";
+            List<Product> ProductToDell = new List<Product>();
+            List<long> product = new List<long>();
+            foreach (var item in allProducts)
+            {
+                if (item.ArticleNumberOzon != 0 && item.RemainsWhite != item.RemainsBlack)
+                {
+                    product.Add(item.ArticleNumberOzon);
+                    ProductToDell.Add(item);
+                }
+            }
+            ProductsIdsss productsIdsss = new ProductsIdsss { product_id = new List<long>(product) };
+            //Message.infoList.Add(JsonConvert.SerializeObject(productsIdsss));
+           // Message.AllErrors();
+            if (PostRequestAsync(productsIdsss).result)
+            {
+                foreach (var item in ProductToDell)
+                {
+                    DataBaseJob.RemainsToWait(item);
+                    ProductList1.Remove(item);
+                }
+                Message.infoList.Add("Остатки зафиксированы.");
+                Message.AllErrors();
+            }
+        }
         public void UpdateProgress(double kolvo, double apply)
         {
             // Construct a NotificationData object;
@@ -220,54 +298,6 @@ namespace Остатки
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
         }
-
-        private static void GoTasksUpdate(Queue<string> ochered)
-		{
-            ConcurrentQueue<string> ocher = new ConcurrentQueue<string>(ochered);
-            Action action = () =>
-            {
-                while (!ocher.IsEmpty)
-                {
-                    string str = "";
-                    ocher.TryDequeue(out str);
-                    ProductJobs.parseLeryaUpdate(str);
-                }
-            };
-            Parallel.Invoke(action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action
-                );
-        }
-
-        public void updateAllDataBase()
-		{
-            List<Product> linksProductTXT = new List<Product>();
-            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
-            {
-                var wait = db.GetCollection<Product>("ProductsWait");
-                var online = db.GetCollection<Product>("Products");
-                var allList = online.FindAll();
-                linksProductTXT = allList.ToList();
-                linksProductTXT.AddRange(wait.FindAll());
-            }
-
-            List<string> allLinksGoToTasks = new List<string>(linksProductTXT.ConvertAll(
-            new Converter<Product, string>(PointFToPoint)));
-
-            var batchedLinks = allLinksGoToTasks.Batch(250);
-            Task[] tasks = new Task[batchedLinks.Count()];
-            for (int i = 0; i < batchedLinks.Count(); i++)
-            {
-                Queue<string> ochered = new Queue<string>(batchedLinks.ElementAt(i));
-                tasks[i] = Task.Factory.StartNew(() => GoTasksUpdate(ochered));
-            }
-            Task.WaitAll(tasks);
-        }
-        public static string PointFToPoint(Product pf)
-        {
-            return pf.ProductLink;
-        }
-        
         private void GoOneUpdate_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -374,14 +404,15 @@ namespace Остатки
             {
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var online = db.GetCollection<Product>("Products");
-                var allList = online.FindAll();
-                linksProductTXT = allList.ToList();
-                linksProductTXT.AddRange(wait.FindAll());
+                var allList = online.Query().OrderBy(x => x.RemainsWhite).ToList();
+                linksProductTXT = allList;
+                linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
             }
             List<string> allLinksGoToTasks = new List<string>(linksProductTXT.ConvertAll(
             new Converter<Product, string>(ProductJobs.GetProductLink)));
             UpdateProgress(allLinksGoToTasks.Count(),0,"Плучаем данные");
             ProductJobs.ocher = new ConcurrentQueue<string>(allLinksGoToTasks);
+            int kolvoToUpdate = ProductJobs.ocher.Count;
             Action action = () =>
             {
                 while (!ProductJobs.ocher.IsEmpty)
@@ -411,15 +442,7 @@ namespace Остатки
         public remains2()
 		{
 			InitializeComponent();
-            //updateAllDataBase();
-            //Thread thread = new Thread(updateAllDataBase);
-            //thread.Start();
-            //thread.Join();
-
             getRemainsIsBaseThread();
-            //PostRequestAsync();
-            //Thread thread = new Thread(getRemainsIsBaseThread);
-            //thread.Start();
         }
 
     }

@@ -80,7 +80,6 @@ namespace Остатки.Classes
 				}
 			}
 		}
-		
 		public static void RemainsToArchive(Product product)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
@@ -182,7 +181,6 @@ namespace Остатки.Classes
 				col.Update(proverk);
 			}
 		}
-
 		public static void SaveNewRemains(ConcurrentQueue<Product> NewRemaintProductLerya)
 		{
 			List<Product> lstPr = new List<Product>();
@@ -237,9 +235,6 @@ namespace Остатки.Classes
 						{
 
 						}
-						
-							
-						
 						remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
 					}
 				};

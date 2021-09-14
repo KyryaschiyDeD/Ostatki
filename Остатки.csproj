@@ -133,6 +133,8 @@
     <Compile Include="archiveRemains.xaml.cs">
       <DependentUpon>archiveRemains.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\ApiKeys.cs" />
+    <Compile Include="Classes\ApiKeysesJob.cs" />
     <Compile Include="Classes\DataBaseJob.cs" />
     <Compile Include="Classes\Global.cs" />
     <Compile Include="Classes\HTMLJob.cs" />

@@ -29,7 +29,6 @@ namespace Остатки.Classes
 		public static ConcurrentQueue<string> ocher = new ConcurrentQueue<string>();
 		public static ConcurrentQueue<Product> NewRemaintProductLerya = new ConcurrentQueue<Product>();
 
-
 		public static string getResponse(string uri)
 		{
 			string htmlCode = "";
@@ -48,7 +47,7 @@ namespace Остатки.Classes
 			return htmlCode;
 		}
 
-		static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
+		public static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
 
 		private static string GetResponseUpdates(string uri)
 		{
@@ -262,9 +261,9 @@ namespace Остатки.Classes
 		}
 		public static void parseLeryaUpdate(object ink)
 		{
-			List<Product> ProductToUpdate = new List<Product>(); 
 			if (ink != null)
 			{
+				
 				string link = ink.ToString();
 				List<int> productCount = new List<int>(); // Кол-во
 				List<int> productLocation = new List<int>(); // Место
@@ -391,7 +390,7 @@ namespace Остатки.Classes
 					Dictionary<int, int> remainsDictionary = new Dictionary<int, int>();
 					foreach (var item in productLocation)
 					{
-						if (Global.whiteList.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 3)
+						if (Global.whiteList.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
 						{
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 						}
@@ -439,6 +438,7 @@ namespace Остатки.Classes
 							{
 								onePos.Weight = Convert.ToDouble(xaracterTextList[i].Replace(".", ","));
 							}
+							break;
 						}
 					}
 					if (!massa)
@@ -446,6 +446,25 @@ namespace Остатки.Classes
 					onePos.remainsDictionary = remainsDictionary;
 					NewRemaintProductLerya.Enqueue(onePos);
 				}
+				else
+				{
+					if (kolvoUpdatePopitka.ContainsKey(ink.ToString()))
+					{
+						if (kolvoUpdatePopitka[ink.ToString()] < 10)
+						{
+							ProductJobs.ocher.Enqueue(ink.ToString());
+							kolvoUpdatePopitka[ink.ToString()]++;
+						}
+					}
+					else
+					{
+						kolvoUpdatePopitka.Add(ink.ToString(), 1);
+						ProductJobs.ocher.Enqueue(ink.ToString());
+					}
+						
+					
+				}
+					
 
 			}
 			
@@ -459,12 +478,10 @@ namespace Остатки.Classes
 			}
 		}
 
-
 		public static string GetProductLink(Product pf)
 		{
 			return pf.ProductLink;
 		}
-		
 
 	}
 }

@@ -156,35 +156,5 @@ namespace Остатки
 				await FileIO.WriteTextAsync(new_file, allLinks);
 			}
 		}
-
-		private async void updateAllData_Click(object sender, RoutedEventArgs e)
-		{
-			string allLinks = "";
-			using (var db = new LiteDatabase($@"{ApplicationData.Current.LocalFolder.Path}/ProductsDB.db"))
-			{
-				var col = db.GetCollection<Product>("Products");
-				var allList = col.FindAll();
-				foreach (var item in allList)
-				{
-					allLinks += item.ProductLink + "\n";
-				}
-			}
-			var savePicker = new FileSavePicker();
-			// место для сохранения по умолчанию
-			savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-			// устанавливаем типы файлов для сохранения
-			savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".txt" });
-			// устанавливаем имя нового файла по умолчанию
-			savePicker.SuggestedFileName = "AllLinksBaseOzon";
-			savePicker.CommitButtonText = "Сохранить";
-
-			var new_file = await savePicker.PickSaveFileAsync();
-			if (new_file != null)
-			{
-				await FileIO.WriteTextAsync(new_file, allLinks);
-			}
-
-			File.Delete($@"{ApplicationData.Current.LocalFolder.Path}/ProductsDB.db");
-		}
 	}
 }

@@ -42,6 +42,10 @@
 				Icon="RepeatAll"
 				Click="Update_Click"
 				/>
+			<AppBarButton
+				Icon="Crop"
+				Click="GoArchiveOOO_Click"
+				/>
 		</CommandBar>
 		<controls:DataGrid x:Name="dataGridProduct" 
 						   IsReadOnly ="True"

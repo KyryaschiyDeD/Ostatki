@@ -7,15 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
+	<Grid>
 		<RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center">
 			<StackPanel x:Name="Customer" Margin="20" HorizontalAlignment="Center">
 				<TextBox TextAlignment="Center" CornerRadius="15" Width="400" x:Name="link" PlaceholderText="Ссылка" Margin="0,0,0,0" HorizontalAlignment="Left" />
 				<Button Content="Добавить" CornerRadius="15" Width="400" x:Name="addLink" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="addLink_Click"/>
 				<Button Content="Добавить .txt файл" CornerRadius="15" Width="400" x:Name="addFileLinks" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="addFileLinks_Click"/>
 				<Button Content="Импорт в .txt файл" CornerRadius="15" Width="400" x:Name="createFileLinks" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="createFileLinks_Click"/>
-				<Button Content="Обновить всё в бд" CornerRadius="15" Width="400" x:Name="updateAllData" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="updateAllData_Click"/>
 			</StackPanel>
 			<TextBlock HorizontalAlignment="Left" x:Name="Result" Margin="517,190,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top"/>
 		</RelativePanel>

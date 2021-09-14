@@ -46,7 +46,9 @@ namespace Остатки.Pages
 		static ConcurrentQueue<string> HtmlQueue = new ConcurrentQueue<string>();
 
 		static List<Product> AllProduct = new List<Product>();
-		
+
+		static bool CheckedProductInDataBase = false;
+
 		List<string> fullLinks = new List<string>();
 		int count;
 		static int trueLinksCount = 0;
@@ -286,23 +288,6 @@ namespace Остатки.Pages
 			};
 
 			Parallel.Invoke(action, action, action, action, action, action, action, action, action, action, action, action, action, action, action, action);
-			//int testCount = UnRedactLinksQueue.Count;
-			//while (testCount != HtmlQueue.Count)
-			//{
-
-			//	Task[] tasks2 = new Task[UnRedactLinksQueue.Count];
-			//	int taskCount = UnRedactLinksQueue.Count;
-			//	for (int i = 0; i < taskCount; i++)
-			//	{
-			//		tasks2[i] = Task.Factory.StartNew(() => GetCodeByLink(UnRedactLinksQueue.Dequeue()));
-			//		UpdateProgresslnk(Convert.ToDouble(taskCount), Convert.ToDouble(i));
-			//	}
-			//	Task.WaitAll(tasks2);
-			//	UpdateProgresslnk(Convert.ToDouble(testCount), Convert.ToDouble(testCount - HtmlQueue.Count));
-			//	if (testCount == HtmlQueue.Count)
-			//		break;
-			//}
-
 
 			string tag = "Product";
 			string group = "Lerya";
@@ -358,8 +343,14 @@ namespace Остатки.Pages
 				if (code.IndexOf("<uc-elbrus-pdp-stocks-list") != -1)
 					countLocaionCode = code.Substring(code.IndexOf("<uc-elbrus-pdp-stocks-list"), code.IndexOf("</uc-elbrus-pdp-stocks-list") - code.IndexOf("<uc-elbrus-pdp-stocks-list"));
 
-				int select = AllProduct.FindIndex(x => x.ProductLink == prdctLink);
-				if (select == -1)
+				bool IsProductInDatabase = false;
+				if (CheckedProductInDataBase)
+				{
+					int select = AllProduct.FindIndex(x => x.ProductLink == prdctLink);
+					if (select == -1)
+						IsProductInDatabase = true;
+				}
+				if (!IsProductInDatabase && CheckedProductInDataBase || !CheckedProductInDataBase)
 				{
 					MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
 					MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
@@ -815,7 +806,7 @@ namespace Остатки.Pages
 			folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 			folderPicker.FileTypeFilter.Add("*");
 			fileWithLinks = await folderPicker.PickSingleFolderAsync();
-
+			CheckedProductInDataBase = TrueProductsDatabase.IsChecked.Value;
 			Thread getLinks = new Thread(getLinksTreadPerexod);
 			getLinks.Start();
 		}
