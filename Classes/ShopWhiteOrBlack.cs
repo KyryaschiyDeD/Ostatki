@@ -9,8 +9,9 @@ namespace Остатки.Classes
 	public class ShopWhiteOrBlack
 	{
 		public Guid Id { get; set; }
-		public string Name { get; set; }
-		public int Code { get; set; }
-		public bool ShopType { get; set; }
+		public string Name { get; set; } // Наименование магазина
+		public int Code { get; set; } // Его код
+		public bool ShopType { get; set; } // Белый или чёрный
+		public bool ShopIsOnly { get; set; } // Устраивают ли нас остатки только там? 
 	}
 }

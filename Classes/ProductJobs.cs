@@ -9,6 +9,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Остатки.Classes;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using System.Threading;
 
 namespace Остатки.Classes
 {
@@ -48,16 +51,40 @@ namespace Остатки.Classes
 		}
 
 		public static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
+		static void AddProxy(HttpWebRequest request)
+		{
+			var proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+			request.Proxy = proxy;
+		}
 
+		//static void AddProxyLoginAndPassword(HttpWebRequest request)
+		//{
+		//	var proxy = new WebProxy(proxyip, proxyport);
+		//	proxy.Credentials = new NetworkCredential("username", "password");
+		//	request.Proxy = proxy;
+		//}
+
+		//public static IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
+		//public static IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
 		private static string GetResponseUpdates(string uri)
 		{
+			Thread.Sleep(3000);
 			string htmlCode = "";
+			//driver.Navigate().GoToUrl(uri);
+			//driver.Url = uri;
 			HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(uri);
-			proxy_request.Method = "GET";
+			//proxy_request.Method = "GET";
 			proxy_request.ContentType = "application/x-www-form-urlencoded";
+			//proxy_request.Headers.Add("Accept-Language: ru-ru");
 			proxy_request.UserAgent = HTMLJob.userAgent[HTMLJob.CountOfUserAgent];
 			proxy_request.KeepAlive = false;
 			proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+			proxy_request.Referer = @"https://leroymerlin.ru/";
+			proxy_request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
+			proxy_request.Host = "leroymerlin.ru";
+			proxy_request.Headers.Add("Bx-ajax", "true");
+			var cookieContainer = new CookieContainer();
+			proxy_request.CookieContainer = cookieContainer;
 			HttpWebResponse resp = null;
 			string html = "";
 			try
@@ -66,13 +93,15 @@ namespace Остатки.Classes
 				if (resp != null)
 					using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
 						html = sr.ReadToEnd();
+				//htmlCode = driver.PageSource;
 				htmlCode = html.Trim();
+				//driver.Quit();
 				if (String.IsNullOrEmpty(htmlCode) || htmlCode.Contains("blocked"))
 				{
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 10))
+						if (!(kolvoUpdatePopitka[uri] > 3))
 							ocher.Enqueue(uri);
 					}
 					else
@@ -90,7 +119,7 @@ namespace Остатки.Classes
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 10))
+						if (!(kolvoUpdatePopitka[uri] > 3))
 							ocher.Enqueue(uri);
 					}
 					else
@@ -105,7 +134,7 @@ namespace Остатки.Classes
 				if (kolvoUpdatePopitka.ContainsKey(uri))
 				{
 					kolvoUpdatePopitka[uri]++;
-					if (!(kolvoUpdatePopitka[uri] > 10))
+					if (!(kolvoUpdatePopitka[uri] > 3))
 						ocher.Enqueue(uri);
 				}
 				else
@@ -114,12 +143,9 @@ namespace Остатки.Classes
 					ocher.Enqueue(uri);
 				}
 			}
-
 			HTMLJob.CountOfUserAgent++;
-			
 			HTMLJob.CountproxyIp++;
 			HTMLJob.CountproxyPort++;
-			
 			return htmlCode;
 		}
 
@@ -263,7 +289,6 @@ namespace Остатки.Classes
 		{
 			if (ink != null)
 			{
-				
 				string link = ink.ToString();
 				List<int> productCount = new List<int>(); // Кол-во
 				List<int> productLocation = new List<int>(); // Место
@@ -292,10 +317,10 @@ namespace Остатки.Classes
 							nextNameArticleId += match;
 						}
 					}
-					else
-					{
-						Message.errorsList.Add("Совпадений не найдено");
-					}
+					//else
+					//{
+					//	Message.errorsList.Add("Совпадений не найдено");
+					//}
 					// Выделяем только наименование, артикул и цену
 					regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
 					matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
@@ -327,10 +352,10 @@ namespace Остатки.Classes
 							resultNameArticleId += match;
 						}
 					}
-					else
-					{
-						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
-					}
+					//else
+					//{
+					//	Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+					//}
 					string[] namesAndArticleId = resultNameArticleId.Split('"');
 					// Вносим в переменные 
 					try
@@ -386,13 +411,17 @@ namespace Остатки.Classes
 					{
 						Message.errorsList.Add("Не удалось найти и загрузить местоположение!!!");
 					}
-
+					int countOfWhoiteList = 0;
 					Dictionary<int, int> remainsDictionary = new Dictionary<int, int>();
 					foreach (var item in productLocation)
 					{
 						if (Global.whiteList.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
 						{
+							List<ShopWhiteOrBlack> shopsWhiteOrBlack = ShopWhiteOrBlackJob.GetAllShopList();
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
+							if (shopsWhiteOrBlack.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
+								countOfWhoiteList += 3;
+							countOfWhoiteList ++;
 						}
 						else
 						if (Global.blackList.Contains(item))
@@ -401,7 +430,11 @@ namespace Остатки.Classes
 							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 						remainsDictionary.Add(item, productCount.ElementAt(productLocation.IndexOf(item)));
 					}
-
+					if (countOfWhoiteList < 3)
+					{
+						onePos.RemainsBlack += onePos.RemainsWhite;
+						onePos.RemainsWhite = 0;
+					}
 					string XaractCode = code.Substring(code.IndexOf(@"<dl class=""def-list"">"), code.IndexOf("</dl>") - code.IndexOf(@"<dl class=""def-list"">"));
 
 					Regex regexXaracterName = new Regex(@"<dt class=""def-list__term"">(.)*>");
@@ -461,13 +494,8 @@ namespace Остатки.Classes
 						kolvoUpdatePopitka.Add(ink.ToString(), 1);
 						ProductJobs.ocher.Enqueue(ink.ToString());
 					}
-						
-					
 				}
-					
-
 			}
-			
 		}
 
 		public static void UpdateOneProduct()
@@ -476,6 +504,46 @@ namespace Остатки.Classes
 			{
 				DataBaseJob.SaveNewRemains(NewRemaintProductLerya);
 			}
+		}
+		public static List<Product> productList = new List<Product>();
+		public static void AddNewApiClientID(string clientId, string link)
+		{
+
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var products = db.GetCollection<Product>("Products");
+				var proverk = products.FindOne(x => x.ProductLink == link);
+				if (proverk == null)
+				{
+					var productsArchive = db.GetCollection<Product>("ProductsArchive");
+					proverk = productsArchive.FindOne(x => x.ProductLink == link);
+					if (proverk == null)
+					{
+						var productsWait = db.GetCollection<Product>("ProductsWait");
+						proverk = productsWait.FindOne(x => x.ProductLink == link);
+						if (proverk != null)
+						{
+							if (!proverk.AccauntOzonID.ContainsKey(clientId))
+								proverk.AccauntOzonID.Add(clientId, true);
+							productsWait.Update(proverk);
+						}
+					}
+					else
+					{
+						if (!proverk.AccauntOzonID.ContainsKey(clientId))
+							proverk.AccauntOzonID.Add(clientId, true);
+						productsArchive.Update(proverk);
+					}
+
+				}
+				else
+				{
+					if (!proverk.AccauntOzonID.ContainsKey(clientId))
+						proverk.AccauntOzonID.Add(clientId, true);
+					products.Update(proverk);
+				}
+			}
+
 		}
 
 		public static string GetProductLink(Product pf)

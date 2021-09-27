@@ -1,4 +1,7 @@
-﻿using Windows.UI.Xaml;
+﻿using LiteDB;
+using System.Collections.Generic;
+using System.Linq;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
 using Остатки.Pages;
@@ -15,10 +18,19 @@ namespace Остатки
         public MainPage()
         {
             this.InitializeComponent();
-
             Global.GetWhiteBlackShops();
-
-            myFrame.Navigate(typeof(remains2));
+            //List<Product> allProducts = new List<Product>();
+            //
+            //using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+            //{
+            //    var col = db.GetCollection<Product>("Products");
+            //    allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+            //}
+            //List<Product> allProducts0 = allProducts.Where(x => x.RemainsWhite == 0).ToList();
+            //List<Product> allProducts15 = allProducts.Where(x => x.RemainsWhite < 15).ToList();
+            //remains0.Text = allProducts0.Count().ToString();
+            //remains15.Text = allProducts15.Count().ToString();
+             myFrame.Navigate(typeof(remains2));
             TitleTextBlock.Text = "Остатки в 3D";
         }
 

@@ -8,13 +8,13 @@
 	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-	<!--<Grid>
+	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition />
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
 		<StackPanel Grid.Column="0" MinWidth="400" Margin="0,100,0,0">
-
+			<TextBox x:Name="NameInBase" PlaceholderText="Наименование" Margin="10" HorizontalAlignment="Center" MinWidth="300" />
 			<TextBox x:Name="ClientId" PlaceholderText="Client Id" Margin="10" HorizontalAlignment="Center" MinWidth="300" />
 			<TextBox x:Name="APIKey" PlaceholderText="API key" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
 			<Button x:Name="AddNewApiKey" Content="Добавить" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="AddNewApiKey_Click"/>
@@ -36,19 +36,12 @@
 						Width="250"
 						Binding="{Binding Name}" 
 						FontSize="20" />
-
 				<controls:DataGridTextColumn 
-						Header="Код"
-						Width="75"
-						Binding="{Binding Code}" 
+						Header="Дата создания"
+						Width="250"
+						Binding="{Binding DateCreate}" 
 						FontSize="20" />
-
-				<controls:DataGridCheckBoxColumn 
-						Header="Ч/Б"
-						Width="75"
-						Binding="{Binding ShopType}" 
-						 />
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>
-	</Grid>-->
+	</Grid>
 </Page>

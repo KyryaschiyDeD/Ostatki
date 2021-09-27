@@ -34,14 +34,14 @@ namespace Остатки.Pages.SettinPages
 
 		private void CreateNewShop_Click(object sender, RoutedEventArgs e)
 		{
-			ShopWhiteOrBlackJob.CreateNewShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked);
+			ShopWhiteOrBlackJob.CreateNewShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked);
 			GoToShopList();
 			Zeroing();
 		}
 
 		private void RedactOldShop_Click(object sender, RoutedEventArgs e)
 		{
-			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked);
+			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked);
 			GoToShopList();
 			Zeroing();
 		}

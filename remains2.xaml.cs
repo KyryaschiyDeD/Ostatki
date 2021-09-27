@@ -17,6 +17,8 @@ using System.Threading;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace Остатки
 {
@@ -194,7 +196,7 @@ namespace Остатки
         {
             ObservableCollection<Product> tmpFilterProduct;
             tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
-                                                                 where item.ArticleNumberOzon == 0
+                                                                 where item.ArticleNumberOzonDict.Count == 0
                                                                  select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
@@ -205,14 +207,12 @@ namespace Остатки
             thread.Join();
         }
 
-
-
-        private static Susseess PostRequestAsync(ProductsIdsss pageOzon)
+        private static Susseess PostRequestAsync(ApiKeys key,ProductsIdsss pageOzon)
         {
             var jsort = JsonConvert.SerializeObject(pageOzon);
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/archive");
-            httpWebRequest.Headers.Add("Client-Id", "104333");
-            httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
+            httpWebRequest.Headers.Add("Client-Id", key.ClientId);
+            httpWebRequest.Headers.Add("Api-Key", key.ApiKey);
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
             string json = @"{
@@ -243,19 +243,63 @@ namespace Остатки
             }
             string ozonID = "";
             List<Product> ProductToDell = new List<Product>();
-            List<long> product = new List<long>();
-            foreach (var item in allProducts)
+            //List<Product> ProductToDell = new List<Product>();
+            Dictionary<ApiKeys, List<long>> productAllDict = new Dictionary<ApiKeys, List<long>>();
+            Dictionary<Product, int> countOfAPI = new Dictionary<Product, int>();
+            //List<long> product = new List<long>();
+            using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
             {
-                if (item.ArticleNumberOzon != 0 && item.RemainsWhite != item.RemainsBlack)
+                var col = db.GetCollection<Product>("Products");
+                allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+            }
+            foreach (var keys in ApiKeysesJob.GetAllApiList())
+            {
+                
+                List<long> product = new List<long>();
+                foreach (var item in allProducts)
                 {
-                    product.Add(item.ArticleNumberOzon);
-                    ProductToDell.Add(item);
+                    if (item.ArticleNumberOzonDict.ContainsKey(keys.ClientId))
+                    if (item.ArticleNumberOzonDict[keys.ClientId] != 0 && item.RemainsWhite != item.RemainsBlack)
+                    {
+                        if (item.RemainsWhite == 0)
+							{
+                                product.Add(item.ArticleNumberOzonDict[keys.ClientId]);
+                                if (!countOfAPI.ContainsKey(item))
+                                    countOfAPI.Add(item, 1);
+                                else
+                                    countOfAPI[item]++;
+                            }
+                    }
+                }
+                productAllDict.Add(keys, product);
+            }
+			foreach (var item in countOfAPI)
+			{
+                if (item.Value == item.Key.CountOfTrueAccaunt)
+                    ProductToDell.Add(item.Key);
+            }
+            Dictionary<ApiKeys, ProductsIdsss> productsIdsss = new Dictionary<ApiKeys, ProductsIdsss>();
+
+            foreach (var item in productAllDict)
+			{
+                productsIdsss.Add(item.Key, new ProductsIdsss { product_id = new List<long>(item.Value) });
+            }
+            //Message.infoList.Add(JsonConvert.SerializeObject(productsIdsss));
+            // Message.AllErrors();
+            int kolvoPost = 0;
+			foreach (var item in productsIdsss)
+			{
+                Message.infoList.Add($"Ключ: {item.Key.ClientId}, {item.Value.product_id.Count}");
+			}
+            Message.AllErrors();
+            foreach (var item in productsIdsss)
+			{
+                if (PostRequestAsync(item.Key, item.Value).result)
+                {
+                    kolvoPost++;
                 }
             }
-            ProductsIdsss productsIdsss = new ProductsIdsss { product_id = new List<long>(product) };
-            //Message.infoList.Add(JsonConvert.SerializeObject(productsIdsss));
-           // Message.AllErrors();
-            if (PostRequestAsync(productsIdsss).result)
+            if (kolvoPost == productsIdsss.Count())
             {
                 foreach (var item in ProductToDell)
                 {
@@ -404,7 +448,8 @@ namespace Остатки
             {
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var online = db.GetCollection<Product>("Products");
-                var allList = online.Query().OrderBy(x => x.RemainsWhite).ToList();
+                //var allList = online.Query().Where(x => x.RemainsWhite <= 80 && x.RemainsWhite != 0 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
+                var allList = online.Query().ToList();
                 linksProductTXT = allList;
                 linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
             }
@@ -413,6 +458,9 @@ namespace Остатки
             UpdateProgress(allLinksGoToTasks.Count(),0,"Плучаем данные");
             ProductJobs.ocher = new ConcurrentQueue<string>(allLinksGoToTasks);
             int kolvoToUpdate = ProductJobs.ocher.Count;
+
+            //IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
+            //driver.Manage().Window.Maximize();
             Action action = () =>
             {
                 while (!ProductJobs.ocher.IsEmpty)
@@ -423,18 +471,7 @@ namespace Остатки
                     UpdateProgress(allLinksGoToTasks.Count(), ProductJobs.NewRemaintProductLerya.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action,
-                action, action, action, action, action, action
+            Parallel.Invoke(action
                 );
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProductLerya);
@@ -443,6 +480,14 @@ namespace Остатки
 		{
 			InitializeComponent();
             getRemainsIsBaseThread();
+			//foreach (var item in ProductList1)
+			//{
+   //             if (item.DateHistoryRemains.Count == 0)
+			//	{
+   //                 item.DateHistoryRemains.Add(DateTime.MinValue);
+   //             }
+   //             DataBaseJob.UpdateOneProduct(item);
+			//}
         }
 
     }

@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace Остатки.Classes
 {
-	class ApiKeys
+	public class ApiKeys
 	{
+		public Guid Id { get; set; }
+		public string Name { get; set; }
+		public string ClientId { get; set; }
+		public string ApiKey { get; set; }
+		public DateTime DateCreate {get; set;}
 	}
 }

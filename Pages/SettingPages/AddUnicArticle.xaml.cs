@@ -44,7 +44,7 @@ namespace Остатки.Pages.SettingPages
 				tmpFilterProduct = new ObservableCollection<Product>(allProducts);
 			}
 			ProductErrorList = new Queue<Product>(from item in tmpFilterProduct
-												  where item.ArticleNumberOzon == 0 && String.IsNullOrEmpty(item.ArticleNumberUnic)
+												  where item.ArticleNumberOzonDict.Count == 0 && String.IsNullOrEmpty(item.ArticleNumberUnic)
 													select item);
 		}
 		private void GoAnText()

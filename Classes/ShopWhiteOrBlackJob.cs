@@ -10,7 +10,7 @@ namespace Остатки.Classes
 {
 	public class ShopWhiteOrBlackJob
 	{
-		public static void CreateNewShop(string shopName, string shopCode, bool White)
+		public static void CreateNewShop(string shopName, string shopCode, bool White, bool Only)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
 			{
@@ -18,10 +18,10 @@ namespace Остатки.Classes
 				var proverk = col.FindOne(x => x.Name == shopName);
 				proverk = col.FindOne(x => x.Code == Convert.ToInt32(shopCode));
 				if (proverk == null)
-					col.Insert(new ShopWhiteOrBlack() { Name = shopName, Code = Convert.ToInt32(shopCode), ShopType = White });
+					col.Insert(new ShopWhiteOrBlack() { Name = shopName, Code = Convert.ToInt32(shopCode), ShopType = White, ShopIsOnly = Only });
 			}
 		}
-		public static void RedactOldShop(string shopName, string shopCode, bool White)
+		public static void RedactOldShop(string shopName, string shopCode, bool White, bool Only)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
 			{
@@ -32,6 +32,7 @@ namespace Остатки.Classes
 				{
 					proverk.Name = shopName;
 					proverk.ShopType = White;
+					proverk.ShopIsOnly = Only;
 					col.Update(proverk);
 				}
 					

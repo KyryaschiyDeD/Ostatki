@@ -178,6 +178,7 @@ namespace Остатки.Classes
 				var col = db.GetCollection<Product>("Products");
 				var proverk = col.FindOne(x => x.Id == product.Id);
 				proverk.ArticleNumberUnic = product.ArticleNumberUnic;
+				proverk.DateHistoryRemains = product.DateHistoryRemains;
 				col.Update(proverk);
 			}
 		}

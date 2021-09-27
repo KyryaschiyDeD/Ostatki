@@ -52,6 +52,7 @@ namespace Остатки.Pages
 		List<string> fullLinks = new List<string>();
 		int count;
 		static int trueLinksCount = 0;
+
 		static object locker = new object();
 
 		public void GetCodeByLink(object lnk)
@@ -827,11 +828,11 @@ namespace Остатки.Pages
 			GetLinks();
 		}
 
-		private static Root PostRequestAsync(int pageOzon)
+		private static Root PostRequestAsync(int pageOzon, string clientId, string apiKey)
 		{
 			var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
-			httpWebRequest.Headers.Add("Client-Id", "104333");
-			httpWebRequest.Headers.Add("Api-Key", "01b9ded4-1af2-46a1-9d79-64c9869593cd");
+			httpWebRequest.Headers.Add("Client-Id", clientId);
+			httpWebRequest.Headers.Add("Api-Key", apiKey);
 			httpWebRequest.ContentType = "application/json";
 			httpWebRequest.Method = "POST";
 			string json = @"{
@@ -862,43 +863,43 @@ namespace Остатки.Pages
 		static List<Product> allProducts = new List<Product>();
 		static List<Product> allProductsUpdate = new List<Product>();
 
-		public static void CheckArticulLeryaOrOzonPerexod(object peredacha)
-		{
-			Queue<ItemProsuctOfferIDs> ocheres = new Queue<ItemProsuctOfferIDs>((Queue<ItemProsuctOfferIDs>)peredacha);
-			Task[] tasks2 = new Task[ocheres.Count];
-			int taskCount = ocheres.Count;
-			for (int i = 0; i < taskCount; i++)
-			{
-				tasks2[i] = Task.Factory.StartNew(() => CheckArticulLeryaOrOzon(ocheres.Dequeue()));
-			}
-			Task.WaitAll(tasks2);
-		}
-		public static void CheckArticulLeryaOrOzon(ItemProsuctOfferIDs item)
-		{
-			if (item != null)
-			{
-				Product OneProduct = null;
-				try
-				{
-					OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item.offer_id));
-				}
-				catch (Exception)
-				{
-					OneProduct = null;
-				}
-				if (OneProduct != null)
-				{
-					OneProduct.ArticleNumberOzon = Convert.ToInt64(item.product_id);
-					OneProduct.ArticleError = false;
-					allProductsUpdate.Add(OneProduct);
-				}
-				else
-				{
-					AllErrorsProduct.Add(item);
-				}
-			}
+		//public static void CheckArticulLeryaOrOzonPerexod(object peredacha)
+		//{
+		//	Queue<ItemProsuctOfferIDs> ocheres = new Queue<ItemProsuctOfferIDs>((Queue<ItemProsuctOfferIDs>)peredacha);
+		//	Task[] tasks2 = new Task[ocheres.Count];
+		//	int taskCount = ocheres.Count;
+		//	for (int i = 0; i < taskCount; i++)
+		//	{
+		//		tasks2[i] = Task.Factory.StartNew(() => CheckArticulLeryaOrOzon(ocheres.Dequeue()));
+		//	}
+		//	Task.WaitAll(tasks2);
+		//}
+		//public static void CheckArticulLeryaOrOzon(ItemProsuctOfferIDs item)
+		//{
+		//	if (item != null)
+		//	{
+		//		Product OneProduct = null;
+		//		try
+		//		{
+		//			OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item.offer_id));
+		//		}
+		//		catch (Exception)
+		//		{
+		//			OneProduct = null;
+		//		}
+		//		if (OneProduct != null)
+		//		{
+		//			OneProduct.ArticleNumberOzon = Convert.ToInt64(item.product_id);
+		//			OneProduct.ArticleError = false;
+		//			allProductsUpdate.Add(OneProduct);
+		//		}
+		//		else
+		//		{
+		//			AllErrorsProduct.Add(item);
+		//		}
+		//	}
 			
-		}
+		//}
 
 		private void CheckingAndReconciliationOfArticles_Click(object sender, RoutedEventArgs e)
 		{
@@ -910,33 +911,36 @@ namespace Остатки.Pages
 				var col = db.GetCollection<Product>("Products");
 				allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
 			}
-
-			for (int i = 1; i <= 6; i++)
+			foreach (var item in ApiKeysesJob.GetAllApiList())
 			{
-				//Thread.Sleep(5000);
-				List<ItemProsuctOfferIDs> items = PostRequestAsync(i).result.items;
-				foreach (var item in items)
+
+				for (int i = 1; i <= 6; i++)
 				{
-					Product OneProduct = null;
-					try
+					//Thread.Sleep(5000);
+					List<ItemProsuctOfferIDs> items = PostRequestAsync(i, item.ClientId, item.ApiKey).result.items;
+					foreach (var item1 in items)
 					{
-						OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item.offer_id));
+						Product OneProduct = null;
+						try
+						{
+							OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item1.offer_id));
+						}
+						catch (Exception)
+						{
+							OneProduct = null;
+						}
+						if (OneProduct != null && !OneProduct.ArticleNumberOzonDict.ContainsKey(item.ClientId))
+						{
+							OneProduct.ArticleNumberOzonDict.Add(item.ClientId, Convert.ToInt64(item1.product_id));
+							OneProduct.ArticleError = false;
+							allProductsUpdate.Add(OneProduct);
+						}
+						else
+						{
+							AllErrorsProduct.Add(item1);
+						}
+						//writeToTxtExperiense += $"Наш артикул: {item.offer_id}  Озон артикул: {item.product_id}\n";
 					}
-					catch (Exception)
-					{
-						OneProduct = null;
-					}
-					if (OneProduct != null)
-					{
-						OneProduct.ArticleNumberOzon = Convert.ToInt64(item.product_id);
-						OneProduct.ArticleError = false;
-						allProductsUpdate.Add(OneProduct);
-					}
-					else
-					{
-						AllErrorsProduct.Add(item);
-					}
-					//writeToTxtExperiense += $"Наш артикул: {item.offer_id}  Озон артикул: {item.product_id}\n";
 				}
 			}
 			DataBaseJob.UpdateList(allProductsUpdate);

@@ -72,5 +72,12 @@
 				<Frame Name="myFrame" />
 			</SplitView.Content>
 		</SplitView>
+		<!--<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+			<TextBlock Text="Остатки в нуле: "/>
+			<TextBlock x:Name="remains0"/>
+			<TextBlock Text="Остатки &lt; 15: "/>
+			<TextBlock x:Name="remains15"/>
+		</StackPanel>-->
+		
 	</Grid>
 </Page>

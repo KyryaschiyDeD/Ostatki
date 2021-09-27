@@ -17,10 +17,18 @@ namespace Остатки.Classes
 		public string ProductLink { get; set; }
 		public string Name { get; set; } // Наименование
 		public long ArticleNumberLerya { get; set; } // Леруа артикл
-		public long ArticleNumberOzon { get; set; } // Озон артикл
+		public Dictionary<string, long> ArticleNumberOzonDict { get; set; } = new Dictionary<string, long>();
+		public string ArticleNumberOzonDictCount
+		{
+			get
+			{
+				return ArticleNumberOzonDict.Count.ToString();
+			}
+		}
+		//public long ArticleNumberOzon { get; set; } // Озон артикл
 		public string ArticleNumberUnic { get; set; } // Озон Кривой (который мы сочиняли сами)
 		public int RemainsWhite { get; set; } // Остатки из белого списка
-		public Dictionary<int, int> remainsDictionary { get;set;}
+		public Dictionary<int, int> remainsDictionary { get; set; }
 		public List<DateTime> DateHistoryRemains { get; set; } = new List<DateTime>();// Даты и время проверки остатков
 		public List<int> HistoryRemainsWhite { get; set; } = new List<int>();// История Остатки из белого списка
 		public int RemainsBlack { get; set; } // Остальные остатки
@@ -32,7 +40,7 @@ namespace Остатки.Classes
 			{
 				if (OldPrice.Count > 0)
 					return OldPrice[OldPrice.Count() - 1];
-				else 
+				else
 					return Convert.ToDouble(0);
 			}
 		}
@@ -42,7 +50,37 @@ namespace Остатки.Classes
 		public bool ArticleErrorIgnore { get; set; } // Игнорируем ли мы конфликт
 		public List<double> OldPrice { get; set; } = new List<double>(); // Цена Леруа цена была
 		public List<DateTime> DateOldPrice { get; set; } = new List<DateTime>();
-
+		public Dictionary<string, bool> AccauntOzonID { get; set; } = new Dictionary<string, bool>();
+		public string ClientIDAPi
+		{
+			get
+			{
+				string APIs = "";
+				if (AccauntOzonID.Count > 0)
+				{
+					foreach (var item in AccauntOzonID.Keys)
+					{
+						APIs += item + " ";
+					}
+				}
+				else
+					return "Пуста";
+				return APIs;
+			}
+		}
+		public int CountOfTrueAccaunt
+		{
+			get
+			{
+				int kolvo = 0;
+				foreach (var item in AccauntOzonID)
+				{
+					if (item.Value)
+						kolvo++;
+				}
+				return kolvo;
+			}
+		}
 		public override string ToString()
 		{
 			return $"{ArticleNumberLerya}";

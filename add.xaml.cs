@@ -2,11 +2,13 @@
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.UI.Core;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -22,10 +24,21 @@ namespace Остатки
 	public sealed partial class add : Page
 	{
 		Queue<string> ochered = new Queue<string>();
+		public ObservableCollection<CheckBox> myLabels { get; set; } = new ObservableCollection<CheckBox>();
 		StorageFile file;
 		public add()
 		{
 			this.InitializeComponent();
+			List<string> ListApi = ApiKeysesJob.GetNames();
+			foreach (var item in ListApi)
+			{
+				CheckBox chBox = new CheckBox();
+				chBox.Content = item;
+				chBox.Visibility = Visibility.Visible;
+				chBox.DataContext = this;
+				myLabels.Add(chBox);
+			}
+			
 		}
 
 		public void UpdateProgress(double kolvo, double apply)
@@ -96,23 +109,50 @@ namespace Остатки
 			// Provide sequence number to prevent out-of-order updates, or assign 0 to indicate "always update"
 			toast.Data.SequenceNumber = 0;
 
-			// Show the toast notification to the user
+
 			ToastNotificationManager.CreateToastNotifier().Show(toast);
-			//IList<string> linksProductTXT = await FileIO.ReadLinesAsync(file);
 			ochered = new Queue<string>(await FileIO.ReadLinesAsync(file));
-			/*foreach (var item in linksProductTXT)
-			{
-				ochered.Enqueue(item);
-			} */
 			Task[] tasks2 = new Task[ochered.Count];
+
 			int allCount = ochered.Count;
+			List<Product> linksProductTXT = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var wait = db.GetCollection<Product>("ProductsWait");
+				var online = db.GetCollection<Product>("Products");
+				var archive = db.GetCollection<Product>("ProductsArchive");
+				var allList = 
+				linksProductTXT = online.Query().ToList();
+				linksProductTXT.AddRange(wait.Query().ToList());
+				linksProductTXT.AddRange(archive.Query().ToList());
+			}
+			List<string> allLinks = new List<string>(linksProductTXT.ConvertAll(
+			new Converter<Product, string>(ProductJobs.GetProductLink)));
 			for (int i = 0; i < allCount; i++)
 			{
-				tasks2[i] = Task.Factory.StartNew(() => ProductJobs.parseLerya(ochered.Dequeue()));
-				UpdateProgress(allCount, i+1);
-			}
-			//Task.WaitAll(tasks2);
+				string link = ochered.Dequeue();
+				if (!allLinks.Contains(link))
+				{
+					tasks2[i] = Task.Factory.StartNew(() => ProductJobs.parseLerya(link));
+					UpdateProgress(allCount, i + 1);
+				}
+				else
+				{
+					foreach (var item in myLabels)
+					{
+						await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+							() =>
+							{
+								if (item.IsChecked.Value)
+								{
+									ProductJobs.AddNewApiClientID(item.Name, link);
+								}
+							});
+						
+					}
+				}
 
+			}
 		}
 
 		private async void addFileLinks_Click(object sender, RoutedEventArgs e)

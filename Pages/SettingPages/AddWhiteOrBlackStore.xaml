@@ -25,6 +25,7 @@
 				<RadioButton Grid.Column="0" GroupName="ShopIsWhiteOrBlack" x:Name="WhiteRadioButton" Content="Белый" HorizontalAlignment="Right" />
 				<RadioButton Grid.Column="1" GroupName="ShopIsWhiteOrBlack" x:Name="BlackRadioButton" Content="Чёрный" HorizontalAlignment="Left" />
 			</Grid>
+			<CheckBox x:Name="ShopIsOnlyThisCheckBox" Content="Только тут" HorizontalAlignment="Center" IsChecked="False" />
 			<Button x:Name="CreateNewShop" Content="Добавить" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="CreateNewShop_Click"/>
 			<Button x:Name="RedactOldShop" Content="Редактировать старый" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="RedactOldShop_Click"/>
 		</StackPanel>
@@ -57,6 +58,12 @@
 						Width="75"
 						Binding="{Binding ShopType}" 
 						 />
+				<controls:DataGridCheckBoxColumn 
+						Header="Только тут?"
+						Width="75"
+						Binding="{Binding ShopIsOnly}" 
+						 />
+				
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>
 	</Grid>
