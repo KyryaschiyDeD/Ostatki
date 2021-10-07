@@ -16,8 +16,50 @@ namespace Остатки.Classes
 		public Guid Id { get; set; }
 		public string ProductLink { get; set; }
 		public string Name { get; set; } // Наименование
-		public long ArticleNumberLerya { get; set; } // Леруа артикл
+		//public long ArticleNumberLerya { get; set; } // Леруа артикл
+		public string ArticleNumberInShop { get; set; } // Артикул в магазине
 		public Dictionary<string, long> ArticleNumberOzonDict { get; set; } = new Dictionary<string, long>();
+		public long ArticleNumberOzonDictGetElena 
+		{ 
+			get
+			{
+				try
+				{
+					return ArticleNumberOzonDict["104333"];
+				}
+				catch (Exception)
+				{
+					return -1;
+				}
+				
+			}
+		}
+		public long ArticleNumberOzonDictGetTimeLine
+		{
+			get
+			{
+				try
+				{
+					return ArticleNumberOzonDict["200744"];
+				}
+				catch (Exception)
+				{
+					return -1;
+				}
+
+			}
+		}
+		public long ArticleNumberOzonDictGetByClientID(string clientID)
+		{
+			try
+			{
+				return ArticleNumberOzonDict[clientID];
+			}
+			catch (Exception)
+			{
+				return -1;
+			}
+		}
 		public string ArticleNumberOzonDictCount
 		{
 			get
@@ -33,7 +75,7 @@ namespace Остатки.Classes
 		public List<int> HistoryRemainsWhite { get; set; } = new List<int>();// История Остатки из белого списка
 		public int RemainsBlack { get; set; } // Остальные остатки
 		public List<int> HistoryRemainsBlack { get; set; } = new List<int>();// История Остальные остатки
-		public double NowPrice { get; set; } // Цена Леруа сейчас
+		public double NowPrice { get; set; } // Цена магазина сейчас
 		public double OldPriceCh
 		{
 			get
@@ -81,9 +123,58 @@ namespace Остатки.Classes
 				return kolvo;
 			}
 		}
+		public string TypeOfShop { get; set; }
 		public override string ToString()
 		{
-			return $"{ArticleNumberLerya}";
+			return ArticleNumberInShop;
+		}
+		public string ToStringInfo()
+		{
+			string data = "";
+			data += $"Артикул товара в магазе: {ArticleNumberInShop} \n";
+
+			data += $"Аккаунты: \n";
+			int countAccaunt = 0;
+			foreach (var item in ApiKeysesJob.GetAllApiList())
+			{
+				long chID = ArticleNumberOzonDictGetByClientID(item.ClientId);
+				if (chID != -1)
+				{
+					data += $"\t {ApiKeysesJob.GetApiName(item)}: {chID}\n";
+					countAccaunt++;
+				}
+			}
+			if (countAccaunt == 0)
+				data += $"\t Товар не найден в БД на озон!\n";
+
+			data += $"Кол-во аккаунтов: {ArticleNumberOzonDictCount} \n";
+			data += $"Остатки на белизне: {RemainsWhite} \n";
+			data += $"Остатки ин жопенн: {RemainsBlack} \n";
+			data += $"Послед. дата проверки: {DateHistoryRemains.Last()} \n";
+			data += $"\tЦена: {NowPrice}\n";
+			if (OldPriceCh != 0)
+			{
+				data += $"\t   Ранее: {OldPriceCh} \n";
+				data += $"\t   Изменение замечено: {DateOldPrice.Last()} \n";
+			}
+			else
+				data += $"\t Цена не менялась \n";
+			data += $"Вес: {Weight}\n";
+			data += $"Магазин: {TypeOfShop}\n";
+
+			return data;
+		}
+		public string GetAccountIds
+		{
+			get
+			{
+				string str = "";
+				foreach (var item in AccauntOzonID)
+				{
+					str += item.Key.Length + " ";
+				}
+				return str;
+			}
 		}
 	}
 }

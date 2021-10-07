@@ -12,18 +12,32 @@ namespace Остатки.Classes
 	{
 		public static StorageFolder folder = ApplicationData.Current.LocalFolder;
 
-		public static List<int> whiteList = new List<int>();
-		public static List<int> blackList = new List<int>();
-		
-		public static void GetWhiteBlackShops()
+		public static List<int> whiteListLeroy = new List<int>();
+		public static List<int> blackListLeroy = new List<int>();
+
+		public static List<int> whiteListLeonardo = new List<int>();
+		public static List<int> blackListLeonardo = new List<int>();
+
+		public static void GetWhiteBlackShopsLeroy()
 		{
-			List<ShopWhiteOrBlack> list = ShopWhiteOrBlackJob.GetAllShopList();
+			List<ShopWhiteOrBlack> list = ShopWhiteOrBlackJob.GetShopListSpecifically("Леруа Мерлен");
 			foreach (var item in list)
 			{
 				if (item.ShopType)
-					whiteList.Add(item.Code);
+					whiteListLeroy.Add(item.Code);
 				else
-					blackList.Add(item.Code);
+					blackListLeroy.Add(item.Code);
+			}
+		}
+		public static void GetWhiteBlackShopsLeonardo()
+		{
+			List<ShopWhiteOrBlack> list = ShopWhiteOrBlackJob.GetShopListSpecifically("Леонардо");
+			foreach (var item in list)
+			{
+				if (item.ShopType)
+					whiteListLeroy.Add(item.Code);
+				else
+					blackListLeroy.Add(item.Code);
 			}
 		}
 

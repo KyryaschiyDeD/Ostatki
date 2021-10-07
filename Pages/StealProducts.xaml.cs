@@ -193,7 +193,7 @@ namespace Остатки.Pages
 			
 			return htmlCode;
 		}
-
+		
 		public void createProductThread()
 		{
 			string tag1 = "ProductLinksCode";
@@ -404,10 +404,10 @@ namespace Остатки.Pages
 					if (locationTrue && kolvoTru)
 						foreach (var item in productLocation)
 						{
-							if (Global.whiteList.Contains(item))
+							if (Global.whiteListLeroy.Contains(item))
 								onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 							else
-							if (Global.blackList.Contains(item))
+							if (Global.blackListLeroy.Contains(item))
 								onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 						}
 					else
@@ -823,10 +823,7 @@ namespace Остатки.Pages
 			}
 		}
 
-		private void StealProducts_Click(object sender, RoutedEventArgs e)
-		{
-			GetLinks();
-		}
+		
 
 		private static Root PostRequestAsync(int pageOzon, string clientId, string apiKey)
 		{
@@ -858,7 +855,7 @@ namespace Остатки.Pages
 				return JsonConvert.DeserializeObject<Root>(result);
 			}
 		}
-
+		
 		static List<ItemProsuctOfferIDs> AllErrorsProduct = new List<ItemProsuctOfferIDs>();
 		static List<Product> allProducts = new List<Product>();
 		static List<Product> allProductsUpdate = new List<Product>();
@@ -923,7 +920,7 @@ namespace Остатки.Pages
 						Product OneProduct = null;
 						try
 						{
-							OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberLerya == Convert.ToInt64(item1.offer_id));
+							OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberInShop == item1.offer_id);
 						}
 						catch (Exception)
 						{
@@ -949,6 +946,14 @@ namespace Остатки.Pages
 			//									CreationCollisionOption.ReplaceExisting);
 
 			//await FileIO.WriteTextAsync(helloFile, writeToTxtExperiense);
+		}
+		private void StealProductLeroys_Click(object sender, RoutedEventArgs e)
+		{
+			GetLinks();
+		}
+		private void StealProductLeonardos_Click(object sender, RoutedEventArgs e)
+		{
+			LeonardoJobs.GetLinks(TrueProductsDatabase.IsChecked.Value);
 		}
 	}
 }

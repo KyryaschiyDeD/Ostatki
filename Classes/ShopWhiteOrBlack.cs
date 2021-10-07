@@ -10,6 +10,7 @@ namespace Остатки.Classes
 	{
 		public Guid Id { get; set; }
 		public string Name { get; set; } // Наименование магазина
+		public string WhatIsShop { get; set; } // Что за магазин?
 		public int Code { get; set; } // Его код
 		public bool ShopType { get; set; } // Белый или чёрный
 		public bool ShopIsOnly { get; set; } // Устраивают ли нас остатки только там? 

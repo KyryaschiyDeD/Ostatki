@@ -10,17 +10,15 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 	<Grid>
 		<Grid.Resources>
-			<!--DataTemplate for Published Date column defined in Grid.Resources.  PublishDate is a property on the ItemsSource of type DateTime -->
 			<DataTemplate x:Key="FuncTemplate" >
 				<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
-					<!--<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>-->
+					<Button FontFamily="Segoe MDL2 Assets" FontSize="20" Content="&#xE897;" x:Name="GoToInfo" HorizontalAlignment="Center"  Click="GoToInfo_Click"/>
 					<Button FontFamily="Segoe MDL2 Assets" FontSize="20" Content="&#xF83E;" x:Name="GoOneUpdate" HorizontalAlignment="Center" Click="GoOneUpdate_Click"/>
 					<Button FontFamily="Segoe MDL2 Assets" FontSize="20" Content="&#xE850;" x:Name="GoToWaitRemains" HorizontalAlignment="Center" Click="GoToWaitRemains_Click"/>
 					<Button FontFamily="Segoe MDL2 Assets" FontSize="20" Content="&#xE8B7;" x:Name="GoToArchiveRemains" HorizontalAlignment="Center" Click="GoToArchiveRemains_Click"/>
 					<Button FontFamily="Segoe MDL2 Assets" FontSize="20" Content="&#xE74D;" x:Name="GoToDelete" HorizontalAlignment="Center"  Click="GoToDelete_Click"/>
 				</StackPanel>
 			</DataTemplate>
-			<!--DataTemplate for the Published Date column when in edit mode. -->
 			<DataTemplate x:Key="EditingDateTemplate">
 				<DatePicker SelectedDate="{Binding PublishDate}"  />
 			</DataTemplate>
@@ -100,8 +98,8 @@
 				<controls:DataGridTextColumn 
             Header="Артикул" 
             Width="SizeToHeader"
-            Binding="{Binding ArticleNumberLerya}" 
-					 Tag="ArticleNumberLerya">
+            Binding="{Binding ArticleNumberInShop}" 
+					 Tag="ArticleNumberInShop">
 					<controls:DataGridTextColumn.ElementStyle>
 						<Style TargetType="TextBlock">
 							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>

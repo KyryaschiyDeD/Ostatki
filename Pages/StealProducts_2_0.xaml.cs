@@ -294,12 +294,12 @@ namespace Остатки.Pages
 				if (locationTrue && kolvoTru)
 					foreach (var item in productLocation)
 					{
-						if (Global.whiteList.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 3)
+						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 3)
 						{
 							oneProduct.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 						}
 						else
-						if (Global.blackList.Contains(item))
+						if (Global.blackListLeroy.Contains(item))
 							oneProduct.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 						else
 							oneProduct.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));

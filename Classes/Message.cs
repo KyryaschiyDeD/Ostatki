@@ -21,6 +21,17 @@ namespace Остатки.Classes
 			};
 			var errorDialogRusult = errorDialog.ShowAsync();
 		}
+		public static void ShowInfoProduct(string name, object data)
+		{
+			ContentDialog InfoProductDialog = new ContentDialog()
+			{
+				Title = name,
+				Content = data.ToString(),
+				PrimaryButtonText = "ОК"
+			};
+			var InfoProductRusult = InfoProductDialog.ShowAsync();
+		}
+		
 		public static void ShowError(object data)
 		{
 			ContentDialog errorDialog = new ContentDialog()
@@ -42,7 +53,7 @@ namespace Остатки.Classes
 				}
 				ShowError(data);
 				errorsList.Clear();
-			}
+			}else
 			if (infoList.Count != 0)
 			{
 				string data = "";

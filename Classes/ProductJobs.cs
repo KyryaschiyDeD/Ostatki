@@ -9,8 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Остатки.Classes;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using System.Threading;
 
 namespace Остатки.Classes
@@ -57,15 +55,6 @@ namespace Остатки.Classes
 			request.Proxy = proxy;
 		}
 
-		//static void AddProxyLoginAndPassword(HttpWebRequest request)
-		//{
-		//	var proxy = new WebProxy(proxyip, proxyport);
-		//	proxy.Credentials = new NetworkCredential("username", "password");
-		//	request.Proxy = proxy;
-		//}
-
-		//public static IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
-		//public static IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
 		private static string GetResponseUpdates(string uri)
 		{
 			Thread.Sleep(3000);
@@ -79,6 +68,7 @@ namespace Остатки.Classes
 			proxy_request.UserAgent = HTMLJob.userAgent[HTMLJob.CountOfUserAgent];
 			proxy_request.KeepAlive = false;
 			proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+			proxy_request.Timeout = 20000;
 			proxy_request.Referer = @"https://leroymerlin.ru/";
 			proxy_request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
 			proxy_request.Host = "leroymerlin.ru";
@@ -221,7 +211,7 @@ namespace Остатки.Classes
 			{
 				onePos.Name = namesAndArticleId[3];
 				onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
-				onePos.ArticleNumberLerya = Convert.ToInt64(namesAndArticleId[1]);
+				onePos.ArticleNumberInShop = namesAndArticleId[1];
 			}
 			catch (Exception)
 			{
@@ -269,13 +259,13 @@ namespace Остатки.Classes
 
 			foreach (var item in productLocation)
 			{
-				if (Global.whiteList.Contains(item))
+				if (Global.whiteListLeroy.Contains(item))
 
 					onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 
 
 				else
-				if (Global.blackList.Contains(item))
+				if (Global.blackListLeroy.Contains(item))
 
 					onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 
@@ -362,7 +352,7 @@ namespace Остатки.Classes
 					{
 						onePos.Name = namesAndArticleId[3];
 						onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
-						onePos.ArticleNumberLerya = Convert.ToInt64(namesAndArticleId[1]);
+						onePos.ArticleNumberInShop = namesAndArticleId[1];
 					}
 					catch (Exception)
 					{
@@ -415,7 +405,7 @@ namespace Остатки.Classes
 					Dictionary<int, int> remainsDictionary = new Dictionary<int, int>();
 					foreach (var item in productLocation)
 					{
-						if (Global.whiteList.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
+						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
 						{
 							List<ShopWhiteOrBlack> shopsWhiteOrBlack = ShopWhiteOrBlackJob.GetAllShopList();
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
@@ -424,7 +414,7 @@ namespace Остатки.Classes
 							countOfWhoiteList ++;
 						}
 						else
-						if (Global.blackList.Contains(item))
+						if (Global.blackListLeroy.Contains(item))
 							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
 						else
 							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));

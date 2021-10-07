@@ -1,0 +1,52 @@
+﻿<Page
+    x:Class="Остатки.Pages.MainInfoList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Остатки.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="40"/>
+			<RowDefinition MinHeight="960"/>
+		</Grid.RowDefinitions>
+
+			<CommandBar
+			IsOpen="True"
+			IsSticky="True" 
+			DefaultLabelPosition="Right"
+			Content=""
+			Grid.Row="0">
+				<AppBarElementContainer>
+					<Button CornerRadius="15" x:Name="UpdateStat" Content="Собрать новую статистику" Click="UpdateStat_Click"></Button>
+				</AppBarElementContainer>
+			</CommandBar>
+			<Grid
+				Grid.Row="1">
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<StackPanel Grid.Column="0" Grid.Row="0" x:Name="Grid00">
+
+				</StackPanel>
+				<StackPanel Grid.Column="1" Grid.Row="0" x:Name="Grid01">
+
+				</StackPanel>
+				<StackPanel Grid.Column="0" Grid.Row="1" x:Name="Grid10">
+
+				</StackPanel>
+				<StackPanel Grid.Column="1" Grid.Row="1" x:Name="Grid11">
+
+				</StackPanel>
+			</Grid>
+
+	</Grid>
+</Page>

@@ -2,6 +2,7 @@
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
+using Остатки.Pages.SettingPages.AddWhiteOrBlackStore;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -12,38 +13,28 @@ namespace Остатки.Pages.SettinPages
 	/// </summary>
 	public sealed partial class AddWhiteOrBlackStore : Page
 	{
-		public ObservableCollection<ShopWhiteOrBlack> ShopList = new ObservableCollection<ShopWhiteOrBlack>();
 		public AddWhiteOrBlackStore()
 		{
 			this.InitializeComponent();
-			GoToShopList();
 		}
 
-		private void GoToShopList()
+		private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			ShopList = new ObservableCollection<ShopWhiteOrBlack>(ShopWhiteOrBlackJob.GetAllShopList());
+			if (Leroy.IsSelected)
+			{
+				myFrame.Navigate(typeof(AddWhiteOrBlackStoreLeroy));
+				TitleTextBlock.Text = "Леруа";
+			}
+			else if (Leonardo.IsSelected)
+			{
+				myFrame.Navigate(typeof(AddWhiteOrBlackStoreLeonardo));
+				TitleTextBlock.Text = "Леонардо";
+			}
 		}
 
-		private void Zeroing()
+		private void HamburgerButton_Click(object sender, RoutedEventArgs e)
 		{
-			ShopName.Text = "";
-			ShopCode.Text = "";
-			WhiteRadioButton.IsChecked = false;
-			BlackRadioButton.IsChecked = false;
-		}
-
-		private void CreateNewShop_Click(object sender, RoutedEventArgs e)
-		{
-			ShopWhiteOrBlackJob.CreateNewShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked);
-			GoToShopList();
-			Zeroing();
-		}
-
-		private void RedactOldShop_Click(object sender, RoutedEventArgs e)
-		{
-			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked);
-			GoToShopList();
-			Zeroing();
+			mySplitView.IsPaneOpen = !mySplitView.IsPaneOpen;
 		}
 	}
 }

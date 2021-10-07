@@ -58,8 +58,8 @@
 				<controls:DataGridTextColumn 
             Header="Артикул" 
             Width="SizeToHeader"
-            Binding="{Binding ArticleNumberLerya}" 
-					 Tag="ArticleNumberLerya">
+            Binding="{Binding ArticleNumberInShop}" 
+					 Tag="ArticleNumberInShop">
 					<controls:DataGridTextColumn.ElementStyle>
 						<Style TargetType="TextBlock">
 							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>

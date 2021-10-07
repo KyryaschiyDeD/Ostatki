@@ -30,7 +30,7 @@ namespace Остатки.Classes
 			{
 				var wait = db.GetCollection<Product>("ProductsWait");
 				var online = db.GetCollection<Product>("Products");
-				var proverk = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = wait.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null)
 				{
 					wait.Insert(product);
@@ -49,7 +49,7 @@ namespace Остатки.Classes
 			{
 				var wait = db.GetCollection<Product>("ProductsWait");
 				var online = db.GetCollection<Product>("Products");
-				var proverk = online.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = online.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null)
 				{
 					online.Insert(product);
@@ -68,7 +68,7 @@ namespace Остатки.Classes
 			{
 				var archive = db.GetCollection<Product>("ProductsArchive");
 				var online = db.GetCollection<Product>("Products");
-				var proverk = online.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = online.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null)
 				{
 					online.Insert(product);
@@ -86,7 +86,7 @@ namespace Остатки.Classes
 			{
 				var wait = db.GetCollection<Product>("ProductsArchive");
 				var online = db.GetCollection<Product>("Products");
-				var proverk = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = wait.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null)
 				{
 					wait.Insert(product);
@@ -104,7 +104,7 @@ namespace Остатки.Classes
 			{
 				var archive = db.GetCollection<Product>("ProductsArchive");
 				var wait = db.GetCollection<Product>("ProductsWait");
-				var proverk = archive.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = archive.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null)
 				{
 					archive.Insert(product);
@@ -123,8 +123,8 @@ namespace Остатки.Classes
 			{
 				var col = db.GetCollection<Product>("Products");
 				var wait = db.GetCollection<Product>("ProductsWait");
-				var proverk = col.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
-				var proverkWait = wait.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = col.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
+				var proverkWait = wait.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 				if (proverk == null && proverkWait == null)
 					col.Insert(product);
 			}
@@ -137,7 +137,7 @@ namespace Остатки.Classes
 				var col = db.GetCollection<Product>("Products");
 				foreach (var item in product)
 				{
-					var proverk = col.FindOne(x => x.ArticleNumberLerya == item.ArticleNumberLerya);
+					var proverk = col.FindOne(x => x.ArticleNumberInShop == item.ArticleNumberInShop);
 					if (proverk != null)
 					{
 						proverk = item;
@@ -152,7 +152,7 @@ namespace Остатки.Classes
 			using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
 			{
 				var col = db.GetCollection<Product>("Products");
-				var proverk = col.FindOne(x => x.ArticleNumberLerya == product.ArticleNumberLerya);
+				var proverk = col.FindOne(x => x.ArticleNumberInShop == product.ArticleNumberInShop);
 
 				proverk.DateHistoryRemains.Add(System.DateTime.Now);
 
@@ -177,8 +177,20 @@ namespace Остатки.Classes
 			{
 				var col = db.GetCollection<Product>("Products");
 				var proverk = col.FindOne(x => x.Id == product.Id);
+				if (proverk == null)
+				{
+					col = db.GetCollection<Product>("ProductsWait");
+					proverk = col.FindOne(x => x.Id == product.Id);
+					if (proverk == null)
+					{
+						col = db.GetCollection<Product>("ProductsArchive");
+						proverk = col.FindOne(x => x.Id == product.Id);
+					}
+				}
 				proverk.ArticleNumberUnic = product.ArticleNumberUnic;
 				proverk.DateHistoryRemains = product.DateHistoryRemains;
+				proverk.TypeOfShop = product.TypeOfShop;
+				proverk.ArticleNumberInShop = product.ArticleNumberInShop;
 				col.Update(proverk);
 			}
 		}
@@ -200,11 +212,11 @@ namespace Остатки.Classes
 						NewRemaintProductLerya.TryDequeue(out OneProduct);
 						try
 						{
-							var proverk = online.FindOne(x => x.ArticleNumberLerya == OneProduct.ArticleNumberLerya);
+							var proverk = online.FindOne(x => x.ArticleNumberInShop == OneProduct.ArticleNumberInShop);
 							bool ItsWait = false;
 							if (proverk == null)
 							{
-								proverk = wait.FindOne(x => x.ArticleNumberLerya == OneProduct.ArticleNumberLerya);
+								proverk = wait.FindOne(x => x.ArticleNumberInShop == OneProduct.ArticleNumberInShop);
 								ItsWait = true;
 							}
 							proverk.DateHistoryRemains.Add(DateTime.Now);
@@ -243,6 +255,20 @@ namespace Остатки.Classes
 					action, action, action, action, action, action,
 					action, action, action, action, action, action,
 					action, action, action, action, action, action);
+			}
+		}
+
+		public static void GetAllProductFromTheBase(out List<Product> Remains, out List<Product> Wait, out List<Product> Archive, out List<Product> Del)
+		{
+			Remains = new List<Product>();
+			Wait = new List<Product>();
+			Archive = new List<Product>();
+			Del = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				Wait = db.GetCollection<Product>("ProductsWait").Query().ToList();
+				Archive = db.GetCollection<Product>("ProductsArchive").Query().ToList();
+				Remains = db.GetCollection<Product>("Products").Query().ToList();
 			}
 		}
 	}

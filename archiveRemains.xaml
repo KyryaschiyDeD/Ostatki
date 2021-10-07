@@ -50,7 +50,7 @@
 							<TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind Name}"/>
 							<!--<TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Text="{x:Bind NowPrice}"/>
 							<TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Text="{x:Bind OldPriceCh}" />-->
-							<TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Text="{x:Bind ArticleNumberLerya}" />
+							<TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Text="{x:Bind ArticleNumberInShop}" />
 						</StackPanel>
 						<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="1">
 							<Button FontFamily="Segoe MDL2 Assets" FontSize="30" Content="&#xE859;" x:Name="GoToMainRemains" HorizontalAlignment="Center" Click="GoToMainRemains_Click"/>
@@ -103,8 +103,8 @@
 				<controls:DataGridTextColumn 
             Header="Артикул" 
             Width="SizeToHeader"
-            Binding="{Binding ArticleNumberLerya}" 
-					 Tag="ArticleNumberLerya">
+            Binding="{Binding ArticleNumberInShop}" 
+					 Tag="ArticleNumberInShop">
 					<controls:DataGridTextColumn.ElementStyle>
 						<Style TargetType="TextBlock">
 							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>

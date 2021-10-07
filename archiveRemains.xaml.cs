@@ -33,11 +33,11 @@ namespace Остатки
 
             switch (e.Column.Tag.ToString())
             {
-                case "ArticleNumberLerya":
+                case "ArticleNumberInShop":
                     if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductListArchive
-                                                                                        orderby item.ArticleNumberLerya ascending
+                                                                                        orderby item.ArticleNumberInShop ascending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Ascending;
 
@@ -45,7 +45,7 @@ namespace Остатки
                     else
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductListArchive
-                                                                                        orderby item.ArticleNumberLerya descending
+                                                                                        orderby item.ArticleNumberInShop descending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Descending;
                     }
@@ -160,7 +160,7 @@ namespace Остатки
             bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
             if (tmpFilterProduct.Count == 0 && isNumerical)
                 tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListArchive
-                                                                     where item.ArticleNumberLerya == myLong
+                                                                     where item.ArticleNumberInShop == myLong.ToString()
                                                                      select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }

@@ -53,7 +53,7 @@ namespace Остатки.Pages.SettingPages
 			{
 				oneProduct = ProductErrorList.Dequeue();
 				Names.Text = oneProduct.Name;
-				ArticleLeroy.Text = oneProduct.ArticleNumberLerya.ToString();
+				ArticleLeroy.Text = oneProduct.ArticleNumberInShop;
 			}
 			else
 			{

@@ -24,6 +24,12 @@
                    DisplayMode="CompactOverlay" CompactPaneLength="56">
 			<SplitView.Pane>
 				<ListBox x:Name="menu" SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged">
+					<ListBoxItem Name="MainInfoList">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE908;" />
+							<TextBlock FontSize="24" Text="Статистика" Margin="10 0 0 0" />
+						</StackPanel>
+					</ListBoxItem>
 					<ListBoxItem Name="remains">
 						<StackPanel Orientation="Horizontal">
 							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE859;" />

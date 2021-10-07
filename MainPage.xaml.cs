@@ -18,7 +18,7 @@ namespace Остатки
         public MainPage()
         {
             this.InitializeComponent();
-            Global.GetWhiteBlackShops();
+            Global.GetWhiteBlackShopsLeroy();
             //List<Product> allProducts = new List<Product>();
             //
             //using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
@@ -30,13 +30,18 @@ namespace Остатки
             //List<Product> allProducts15 = allProducts.Where(x => x.RemainsWhite < 15).ToList();
             //remains0.Text = allProducts0.Count().ToString();
             //remains15.Text = allProducts15.Count().ToString();
-             myFrame.Navigate(typeof(remains2));
+             myFrame.Navigate(typeof(MainInfoList));
             TitleTextBlock.Text = "Остатки в 3D";
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (remains.IsSelected)
+            if (MainInfoList.IsSelected)
+            {
+                myFrame.Navigate(typeof(MainInfoList));
+                TitleTextBlock.Text = "Статистика";
+            }
+            else if(remains.IsSelected)
             {
                 myFrame.Navigate(typeof(remains2));
                 TitleTextBlock.Text = "Остатки в 3D";

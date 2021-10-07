@@ -29,11 +29,12 @@ namespace Остатки
 		public add()
 		{
 			this.InitializeComponent();
-			List<string> ListApi = ApiKeysesJob.GetNames();
+			List<ApiKeys> ListApi = ApiKeysesJob.GetAllApiList();
 			foreach (var item in ListApi)
 			{
 				CheckBox chBox = new CheckBox();
-				chBox.Content = item;
+				chBox.Name = item.ClientId;
+				chBox.Content = item.Name;
 				chBox.Visibility = Visibility.Visible;
 				chBox.DataContext = this;
 				myLabels.Add(chBox);

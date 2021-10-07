@@ -17,8 +17,6 @@ using System.Threading;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 
 namespace Остатки
 {
@@ -46,11 +44,11 @@ namespace Остатки
             
             switch (e.Column.Tag.ToString())
 			{
-				case "ArticleNumberLerya":
+				case "ArticleNumberInShop":
                     if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
-                                                                                        orderby item.ArticleNumberLerya ascending
+                                                                                        orderby item.ArticleNumberInShop ascending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Ascending;
 
@@ -58,7 +56,7 @@ namespace Остатки
                     else
                     {
                         dataGridProduct.ItemsSource = new ObservableCollection<Product>(from item in ProductList1
-                                                                                        orderby item.ArticleNumberLerya descending
+                                                                                        orderby item.ArticleNumberInShop descending
                                                                                         select item);
                         e.Column.SortDirection = DataGridSortDirection.Descending;
                     }
@@ -187,7 +185,7 @@ namespace Остатки
             bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
             if (tmpFilterProduct.Count == 0 && isNumerical)
                 tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
-                                                                     where item.ArticleNumberLerya == myLong
+                                                                     where item.ArticleNumberInShop == myLong.ToString()
                                                                      select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
@@ -206,7 +204,7 @@ namespace Остатки
             thread.Start();
             thread.Join();
         }
-
+        
         private static Susseess PostRequestAsync(ApiKeys key,ProductsIdsss pageOzon)
         {
             var jsort = JsonConvert.SerializeObject(pageOzon);
@@ -232,7 +230,6 @@ namespace Остатки
                 return JsonConvert.DeserializeObject<Susseess>(result);
             }
         }
-
         private void GoArchiveOOO_Click(object sender, RoutedEventArgs e)
         {
             List<Product> allProducts = new List<Product>();
@@ -335,12 +332,15 @@ namespace Остатки
 
         public void getRemainsIsBaseThread()
         {
+            List<Product> lst = new List<Product>();
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
                 List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
+            
+			
         }
         private void GoOneUpdate_Click(object sender, RoutedEventArgs e)
         {
@@ -379,7 +379,14 @@ namespace Остатки
             Message.infoList.Add($"Удаляем нафиг {item.Name}");
             Message.AllErrors();
         }
-
+        private void GoToInfo_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null)
+                return;
+            var item = button.DataContext as Product;
+            Message.ShowInfoProduct(item.Name, item.ToStringInfo());
+        }
 
         private static void CreateToastProductJob()
         {
@@ -448,10 +455,11 @@ namespace Остатки
             {
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var online = db.GetCollection<Product>("Products");
-                //var allList = online.Query().Where(x => x.RemainsWhite <= 80 && x.RemainsWhite != 0 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
-                var allList = online.Query().ToList();
-                linksProductTXT = allList;
-                linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
+                //linksProductTXT = online.Query().ToList();
+                linksProductTXT = online.Query().Where(x => x.DateHistoryRemains.Last().Date != DateTime.Now.Date).ToList();
+                //linksProductTXT = online.Query().Where(x =>  x.RemainsWhite <= 450 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
+                //linksProductTXT = online.Query().ToList();
+                //linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
             }
             List<string> allLinksGoToTasks = new List<string>(linksProductTXT.ConvertAll(
             new Converter<Product, string>(ProductJobs.GetProductLink)));
@@ -459,8 +467,6 @@ namespace Остатки
             ProductJobs.ocher = new ConcurrentQueue<string>(allLinksGoToTasks);
             int kolvoToUpdate = ProductJobs.ocher.Count;
 
-            //IWebDriver driver = new ChromeDriver($@"{Global.folder.Path}");
-            //driver.Manage().Window.Maximize();
             Action action = () =>
             {
                 while (!ProductJobs.ocher.IsEmpty)
@@ -471,8 +477,7 @@ namespace Остатки
                     UpdateProgress(allLinksGoToTasks.Count(), ProductJobs.NewRemaintProductLerya.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action
-                );
+            Parallel.Invoke(action);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProductLerya);
         }
@@ -480,14 +485,27 @@ namespace Остатки
 		{
 			InitializeComponent();
             getRemainsIsBaseThread();
-			//foreach (var item in ProductList1)
-			//{
-   //             if (item.DateHistoryRemains.Count == 0)
-			//	{
-   //                 item.DateHistoryRemains.Add(DateTime.MinValue);
-   //             }
-   //             DataBaseJob.UpdateOneProduct(item);
-			//}
+            Message.AllErrors();
+    //        foreach (var item in ProductList1)
+    //        {
+    //            Dictionary<string, bool> newDict = new Dictionary<string, bool>();
+    //            bool izm = false;
+				//foreach (var ert in item.AccauntOzonID)
+				//{
+    //                if (ert.Key.Length == 0)
+				//	{
+    //                    izm = true;
+    //                    newDict.Add("200744", ert.Value);
+    //                }
+    //                else
+    //                    newDict.Add("104333", ert.Value);
+    //            }
+    //            if (izm)
+				//{
+    //                item.AccauntOzonID = newDict;
+    //                DataBaseJob.UpdateOneProduct(item);
+    //            }
+    //        }
         }
 
     }
