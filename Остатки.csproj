@@ -145,7 +145,6 @@
     <Compile Include="Classes\SatisticGlobal.cs" />
     <Compile Include="Classes\ShopWhiteOrBlack.cs" />
     <Compile Include="Classes\ShopWhiteOrBlackJob.cs" />
-    <Compile Include="Classes\Test.cs" />
     <Compile Include="Classes\WebJob.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

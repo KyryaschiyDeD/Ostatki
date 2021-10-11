@@ -910,7 +910,6 @@ namespace Остатки.Pages
 			}
 			foreach (var item in ApiKeysesJob.GetAllApiList())
 			{
-
 				for (int i = 1; i <= 6; i++)
 				{
 					//Thread.Sleep(5000);
@@ -926,11 +925,17 @@ namespace Остатки.Pages
 						{
 							OneProduct = null;
 						}
-						if (OneProduct != null && !OneProduct.ArticleNumberOzonDict.ContainsKey(item.ClientId))
+						if (OneProduct != null && !OneProduct.ArticleNumberOzonDictList.ContainsKey(item.ClientId))
 						{
-							OneProduct.ArticleNumberOzonDict.Add(item.ClientId, Convert.ToInt64(item1.product_id));
+							OneProduct.ArticleNumberOzonDictList.Add(item.ClientId, new List<long>() { Convert.ToInt64(item1.product_id) });
 							OneProduct.ArticleError = false;
 							allProductsUpdate.Add(OneProduct);
+						}
+						else
+						if (OneProduct.ArticleNumberOzonDictList.ContainsKey(item.ClientId))
+						{
+							if (!OneProduct.ArticleNumberOzonDictList[item.ClientId].Contains(item1.product_id))
+								OneProduct.ArticleNumberOzonDictList[item.ClientId].Add(item1.product_id);
 						}
 						else
 						{

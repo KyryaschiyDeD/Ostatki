@@ -146,6 +146,30 @@ namespace Остатки.Classes
 				}
 			}
 		}
+		public static void AddListToBackground(List<Product> product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				col.InsertBulk(product);
+				/*foreach (var item in product)
+				{
+					col.Insert(item);
+				}*/
+			}
+		}
+		public static void AddListToRemains(List<Product> product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				col.InsertBulk(product);
+				/*foreach (var item in product)
+				{
+					col.Insert(item);
+				}*/
+			}
+		}
 		public static void UpdateRemainsOldProduct(Product product)
 		{
 			var folder = ApplicationData.Current.LocalFolder;
@@ -187,10 +211,7 @@ namespace Остатки.Classes
 						proverk = col.FindOne(x => x.Id == product.Id);
 					}
 				}
-				proverk.ArticleNumberUnic = product.ArticleNumberUnic;
-				proverk.DateHistoryRemains = product.DateHistoryRemains;
-				proverk.TypeOfShop = product.TypeOfShop;
-				proverk.ArticleNumberInShop = product.ArticleNumberInShop;
+				proverk.ArticleNumberUnicList = product.ArticleNumberUnicList;
 				col.Update(proverk);
 			}
 		}

@@ -49,6 +49,7 @@ namespace Остатки.Classes
 		}
 
 		public static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
+		public static List<ShopWhiteOrBlack> shopsWhiteOrBlack = ShopWhiteOrBlackJob.GetAllShopList();
 		static void AddProxy(HttpWebRequest request)
 		{
 			var proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
@@ -256,7 +257,7 @@ namespace Остатки.Classes
 				}
 
 			}
-
+			onePos.TypeOfShop = "LeroyMerlen";
 			foreach (var item in productLocation)
 			{
 				if (Global.whiteListLeroy.Contains(item))
@@ -407,7 +408,6 @@ namespace Остатки.Classes
 					{
 						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
 						{
-							List<ShopWhiteOrBlack> shopsWhiteOrBlack = ShopWhiteOrBlackJob.GetAllShopList();
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
 							if (shopsWhiteOrBlack.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
 								countOfWhoiteList += 3;

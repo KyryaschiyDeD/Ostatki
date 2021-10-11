@@ -29,6 +29,7 @@ namespace Остатки.Classes
 		static int trueLinksCount = 0;
 
 		static List<Product> AllProduct = new List<Product>();
+		static List<int> shopWhiteOrBlacks = new List<int>();
 
 		static Dictionary<string, string> specificationsDict = new Dictionary<string, string>();
 
@@ -92,6 +93,7 @@ namespace Остатки.Classes
 				List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
 				AllProduct = new List<Product>(allProducts);
 			}
+			shopWhiteOrBlacks = ShopWhiteOrBlackJob.GetAllShopList().Where(x => x.WhatIsShop == "Леонардо" && x.ShopType == true).Select(u => u.Code).ToList();
 		}
 		public static async void getLinksTreadPerexod()
 		{
@@ -186,25 +188,6 @@ namespace Остатки.Classes
 			return str.Replace("data-good-id=","").Replace(@"""","");
 		}
 
-		static string getResponseBuf(string uri)
-		{
-			StringBuilder sb = new StringBuilder();
-			byte[] buf = new byte[16384];
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-			Stream resStream = response.GetResponseStream();
-			int count = 0;
-			do
-			{
-				count = resStream.Read(buf, 0, buf.Length);
-				if (count != 0)
-				{
-					sb.Append(Encoding.GetEncoding(1251).GetString(buf, 0, count));
-				}
-			}
-			while (count > 0);
-			return sb.ToString();
-		}
 		public static string getResponse(string uri)
 		{
 			string htmlCode = "";
@@ -368,10 +351,72 @@ namespace Остатки.Classes
 			// Update the existing notification's data by using tag/group
 			ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
 		}
+
+		private static void CreateToastProductJob()
+		{
+			string tag = "Update";
+			string group = "Lerya";
+
+			// Construct the toast content with data bound fields
+			var content = new ToastContentBuilder()
+				.AddText("Обновляем!!!")
+				.AddVisualChild(new AdaptiveProgressBar()
+				{
+					Title = "Товар",
+					Value = new BindableProgressBarValue("myProgressValue"),
+					ValueStringOverride = new BindableString("progressValueString"),
+					Status = new BindableString("progressStatus")
+				})
+				.GetToastContent();
+
+			// Generate the toast notification
+			var toast = new ToastNotification(content.GetXml());
+			// Assign the tag and group
+			toast.Tag = tag;
+			toast.Group = group;
+
+			// Assign initial NotificationData values
+			// Values must be of type string
+			toast.Data = new NotificationData();
+			toast.Data.Values["progressValue"] = "0";
+			toast.Data.Values["progressValueString"] = "0/0 товаров";
+			toast.Data.Values["progressStatus"] = "Работаем...";
+
+			// Provide sequence number to prevent out-of-order updates, or assign 0 to indicate "always update"
+			toast.Data.SequenceNumber = 0;
+
+			// Show the toast notification to the user
+			ToastNotificationManager.CreateToastNotifier().Show(toast);
+		}
+		public static void UpdateProgress(double kolvo, double apply, string status)
+		{
+			// Construct a NotificationData object;
+			string tag = "Update";
+			string group = "Lerya";
+
+			// Create NotificationData and make sure the sequence number is incremented
+			/* since last update, or assign 0 for updating regardless of order*/
+			var data = new NotificationData
+			{
+				SequenceNumber = 0
+			};
+
+			// Assign new values
+			// Note that you only need to assign values that changed. In this example
+			// we don't assign progressStatus since we don't need to change it
+			data.Values["myProgressValue"] = (apply / kolvo).ToString().Replace(",", ".");
+			data.Values["progressValueString"] = $"{apply}/{kolvo} товаров";
+			data.Values["progressStatus"] = status;
+
+			// Update the existing notification's data by using tag/group
+			ToastNotificationManager.CreateToastNotifier().Update(data, tag, group);
+		}
+
 		public static void createProductThread()
 		{
-			
-			int addCountProduct = 0;
+			CreateToastProductJob();
+			UpdateProgress(0,0,"Создаём");
+			int addStroka = 0;
 			int kolInBlackList = 0;
 			int countToApply = 0;
 			int allCount = UnRedactLinksQueue.Count;
@@ -392,22 +437,24 @@ namespace Остатки.Classes
 					specificationsDict.Add("Цена", null);
 				if (!specificationsDict.ContainsKey("Ссылка"))
 					specificationsDict.Add("Ссылка", null);
+				if (!specificationsDict.ContainsKey("Ссылка ONE"))
+					specificationsDict.Add("Ссылка ONE", null);
 				if (!specificationsDict.ContainsKey("Главные фото"))
 					specificationsDict.Add("Главные фото", null);
 				if (!specificationsDict.ContainsKey("Доп фото"))
 					specificationsDict.Add("Доп фото", null);
 				if (!specificationsDict.ContainsKey("Описание"))
 					specificationsDict.Add("Описание", null);
-				if (!specificationsDict.ContainsKey("Вес расчётный (в граммах)"))
-					specificationsDict.Add("Вес расчётный (в граммах)", null);
-				if (!specificationsDict.ContainsKey("Ширина в мм"))
-					specificationsDict.Add("Ширина в мм", null);
-				if (!specificationsDict.ContainsKey("Длина в мм"))
-					specificationsDict.Add("Длина в мм", null);
-				if (!specificationsDict.ContainsKey("Высота в мм"))
-					specificationsDict.Add("Высота в мм", null);
-				if (!specificationsDict.ContainsKey("Глубина в мм"))
-					specificationsDict.Add("Глубина в мм", null);
+				if (!specificationsDict.ContainsKey("КолВо завод в отправл"))
+					specificationsDict.Add("КолВо завод в отправл", null);
+				if (!specificationsDict.ContainsKey("Объединить на одной карточке"))
+					specificationsDict.Add("Объединить на одной карточке", null);
+				if (!specificationsDict.ContainsKey("Название модели для Ozon"))
+					specificationsDict.Add("Название модели для Ozon", null);
+				if (!specificationsDict.ContainsKey("Неудачка"))
+					specificationsDict.Add("Неудачка", null);
+				if (!specificationsDict.ContainsKey("Проблемная ссылка"))
+					specificationsDict.Add("Проблемная ссылка", null);
 			}
 			
 
@@ -427,11 +474,11 @@ namespace Остатки.Classes
 								HtmlQueue.Enqueue(Code);
 							}
 					}
-					UpdateProgresslnk(Convert.ToDouble(allCount), Convert.ToDouble(HtmlQueue.Count));
+					UpdateProgress(allCount, allCount - HtmlQueue.Count, "Воруем");
 				}
 			};
 			Parallel.Invoke(action, action, action, action, action, action, action, action, action, action, action, action, action, action, action, action);
-
+			List<Product> productListBackground = new List<Product>();
 			List<string> NamesOpisesXaract = new List<string>();
 			while (HtmlQueue.Count != 0)
 			{
@@ -439,100 +486,337 @@ namespace Остатки.Classes
 				HtmlQueue.TryDequeue(out code);
 				string prdctLink = "";
 				LinksQueue.TryDequeue(out prdctLink);
-
 				List<int> productCount = new List<int>(); // Кол-во
 				List<int> productLocation = new List<int>(); // Место
-				Product onePos = new Product();
 
 				string id_goods = GetIdGoodsOnHTMLLeo(code);
 				string remainsCode = GetRemainsPostLeo(prdctLink, id_goods);
-				onePos.ProductLink = prdctLink;
-				long good;
-				long.TryParse(string.Join("", prdctLink.Where(c => char.IsDigit(c))), out good);
-				specificationsDict["АртикулDataBase"] += "lnrd_" + good.ToString() + "\n";
-				onePos.ArticleNumberInShop = id_goods.ToString();
-				onePos.ArticleNumberUnic = "lnrd_" + good.ToString();
-				specificationsDict["good_"] += good.ToString() + "\n";
-				specificationsDict["id_goods"] += id_goods + "\n";
 
-				int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
-				int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
-				string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
-				specificationsDict["Наименование"] += name + "\n";
-				onePos.Name = name;
-
-				int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
-				int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
-				string priceTMP = code.Substring(startIndexPrice, 5).Trim();
-				string price = "";
-				foreach (var item in priceTMP)
+				Regex regexLocation = new Regex(@"<label for=""(\w+)"">");
+				MatchCollection matchColLocation = regexLocation.Matches(remainsCode);
+				foreach (var item in matchColLocation)
 				{
-					if (Char.IsDigit(item) || item == ',')
-						price += item;
+					int shopCode;
+					int.TryParse(string.Join("", item.ToString().Where(c => char.IsDigit(c))), out shopCode);
+					productLocation.Add(shopCode);
 				}
-				onePos.NowPrice = Convert.ToDouble(price);
-				specificationsDict["Цена"] += price + "\n";
 
-				int startIndexOpisCode = code.IndexOf(@" < div id=""collapsedesc""") + @"<div id=""collapsedesc""".Length;
-				int lenIndexOpisCode = code.IndexOf(@"<div id=""collapsereviews""") - startIndexOpisCode - @"<div id=""collapsereviews""".Length;
-				string opisCode = code.Substring(startIndexOpisCode, lenIndexOpisCode);
-
-				if (code.Contains("Описание"))
+				if (remainsCode.Contains("no_exist") || remainsCode.Contains("exist"))
 				{
-					int startIndexOpis = opisCode.IndexOf(@"aria-labelledby=""itemdesc-tab"">") + @"aria-labelledby=""itemdesc-tab"">".Length;
-					int lenIndexOpis = opisCode.IndexOf(@"</div>") - startIndexOpis - @"</div>".Length;
-					if (startIndexOpis > 0 && lenIndexOpis > 0)
+					string colCount = "";
+					try
 					{
-						string opis = opisCode.Substring(startIndexOpis, lenIndexOpis);
-						specificationsDict["Описание"] += HTMLJob.UnHtml(opis) + "\n";
+						if (remainsCode.Contains(@"</td></tr><tr style=""height: 45px; "">"))
+							colCount = remainsCode.Substring(remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst""><svg class"), remainsCode.IndexOf(@"</td></tr><tr style=""height: 45px; "">") - remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst""><svg class"));
+						else
+							colCount = remainsCode;
+						Regex regexCount = new Regex(@"<svg class=""(\w+)"">");
+						MatchCollection matchColCount = regexCount.Matches(colCount);
+						foreach (var item in matchColCount)
+						{
+							if (item.ToString().Contains("no_exist"))
+								productCount.Add(0);
+							else
+							if (item.ToString().Contains("exist"))
+								productCount.Add(1);
+							else
+								productCount.Add(0);
+						}
 					}
-					else
-						specificationsDict["Описание"] += "\n";
+					catch (Exception)
+					{
+						specificationsDict["Проблемная ссылка"] += colCount + " ";
+						specificationsDict["Проблемная ссылка"] += "\n";
+						specificationsDict["Проблемная ссылка"] += "-------------------------------------------\n";
+					}
 				}
 				else
-					specificationsDict["Описание"] += "\n";
-
-				List<string> XaractListOneProduct = new List<string>();
-
-				string xaractCodeAll = code.Substring(code.IndexOf(@"<div class=""featureline""><div class=""featuretitle col-lg-5""><span>"), code.IndexOf(@"</div></div></div></div><a class=""tab-collapse-btn""")- code.IndexOf(@"<div class=""featureline""><div class=""featuretitle col-lg-5""><span>") + @"</div></div></div></div><a class=""tab-collapse-btn""".Length);
-
-				Regex regexXaractName = new Regex(@"<span>([^<]+)<\/span>");
-				MatchCollection xaracterName = regexXaractName.Matches(xaractCodeAll);
-
-				Regex regexXaractContent = new Regex(@"<div class=""featurefield col-lg-7"">([^<]+)<\/div>");
-				MatchCollection xaractContent = regexXaractContent.Matches(xaractCodeAll);
-
-				List<string> names = new List<string>();
-				List<string> contens = new List<string>();
-
-				foreach (var item in xaracterName)
+				if (remainsCode.Contains("нет в наличии") || remainsCode.Contains("много") || remainsCode.Contains("заканчивается") || remainsCode.Contains("мало"))
 				{
-					names.Add(HTMLJob.UnHtml(item.ToString()));
-				}
-				foreach (var item in xaractContent)
-				{
-					contens.Add(HTMLJob.UnHtml(item.ToString()));
-				}
+					Regex regexCount = new Regex(@"<img src="".*?"" title="".*?"">");
+					MatchCollection matchColCount = regexCount.Matches(remainsCode);
+					string[] keys = new string[] { "нет в наличии", "много", "заканчивается", "мало" };
+					foreach (var item in matchColCount)
+					{
+						string sKeyResult = keys.FirstOrDefault(s => item.ToString().Contains(s));
 
-				foreach (var item in names)
-				{
-					XaractListOneProduct.Add(item);
-					if (!NamesOpisesXaract.Contains(item))
-						NamesOpisesXaract.Add(item);
-
-					if (!specificationsDict.ContainsKey(item))
-						specificationsDict.Add(item, "");
-					specificationsDict[item] += contens[names.IndexOf(item)] + "\n";
-				} 
-
-				foreach (var oneName in NamesOpisesXaract)
-				{
-					if (!XaractListOneProduct.Contains(oneName))
-						specificationsDict[oneName] += "\n";
+						switch (sKeyResult)
+						{
+							case "нет в наличии":
+								productCount.Add(0);
+								break;
+							case "мало":
+								productCount.Add(1);
+								break;
+							case "заканчивается":
+								productCount.Add(2);
+								break;
+							case "много":
+								productCount.Add(3);
+								break;
+						} 
+						/*if (item.ToString().Contains("нет в наличии"))
+							productCount.Add(0);
+						else
+						if (item.ToString().Contains("мало"))
+							productCount.Add(1);
+						else
+						if (item.ToString().Contains("заканчивается"))
+							productCount.Add(2);
+						else
+						if (item.ToString().Contains("много"))
+							productCount.Add(3); */
+					}
 				}
 
+				int remaintWhiteTMP = 0;
+				int remaintBlackTMP = 0;
 
+				//if (productCount.Count != productLocation.Count)
+				//{
+				//	if (productCount.Count < productLocation.Count)
+				//		for (int i = 0; i < productLocation.Count - productCount.Count; i++)
+				//		{
+				//			productCount.Add(0);
+				//		}
+				//}
+				Dictionary<int, int> remainsDictionaryTMP = new Dictionary<int, int>();
+				for (int i = 0; i < productCount.Count - 1; i++)
+				{
+					remainsDictionaryTMP.Add(productLocation[i], productCount[i]);
+					if (shopWhiteOrBlacks.Contains(productLocation[i]))
+						remaintWhiteTMP += productCount[i];
+					else
+						remaintBlackTMP += productCount[i];
+				}
+
+				//foreach (var item in productLocation)
+				//{
+				//	specificationsDict["Проблемная ссылка"] += item + " ";
+				//}
+
+				//specificationsDict["Проблемная ссылка"] += "\n";
+
+				//foreach (var item in productCount)
+				//{
+				//	specificationsDict["Проблемная ссылка"] += item + " ";
+				//}
+
+				//specificationsDict["Проблемная ссылка"] += "\n";
+				//specificationsDict["Проблемная ссылка"] += "-------------------------------------------";
+				//specificationsDict["Проблемная ссылка"] += "\n";
+
+				if (remaintWhiteTMP > 1)
+				{
+					Product onePos = new Product();
+					specificationsDict["Ссылка ONE"] += prdctLink + "\n";
+					int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
+					int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
+					string priceTMP = code.Substring(startIndexPrice, 5).Trim();
+					string price = "";
+					foreach (var item in priceTMP)
+					{
+						if (Char.IsDigit(item) || item == ',')
+							price += item;
+					}
+					onePos.NowPrice = Convert.ToDouble(price);
+					
+
+					List<int> countOfComplect = new List<int>();
+					countOfComplect.Add(1);
+
+					if (onePos.NowPrice <= 500)
+					{
+						countOfComplect.Add(3);
+						countOfComplect.Add(5);
+						countOfComplect.Add(10);
+					}
+					else
+					if (onePos.NowPrice <= 1000)
+					{
+						countOfComplect.Add(3);
+						countOfComplect.Add(5);
+					}
+					else
+					if (onePos.NowPrice <= 2000)
+					{
+						countOfComplect.Add(3);
+					}
+					onePos.ProductLink = prdctLink;
+
+					Regex regexImg = new Regex(@"<a href=""(.*?)"" class=""fbimage"" rel=""fbgallery"">");
+					MatchCollection matchColImg = regexImg.Matches(code);
+					string mainPhoto = "";
+					string dopPhoto = "";
+					foreach (var item in matchColImg)
+					{
+						string photoTmp = "https:" + item.ToString().Substring(item.ToString().IndexOf(@"""") + 1, item.ToString().IndexOf(@"""", item.ToString().IndexOf(@"""") + 1) - (item.ToString().IndexOf(@"""") + 1));
+						if (mainPhoto.Length == 0)
+							mainPhoto += photoTmp;
+						else
+							dopPhoto += photoTmp + " ";
+					}
+
+
+
+					long good;
+					long.TryParse(string.Join("", prdctLink.Where(c => char.IsDigit(c))), out good);
+
+
+					onePos.ArticleNumberInShop = id_goods.ToString();
+					foreach (var item in countOfComplect)
+					{
+						onePos.ArticleNumberUnicList.Add("lnrd_" + good.ToString() + "_" + "x" + item.ToString());
+					}
+
+
+
+					int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
+					int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
+					string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
+
+					onePos.Name = name;
+
+
+
+					int startIndexOpisCode = code.IndexOf(@" <div id=""collapsedesc""") + @"<div id=""collapsedesc""".Length;
+					int lenIndexOpisCode = code.IndexOf(@"<div id=""collapsereviews""") - startIndexOpisCode - @"<div id=""collapsereviews""".Length;
+					string opisCode = code.Substring(startIndexOpisCode, lenIndexOpisCode);
+
+					if (code.Contains("Описание"))
+					{
+						int startIndexOpis = opisCode.IndexOf(@"aria-labelledby=""itemdesc-tab"">") + @"aria-labelledby=""itemdesc-tab"">".Length;
+						int lenIndexOpis = opisCode.IndexOf(@"</div>") - startIndexOpis - @"</div>".Length;
+						if (startIndexOpis > 0 && lenIndexOpis > 0)
+						{
+							string opis = opisCode.Substring(startIndexOpis, lenIndexOpis);
+							foreach (var item in countOfComplect)
+							{
+								specificationsDict["Описание"] += HTMLJob.UnHtml(opis) + "\n";
+							}
+						}
+						else
+							foreach (var item in countOfComplect)
+							{
+								specificationsDict["Описание"] += "\n";
+							}
+					}
+					else
+						foreach (var item in countOfComplect)
+						{
+							specificationsDict["Описание"] += "\n";
+						}
+
+					List<string> XaractListOneProduct = new List<string>();
+
+					string xaractCodeAll = code.Substring(code.IndexOf(@"<div class=""featureline""><div class=""featuretitle col-lg-5""><span>"), code.IndexOf(@"</div></div></div></div><a class=""tab-collapse-btn""") - code.IndexOf(@"<div class=""featureline""><div class=""featuretitle col-lg-5""><span>") + @"</div></div></div></div><a class=""tab-collapse-btn""".Length);
+
+					Regex regexXaractName = new Regex(@"<span>([^<]+)<\/span>");
+					MatchCollection xaracterName = regexXaractName.Matches(xaractCodeAll);
+
+					Regex regexXaractContent = new Regex(@"<div class=""featurefield col-lg-7"">([^<]+)<\/div>");
+					MatchCollection xaractContent = regexXaractContent.Matches(xaractCodeAll);
+
+					List<string> names = new List<string>();
+					List<string> contens = new List<string>();
+
+					foreach (var item in xaracterName)
+					{
+						names.Add(HTMLJob.UnHtml(item.ToString()));
+					}
+					foreach (var item in xaractContent)
+					{
+						contens.Add(HTMLJob.UnHtml(item.ToString()));
+					}
+
+					foreach (var item in names)
+					{
+						XaractListOneProduct.Add(item);
+						if (!NamesOpisesXaract.Contains(item))
+							NamesOpisesXaract.Add(item);
+
+						if (!specificationsDict.ContainsKey(item))
+						{
+							specificationsDict.Add(item, "");
+							for (int i = 0; i < addStroka; i++)
+							{
+								specificationsDict[item] += "\n";
+							}
+							
+						}
+							
+						for (int i = 0; i < countOfComplect.Count; i++)
+						{
+							specificationsDict[item] += contens[names.IndexOf(item)] + "\n";
+						}
+
+					}
+
+					foreach (var oneName in NamesOpisesXaract)
+					{
+						if (!XaractListOneProduct.Contains(oneName))
+							for (int i = 0; i < countOfComplect.Count; i++)
+							{
+								specificationsDict[oneName] += "\n";
+							}
+					}
+
+					foreach (var item in countOfComplect)
+					{
+						specificationsDict["Главные фото"] += mainPhoto + "\n";
+						specificationsDict["Доп фото"] += dopPhoto + "\n";
+						specificationsDict["Ссылка"] += prdctLink + "\n";
+						specificationsDict["АртикулDataBase"] += "lnrd_" + good.ToString() + "_" + "x" + item.ToString() + "\n";
+						specificationsDict["good_"] += good.ToString() + "\n";
+						specificationsDict["id_goods"] += id_goods + "\n";
+						specificationsDict["Наименование"] += name + "\n";
+						double newPrice = 0;
+						if (onePos.NowPrice < 400)
+							newPrice = (Convert.ToDouble(price) + 45 + 2000 / 1000 * 20 + 50 + 50) * 1.075 * 1.1 * 1.35;
+						else
+							newPrice = (Convert.ToDouble(price) + 45 + 20 * 2000 / 1000) * 1.075 * 1.044 * 1.1 * 1.35;
+
+						newPrice = newPrice*1.15;
+
+						int nowPrice = 0;
+
+						switch (item)
+						{
+							case 1:
+								nowPrice = Convert.ToInt32(newPrice) / 10 * 10;
+								break;
+							case 3:
+								nowPrice = Convert.ToInt32(newPrice * item * 0.85) / 10 * 10;
+								break;
+							case 5:
+								nowPrice = Convert.ToInt32(newPrice * item * 0.825) / 10 * 10;
+								break;
+							case 10:
+								nowPrice = Convert.ToInt32(newPrice * item * 0.8) / 10 * 10;
+								break;
+							default:
+								break;
+						}
+
+						specificationsDict["Цена"] += nowPrice + "\n";
+						specificationsDict["КолВо завод в отправл"] += item + "\n";
+						specificationsDict["Название модели для Ozon"] += name + "\n";
+						specificationsDict["Объединить на одной карточке"] += id_goods + "_one_cart\n";
+						addStroka++;
+					}
+
+					onePos.RemainsWhite = remaintWhiteTMP;
+					onePos.RemainsBlack = remaintBlackTMP;
+					onePos.remainsDictionary = remainsDictionaryTMP;
+					onePos.DateHistoryRemains.Add(DateTime.Now);
+					onePos.Weight = 2000;
+					onePos.TypeOfShop = "Леонардо";
+					productListBackground.Add(onePos);
+				}
+
+				UpdateProgress(allCount, allCount - HtmlQueue.Count, "Создаём");
 			}
+			DataBaseJob.AddListToBackground(productListBackground);
 		}
 		public static string RemoveInvalidChars(string file_name)
 		{

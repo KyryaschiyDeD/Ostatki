@@ -44,7 +44,7 @@ namespace Остатки.Pages.SettingPages
 				tmpFilterProduct = new ObservableCollection<Product>(allProducts);
 			}
 			ProductErrorList = new Queue<Product>(from item in tmpFilterProduct
-												  where item.ArticleNumberOzonDict.Count == 0 && String.IsNullOrEmpty(item.ArticleNumberUnic)
+												  where item.ArticleNumberOzonDictList.Count == 0 && String.IsNullOrEmpty(item.ArticleNumberUnicList.First())
 													select item);
 		}
 		private void GoAnText()
@@ -66,7 +66,7 @@ namespace Остатки.Pages.SettingPages
 		{
 			if (oneProduct != null)
 			{
-				oneProduct.ArticleNumberUnic = ArticleUnicOzon.Text;
+				oneProduct.ArticleNumberUnicList.Add(ArticleUnicOzon.Text);
 			}
 			DataBaseJob.UpdateOneProduct(oneProduct);
 			GoAnText();

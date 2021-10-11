@@ -194,7 +194,7 @@ namespace Остатки
         {
             ObservableCollection<Product> tmpFilterProduct;
             tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
-                                                                 where item.ArticleNumberOzonDict.Count == 0
+                                                                 where item.ArticleNumberOzonDictList.Count == 0
                                                                  select item);
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
@@ -238,7 +238,7 @@ namespace Остатки
                 var col = db.GetCollection<Product>("Products");
                 allProducts = col.Query().Where(x => x.RemainsWhite == 0).ToList();
             }
-            string ozonID = "";
+            //string ozonID = "";
             List<Product> ProductToDell = new List<Product>();
             //List<Product> ProductToDell = new List<Product>();
             Dictionary<ApiKeys, List<long>> productAllDict = new Dictionary<ApiKeys, List<long>>();
@@ -255,12 +255,15 @@ namespace Остатки
                 List<long> product = new List<long>();
                 foreach (var item in allProducts)
                 {
-                    if (item.ArticleNumberOzonDict.ContainsKey(keys.ClientId))
-                    if (item.ArticleNumberOzonDict[keys.ClientId] != 0 && item.RemainsWhite != item.RemainsBlack)
+                    if (item.ArticleNumberOzonDictList.ContainsKey(keys.ClientId))
+                    if (item.ArticleNumberOzonDictList[keys.ClientId].First() != 0 && item.RemainsWhite != item.RemainsBlack)
                     {
                         if (item.RemainsWhite == 0)
 							{
-                                product.Add(item.ArticleNumberOzonDict[keys.ClientId]);
+								foreach (var valueOzonApi in item.ArticleNumberOzonDictList[keys.ClientId])
+								{
+                                    product.Add(valueOzonApi);
+                                }
                                 if (!countOfAPI.ContainsKey(item))
                                     countOfAPI.Add(item, 1);
                                 else
@@ -282,7 +285,7 @@ namespace Остатки
                 productsIdsss.Add(item.Key, new ProductsIdsss { product_id = new List<long>(item.Value) });
             }
             //Message.infoList.Add(JsonConvert.SerializeObject(productsIdsss));
-            // Message.AllErrors();
+            //Message.AllErrors();
             int kolvoPost = 0;
 			foreach (var item in productsIdsss)
 			{
@@ -336,11 +339,13 @@ namespace Остатки
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
+                var wait = db.GetCollection<Product>("ProductsWait");
+                var archive = db.GetCollection<Product>("ProductsArchive");
                 List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+                allProducts.AddRange(wait.Query().ToList());
+                allProducts.AddRange(archive.Query().ToList());
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
-            
-			
         }
         private void GoOneUpdate_Click(object sender, RoutedEventArgs e)
         {
@@ -387,7 +392,6 @@ namespace Остатки
             var item = button.DataContext as Product;
             Message.ShowInfoProduct(item.Name, item.ToStringInfo());
         }
-
         private static void CreateToastProductJob()
         {
             string tag = "Update";
@@ -456,8 +460,8 @@ namespace Остатки
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var online = db.GetCollection<Product>("Products");
                 //linksProductTXT = online.Query().ToList();
-                linksProductTXT = online.Query().Where(x => x.DateHistoryRemains.Last().Date != DateTime.Now.Date).ToList();
-                //linksProductTXT = online.Query().Where(x =>  x.RemainsWhite <= 450 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
+                //linksProductTXT = online.Query().Where(x => x.DateHistoryRemains.Last().Date != DateTime.Now.Date).ToList();
+                linksProductTXT = online.Query().Where(x =>  x.RemainsWhite <= 100 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
                 //linksProductTXT = online.Query().ToList();
                 //linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
             }
@@ -482,30 +486,15 @@ namespace Остатки
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProductLerya);
         }
         public remains2()
-		{
-			InitializeComponent();
+        {
+            InitializeComponent();
             getRemainsIsBaseThread();
             Message.AllErrors();
-    //        foreach (var item in ProductList1)
-    //        {
-    //            Dictionary<string, bool> newDict = new Dictionary<string, bool>();
-    //            bool izm = false;
-				//foreach (var ert in item.AccauntOzonID)
-				//{
-    //                if (ert.Key.Length == 0)
-				//	{
-    //                    izm = true;
-    //                    newDict.Add("200744", ert.Value);
-    //                }
-    //                else
-    //                    newDict.Add("104333", ert.Value);
-    //            }
-    //            if (izm)
-				//{
-    //                item.AccauntOzonID = newDict;
-    //                DataBaseJob.UpdateOneProduct(item);
-    //            }
-    //        }
+            //foreach (var item in ProductList1)
+            //{
+
+            //    DataBaseJob.UpdateOneProduct(item);
+            //}
         }
 
     }

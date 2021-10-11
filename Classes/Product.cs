@@ -14,63 +14,43 @@ namespace Остатки.Classes
 	public class Product
 	{
 		public Guid Id { get; set; }
-		public string ProductLink { get; set; }
+		public string ProductLink { get; set; } // Ссылка
 		public string Name { get; set; } // Наименование
-		//public long ArticleNumberLerya { get; set; } // Леруа артикл
 		public string ArticleNumberInShop { get; set; } // Артикул в магазине
-		public Dictionary<string, long> ArticleNumberOzonDict { get; set; } = new Dictionary<string, long>();
-		public long ArticleNumberOzonDictGetElena 
-		{ 
-			get
-			{
-				try
-				{
-					return ArticleNumberOzonDict["104333"];
-				}
-				catch (Exception)
-				{
-					return -1;
-				}
-				
-			}
-		}
-		public long ArticleNumberOzonDictGetTimeLine
+		//public Dictionary<string, long> ArticleNumberOzonDict { get; set; } = new Dictionary<string, long>();
+		public Dictionary<string, List<long>> ArticleNumberOzonDictList { get; set; } = new Dictionary<string, List<long>>(); // Словарь ClientID => список артикулов
+		public int GetCountArticleNumberOzonDictList
 		{
 			get
 			{
-				try
-				{
-					return ArticleNumberOzonDict["200744"];
-				}
-				catch (Exception)
-				{
-					return -1;
-				}
-
+					return ArticleNumberOzonDictList.Count;
 			}
+
 		}
+		
 		public long ArticleNumberOzonDictGetByClientID(string clientID)
 		{
 			try
 			{
-				return ArticleNumberOzonDict[clientID];
+				return ArticleNumberOzonDictList[clientID].First();
 			}
 			catch (Exception)
 			{
 				return -1;
 			}
-		}
+		} // Первый озоновский артикул по ClientID
 		public string ArticleNumberOzonDictCount
 		{
 			get
 			{
-				return ArticleNumberOzonDict.Count.ToString();
+				return ArticleNumberOzonDictList.Count.ToString();
 			}
-		}
-		//public long ArticleNumberOzon { get; set; } // Озон артикл
-		public string ArticleNumberUnic { get; set; } // Озон Кривой (который мы сочиняли сами)
+		}  // Кол-во аккаунтов у товара
+		public List<string> ArticleNumberUnicList { get; set; } = new List<string>(); // Озон артикул, списком
+		public string GetArticleNumberUnicList { 
+			get{ return ArticleNumberUnicList.Last(); } } // Озон артикул, списком
 		public int RemainsWhite { get; set; } // Остатки из белого списка
-		public Dictionary<int, int> remainsDictionary { get; set; }
+		public Dictionary<int, int> remainsDictionary { get; set; } // Остатки по магазинам
 		public List<DateTime> DateHistoryRemains { get; set; } = new List<DateTime>();// Даты и время проверки остатков
 		public List<int> HistoryRemainsWhite { get; set; } = new List<int>();// История Остатки из белого списка
 		public int RemainsBlack { get; set; } // Остальные остатки
