@@ -117,42 +117,104 @@ namespace Остатки
 
 			int allCount = ochered.Count;
 			List<Product> linksProductTXT = new List<Product>();
+			List<Product> ProductFromBackground = new List<Product>();
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 			{
 				var wait = db.GetCollection<Product>("ProductsWait");
 				var online = db.GetCollection<Product>("Products");
 				var archive = db.GetCollection<Product>("ProductsArchive");
-				var allList = 
+				//var allList = 
 				linksProductTXT = online.Query().ToList();
 				linksProductTXT.AddRange(wait.Query().ToList());
 				linksProductTXT.AddRange(archive.Query().ToList());
 			}
+
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
+			{
+				var productsToSpizd = db.GetCollection<Product>("Products");
+				ProductFromBackground = productsToSpizd.Query().ToList();
+			}
+
+			List<string> allLinksFromBackground = new List<string>(ProductFromBackground.ConvertAll(
+			new Converter<Product, string>(ProductJobs.GetProductLink)));
+
 			List<string> allLinks = new List<string>(linksProductTXT.ConvertAll(
 			new Converter<Product, string>(ProductJobs.GetProductLink)));
+
+			List<Product> productsToAdd = new List<Product>();
+			List<Product> productsToDelFromBack = new List<Product>();
+
 			for (int i = 0; i < allCount; i++)
 			{
 				string link = ochered.Dequeue();
-				if (!allLinks.Contains(link))
+				if (!allLinksFromBackground.Contains(link))
 				{
-					tasks2[i] = Task.Factory.StartNew(() => ProductJobs.parseLerya(link));
-					UpdateProgress(allCount, i + 1);
+					if (!allLinks.Contains(link))
+					{
+						if (link.Contains("leroymerlin"))
+						{
+							tasks2[i] = Task.Factory.StartNew(() => ProductJobs.parseLerya(link));
+							tasks2[i].Wait();
+						}
+						else
+						if (link.Contains("leonardo"))
+						{
+							Product newPos = null;
+							tasks2[i] = Task.Factory.StartNew(() => newPos =  LeonardoJobs.AddOneProduct(link, myLabels).Result);
+							tasks2[i].Wait();
+							if (newPos != null)
+								productsToAdd.Add(newPos);
+						}
+					}
+					else
+					{
+						foreach (var item in myLabels)
+						{
+							await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+								() =>
+								{
+									if (item.IsChecked.Value)
+									{
+										ProductJobs.AddNewApiClientID(item.Name, link);
+									}
+								});
+
+						}
+					}
 				}
 				else
 				{
+					Product oneProduct = ProductFromBackground.Find(x => x.ProductLink == link);
+					productsToDelFromBack.Add(oneProduct);
 					foreach (var item in myLabels)
 					{
 						await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-							() =>
-							{
-								if (item.IsChecked.Value)
+								() =>
 								{
-									ProductJobs.AddNewApiClientID(item.Name, link);
-								}
-							});
-						
+									if (item.IsChecked.Value)
+										oneProduct.AccauntOzonID.Add(item.Name, true);
+								});
 					}
+					productsToAdd.Add(oneProduct);
 				}
-
+				UpdateProgress(allCount, i + 1);
+			}
+			ProductJobs.AddNewProductListToRemains(productsToAdd);
+			
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
+			{
+				var backProduct = db.GetCollection<Product>("Products");
+				foreach (var item in productsToDelFromBack)
+				{
+					if (!backProduct.Delete(item.Id))
+					{
+						Product newProductToDellFromBack = backProduct.FindOne(x => x.ArticleNumberInShop == item.ArticleNumberInShop);
+						if (newProductToDellFromBack != null)
+							backProduct.Delete(newProductToDellFromBack.Id);
+					}
+						
+				}
+				
 			}
 		}
 

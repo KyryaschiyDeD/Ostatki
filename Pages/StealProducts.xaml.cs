@@ -910,7 +910,7 @@ namespace Остатки.Pages
 			}
 			foreach (var item in ApiKeysesJob.GetAllApiList())
 			{
-				for (int i = 1; i <= 6; i++)
+				for (int i = 1; i <= 17; i++)
 				{
 					//Thread.Sleep(5000);
 					List<ItemProsuctOfferIDs> items = PostRequestAsync(i, item.ClientId, item.ApiKey).result.items;
@@ -919,7 +919,7 @@ namespace Остатки.Pages
 						Product OneProduct = null;
 						try
 						{
-							OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberInShop == item1.offer_id);
+							OneProduct = allProducts.Single(itemDB => itemDB.ArticleNumberUnicList.Contains(item1.offer_id));
 						}
 						catch (Exception)
 						{
@@ -932,7 +932,7 @@ namespace Остатки.Pages
 							allProductsUpdate.Add(OneProduct);
 						}
 						else
-						if (OneProduct.ArticleNumberOzonDictList.ContainsKey(item.ClientId))
+						if (OneProduct != null && OneProduct.ArticleNumberOzonDictList.ContainsKey(item.ClientId))
 						{
 							if (!OneProduct.ArticleNumberOzonDictList[item.ClientId].Contains(item1.product_id))
 								OneProduct.ArticleNumberOzonDictList[item.ClientId].Add(item1.product_id);

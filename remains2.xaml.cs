@@ -342,8 +342,13 @@ namespace Остатки
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var archive = db.GetCollection<Product>("ProductsArchive");
                 List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-                allProducts.AddRange(wait.Query().ToList());
-                allProducts.AddRange(archive.Query().ToList());
+    //            List<Product> toDel = col.Query().Where(x => x.TypeOfShop == "Леонардо").ToList();
+				//foreach (var item in toDel)
+				//{
+    //                col.Delete(item.Id);
+    //            }
+                //allProducts.AddRange(wait.Query().ToList());
+                //allProducts.AddRange(archive.Query().ToList());
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
         }
@@ -454,36 +459,57 @@ namespace Остатки
         public static void UpdateAllDataBaseLerya()
         {
             CreateToastProductJob();
-            List<Product> linksProductTXT = new List<Product>();
+            List<Product> linksProductLeroy = new List<Product>();
+            List<Product> linksProductLeonardo = new List<Product>();
             using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
             {
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var online = db.GetCollection<Product>("Products");
                 //linksProductTXT = online.Query().ToList();
                 //linksProductTXT = online.Query().Where(x => x.DateHistoryRemains.Last().Date != DateTime.Now.Date).ToList();
-                linksProductTXT = online.Query().Where(x =>  x.RemainsWhite <= 100 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
+                //linksProductTXT = online.Query().Where(x =>  x.RemainsWhite <= 100 && (x.DateHistoryRemains.Last().Date != DateTime.Now.Date)).ToList();
                 //linksProductTXT = online.Query().ToList();
-                //linksProductTXT.AddRange(wait.Query().OrderBy(x => x.RemainsWhite).ToList());
+
+                linksProductLeroy.AddRange(online.Query().Where(x => x.TypeOfShop == "LeroyMerlen" && x.RemainsWhite <= 350).ToList());
+                //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо" && x.RemainsWhite <= 1).ToList());
             }
-            List<string> allLinksGoToTasks = new List<string>(linksProductTXT.ConvertAll(
+            List<string> allLinksGoToTasksLeroy = new List<string>(linksProductLeroy.ConvertAll(
             new Converter<Product, string>(ProductJobs.GetProductLink)));
-            UpdateProgress(allLinksGoToTasks.Count(),0,"Плучаем данные");
-            ProductJobs.ocher = new ConcurrentQueue<string>(allLinksGoToTasks);
-            int kolvoToUpdate = ProductJobs.ocher.Count;
+
+            List<string> allLinksGoToTasksLeonardo = new List<string>(linksProductLeonardo.ConvertAll(
+            new Converter<Product, string>(ProductJobs.GetProductLink)));
+
+            UpdateProgress(allLinksGoToTasksLeroy.Count() + allLinksGoToTasksLeonardo.Count(), 0,"Плучаем данные");
+            ProductJobs.ocherLeroy = new ConcurrentQueue<string>(allLinksGoToTasksLeroy);
+            ProductJobs.ocherLeonardo = new ConcurrentQueue<string>(allLinksGoToTasksLeonardo);
+            ProductJobs.productToUpdate = new List<Product>(linksProductLeroy);
+            ProductJobs.productToUpdate.AddRange(linksProductLeonardo);
+            int kolvoToUpdate = ProductJobs.ocherLeroy.Count;
 
             Action action = () =>
             {
-                while (!ProductJobs.ocher.IsEmpty)
+                while (!ProductJobs.ocherLeroy.IsEmpty)
                 {
                     string str = "";
-                    ProductJobs.ocher.TryDequeue(out str);
+                    ProductJobs.ocherLeroy.TryDequeue(out str);
                     ProductJobs.parseLeryaUpdate(str);
-                    UpdateProgress(allLinksGoToTasks.Count(), ProductJobs.NewRemaintProductLerya.Count(), "Плучаем данные");
+                    UpdateProgress(allLinksGoToTasksLeroy.Count() + allLinksGoToTasksLeonardo.Count(), ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action);
+
+            Action action1 = () =>
+            {
+                while (!ProductJobs.ocherLeonardo.IsEmpty)
+                {
+                    string str = "";
+                    ProductJobs.ocherLeonardo.TryDequeue(out str);
+                    ProductJobs.parseLeonardoUpdate(str);
+                    UpdateProgress(allLinksGoToTasksLeroy.Count() + allLinksGoToTasksLeonardo.Count(), ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
+                }
+            };
+            Parallel.Invoke(action, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1);
             UpdateProgress(0, 0, "Сохраняем данные");
-            DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProductLerya);
+            DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);
         }
         public remains2()
         {

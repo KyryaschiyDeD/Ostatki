@@ -27,8 +27,10 @@ namespace Остатки.Classes
 	class ProductJobs
 	{
 		static object locker = new object();
-		public static ConcurrentQueue<string> ocher = new ConcurrentQueue<string>();
-		public static ConcurrentQueue<Product> NewRemaintProductLerya = new ConcurrentQueue<Product>();
+		public static ConcurrentQueue<string> ocherLeroy = new ConcurrentQueue<string>();
+		public static ConcurrentQueue<string> ocherLeonardo = new ConcurrentQueue<string>();
+		public static List<Product> productToUpdate = new List<Product>();
+		public static ConcurrentQueue<Product> NewRemaintProduct = new ConcurrentQueue<Product>();
 
 		public static string getResponse(string uri)
 		{
@@ -49,11 +51,13 @@ namespace Остатки.Classes
 		}
 
 		public static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
-		public static List<ShopWhiteOrBlack> shopsWhiteOrBlack = ShopWhiteOrBlackJob.GetAllShopList();
-		static void AddProxy(HttpWebRequest request)
+		public static List<ShopWhiteOrBlack> shopsWhiteOrBlackLeroy = ShopWhiteOrBlackJob.GetShopListSpecifically("Леруа Мерлен");
+		public static List<ShopWhiteOrBlack> shopsWhiteOrBlackLeonardo = ShopWhiteOrBlackJob.GetShopListSpecifically("Леонардо");
+		public static List<int> shopWhiteOrBlacks = new List<int>();
+
+		ProductJobs()
 		{
-			var proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
-			request.Proxy = proxy;
+			shopWhiteOrBlacks = ShopWhiteOrBlackJob.GetAllShopList().Where(x => x.WhatIsShop == "Леонардо" && x.ShopType == true).Select(u => u.Code).ToList();
 		}
 
 		private static string GetResponseUpdates(string uri)
@@ -93,45 +97,45 @@ namespace Остатки.Classes
 					{
 						kolvoUpdatePopitka[uri]++;
 						if (!(kolvoUpdatePopitka[uri] > 3))
-							ocher.Enqueue(uri);
+							ocherLeroy.Enqueue(uri);
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(uri,1);
-						ocher.Enqueue(uri);
+						ocherLeroy.Enqueue(uri);
 					}
 						
 				}
 			}
 			catch (Exception)
 			{
-				if (!ocher.Contains(uri))
+				if (!ocherLeroy.Contains(uri))
 				{
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
 						if (!(kolvoUpdatePopitka[uri] > 3))
-							ocher.Enqueue(uri);
+							ocherLeroy.Enqueue(uri);
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(uri, 1);
-						ocher.Enqueue(uri);
+						ocherLeroy.Enqueue(uri);
 					}
 				}
 			}
-			if (htmlCode.Length == 0 && !ocher.Contains(uri))
+			if (htmlCode.Length == 0 && !ocherLeroy.Contains(uri))
 			{
 				if (kolvoUpdatePopitka.ContainsKey(uri))
 				{
 					kolvoUpdatePopitka[uri]++;
 					if (!(kolvoUpdatePopitka[uri] > 3))
-						ocher.Enqueue(uri);
+						ocherLeroy.Enqueue(uri);
 				}
 				else
 				{
 					kolvoUpdatePopitka.Add(uri, 1);
-					ocher.Enqueue(uri);
+					ocherLeroy.Enqueue(uri);
 				}
 			}
 			HTMLJob.CountOfUserAgent++;
@@ -276,6 +280,99 @@ namespace Остатки.Classes
 				DataBaseJob.AddNewProduct(onePos);
 			}
 		}
+
+		public static void parseLeonardoUpdate(object ink) 
+		{
+			if (ink != null)
+			{
+				string link = ink.ToString();
+				List<int> productCount = new List<int>(); // Кол-во
+				List<int> productLocation = new List<int>(); // Место
+				Product onePos = new Product();
+				onePos.ProductLink = link;
+				onePos.RemainsWhite = 0;
+				onePos.RemainsBlack = 0;
+				onePos.DateHistoryRemains.Add(DateTime.Now);
+				Product product = productToUpdate.Find(x => x.ProductLink == link);
+				string remainsCode = LeonardoJobs.GetRemainsPostLeo(link, product.ArticleNumberInShop);
+				Regex regexLocation = new Regex(@"<label for=""(\w+)"">");
+				MatchCollection matchColLocation = regexLocation.Matches(remainsCode);
+				foreach (var item in matchColLocation)
+				{
+					int shopCode;
+					int.TryParse(string.Join("", item.ToString().Where(c => char.IsDigit(c))), out shopCode);
+					productLocation.Add(shopCode);
+				}
+				string colCount = "";
+				remainsCode = Regex.Replace(remainsCode, @"\\", "");
+
+				if (remainsCode.Contains(@"</td></tr><tr style=""height: 45px; "">"))
+					colCount = remainsCode.Substring(remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"), remainsCode.IndexOf(@"</td></tr><tr style=""height: 45px; "">") - remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"));
+				else
+					colCount = remainsCode;
+
+				Regex regexCount = new Regex(@"<td class=""imgbgr2.*?</td>");
+				MatchCollection matchColCount = regexCount.Matches(colCount);
+				foreach (var item in matchColCount)
+				{
+					if (item.ToString().Contains("no_exist"))
+						productCount.Add(0);
+					else
+					if (item.ToString().Contains("exist"))
+						productCount.Add(1);
+					else
+					if (item.ToString().Contains("мало"))
+						productCount.Add(1);
+					else
+					if (item.ToString().Contains("заканчивается"))
+						productCount.Add(2);
+					else
+					if (item.ToString().Contains("много"))
+						productCount.Add(3);
+					else
+						productCount.Add(0);
+				}
+				int remaintWhiteTMP = 0;
+				int remaintBlackTMP = 0;
+
+				Dictionary<int, int> remainsDictionaryTMP = new Dictionary<int, int>();
+				for (int i = 0; i < productCount.Count - 1; i++)
+				{
+					remainsDictionaryTMP.Add(productLocation[i], productCount[i]);
+					if (shopWhiteOrBlacks.Contains(productLocation[i]))
+						remaintWhiteTMP += productCount[i];
+					else
+						remaintBlackTMP += productCount[i];
+				}
+
+				string code = LeonardoJobs.getResponse(link);
+				int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
+				int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
+				string priceTMP = code.Substring(startIndexPrice, 5).Trim();
+				string price = "";
+				foreach (var item in priceTMP)
+				{
+					if (Char.IsDigit(item) || item == ',')
+						price += item;
+				}
+
+				if (price.Length != 0)
+				{
+					onePos.NowPrice = Convert.ToDouble(price);
+				}
+				else
+					onePos.NowPrice = -1;
+
+				onePos.ArticleNumberInShop = product.ArticleNumberInShop;
+				onePos.RemainsWhite = remaintWhiteTMP;
+				onePos.RemainsBlack = remaintBlackTMP;
+				onePos.remainsDictionary = remainsDictionaryTMP;
+				onePos.Weight = 2000;
+
+				NewRemaintProduct.Enqueue(onePos);
+			}
+		}
+
 		public static void parseLeryaUpdate(object ink)
 		{
 			if (ink != null)
@@ -308,10 +405,7 @@ namespace Остатки.Classes
 							nextNameArticleId += match;
 						}
 					}
-					//else
-					//{
-					//	Message.errorsList.Add("Совпадений не найдено");
-					//}
+
 					// Выделяем только наименование, артикул и цену
 					regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
 					matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
@@ -409,7 +503,7 @@ namespace Остатки.Classes
 						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
 						{
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
-							if (shopsWhiteOrBlack.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
+							if (shopsWhiteOrBlackLeroy.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
 								countOfWhoiteList += 3;
 							countOfWhoiteList ++;
 						}
@@ -467,7 +561,7 @@ namespace Остатки.Classes
 					if (!massa)
 						onePos.Weight = 5000;
 					onePos.remainsDictionary = remainsDictionary;
-					NewRemaintProductLerya.Enqueue(onePos);
+					NewRemaintProduct.Enqueue(onePos);
 				}
 				else
 				{
@@ -475,14 +569,14 @@ namespace Остатки.Classes
 					{
 						if (kolvoUpdatePopitka[ink.ToString()] < 10)
 						{
-							ProductJobs.ocher.Enqueue(ink.ToString());
+							ProductJobs.ocherLeroy.Enqueue(ink.ToString());
 							kolvoUpdatePopitka[ink.ToString()]++;
 						}
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(ink.ToString(), 1);
-						ProductJobs.ocher.Enqueue(ink.ToString());
+						ProductJobs.ocherLeroy.Enqueue(ink.ToString());
 					}
 				}
 			}
@@ -490,50 +584,65 @@ namespace Остатки.Classes
 
 		public static void UpdateOneProduct()
 		{
-			if (NewRemaintProductLerya.Count != 0)
+			if (NewRemaintProduct.Count != 0)
 			{
-				DataBaseJob.SaveNewRemains(NewRemaintProductLerya);
+				DataBaseJob.SaveNewRemains(NewRemaintProduct);
 			}
 		}
 		public static List<Product> productList = new List<Product>();
 		public static void AddNewApiClientID(string clientId, string link)
 		{
-
-			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			lock (locker)
 			{
-				var products = db.GetCollection<Product>("Products");
-				var proverk = products.FindOne(x => x.ProductLink == link);
-				if (proverk == null)
+				using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 				{
-					var productsArchive = db.GetCollection<Product>("ProductsArchive");
-					proverk = productsArchive.FindOne(x => x.ProductLink == link);
+					var products = db.GetCollection<Product>("Products");
+					var proverk = products.FindOne(x => x.ProductLink == link);
 					if (proverk == null)
 					{
-						var productsWait = db.GetCollection<Product>("ProductsWait");
-						proverk = productsWait.FindOne(x => x.ProductLink == link);
-						if (proverk != null)
+						var productsArchive = db.GetCollection<Product>("ProductsArchive");
+						proverk = productsArchive.FindOne(x => x.ProductLink == link);
+						if (proverk == null)
+						{
+							var productsWait = db.GetCollection<Product>("ProductsWait");
+							proverk = productsWait.FindOne(x => x.ProductLink == link);
+							if (proverk != null)
+							{
+								if (!proverk.AccauntOzonID.ContainsKey(clientId))
+									proverk.AccauntOzonID.Add(clientId, true);
+								productsWait.Update(proverk);
+							}
+						}
+						else
 						{
 							if (!proverk.AccauntOzonID.ContainsKey(clientId))
 								proverk.AccauntOzonID.Add(clientId, true);
-							productsWait.Update(proverk);
+							productsArchive.Update(proverk);
 						}
+
 					}
 					else
 					{
 						if (!proverk.AccauntOzonID.ContainsKey(clientId))
 							proverk.AccauntOzonID.Add(clientId, true);
-						productsArchive.Update(proverk);
+						products.Update(proverk);
 					}
-
-				}
-				else
-				{
-					if (!proverk.AccauntOzonID.ContainsKey(clientId))
-						proverk.AccauntOzonID.Add(clientId, true);
-					products.Update(proverk);
 				}
 			}
+		}
 
+		public static void AddNewProductListToRemains(List<Product> list)
+		{
+			lock (locker)
+			{
+
+				using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+				{
+					var online = db.GetCollection<Product>("Products");
+					online.InsertBulk(list);
+				}
+
+			}
 		}
 
 		public static string GetProductLink(Product pf)

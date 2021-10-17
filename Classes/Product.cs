@@ -47,8 +47,8 @@ namespace Остатки.Classes
 			}
 		}  // Кол-во аккаунтов у товара
 		public List<string> ArticleNumberUnicList { get; set; } = new List<string>(); // Озон артикул, списком
-		public string GetArticleNumberUnicList { 
-			get{ return ArticleNumberUnicList.Last(); } } // Озон артикул, списком
+		public List<string> GetArticleNumberUnicList { 
+			get{ return ArticleNumberUnicList; } } // Озон артикул, списком
 		public int RemainsWhite { get; set; } // Остатки из белого списка
 		public Dictionary<int, int> remainsDictionary { get; set; } // Остатки по магазинам
 		public List<DateTime> DateHistoryRemains { get; set; } = new List<DateTime>();// Даты и время проверки остатков
@@ -117,10 +117,14 @@ namespace Остатки.Classes
 			int countAccaunt = 0;
 			foreach (var item in ApiKeysesJob.GetAllApiList())
 			{
+				
 				long chID = ArticleNumberOzonDictGetByClientID(item.ClientId);
 				if (chID != -1)
 				{
-					data += $"\t {ApiKeysesJob.GetApiName(item)}: {chID}\n";
+					foreach (var item1 in ArticleNumberOzonDictList[item.ClientId])
+					{
+						data += $"\t {ApiKeysesJob.GetApiName(item)}: {item1}\n";
+					}
 					countAccaunt++;
 				}
 			}

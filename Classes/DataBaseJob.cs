@@ -148,7 +148,7 @@ namespace Остатки.Classes
 		}
 		public static void AddListToBackground(List<Product> product)
 		{
-			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
 			{
 				var col = db.GetCollection<Product>("Products");
 				col.InsertBulk(product);
@@ -231,44 +231,48 @@ namespace Остатки.Classes
 					{
 						Product OneProduct;
 						NewRemaintProductLerya.TryDequeue(out OneProduct);
+						Product proverk = new Product();
 						try
 						{
-							var proverk = online.FindOne(x => x.ArticleNumberInShop == OneProduct.ArticleNumberInShop);
-							bool ItsWait = false;
-							if (proverk == null)
-							{
-								proverk = wait.FindOne(x => x.ArticleNumberInShop == OneProduct.ArticleNumberInShop);
-								ItsWait = true;
-							}
-							proverk.DateHistoryRemains.Add(DateTime.Now);
-
-							proverk.HistoryRemainsWhite.Add(proverk.RemainsWhite);
-							proverk.RemainsWhite = OneProduct.RemainsWhite;
-
-							proverk.HistoryRemainsBlack.Add(proverk.RemainsBlack);
-							proverk.RemainsBlack = OneProduct.RemainsBlack;
-
-							proverk.DateHistoryRemains = OneProduct.DateHistoryRemains;
-
-							proverk.Weight = OneProduct.Weight;
-
-							if (OneProduct.NowPrice != proverk.NowPrice)
-							{
-								proverk.OldPrice.Add(proverk.NowPrice);
-								proverk.NowPrice = OneProduct.NowPrice;
-								proverk.DateOldPrice.Add(System.DateTime.Now);
-							}
-							if (ItsWait)
-							{
-								wait.Update(proverk);
-							}
-							else
-								online.Update(proverk);
+							proverk = online.FindOne(x => x.ProductLink == OneProduct.ProductLink);
 						}
 						catch (Exception)
 						{
-
+							Message.infoList.Add(OneProduct.ArticleNumberInShop);
 						}
+						
+
+						bool ItsWait = false;
+						if (proverk == null)
+						{
+							proverk = wait.FindOne(x => x.ArticleNumberInShop == OneProduct.ArticleNumberInShop);
+							ItsWait = true;
+						}
+						proverk.DateHistoryRemains.Add(DateTime.Now);
+
+						proverk.HistoryRemainsWhite.Add(proverk.RemainsWhite);
+						proverk.RemainsWhite = OneProduct.RemainsWhite;
+
+						proverk.HistoryRemainsBlack.Add(proverk.RemainsBlack);
+						proverk.RemainsBlack = OneProduct.RemainsBlack;
+
+						proverk.DateHistoryRemains = OneProduct.DateHistoryRemains;
+
+						proverk.Weight = OneProduct.Weight;
+
+						if (OneProduct.NowPrice != proverk.NowPrice)
+						{
+							proverk.OldPrice.Add(proverk.NowPrice);
+							proverk.NowPrice = OneProduct.NowPrice;
+							proverk.DateOldPrice.Add(System.DateTime.Now);
+						}
+						if (ItsWait)
+						{
+							wait.Update(proverk);
+						}
+						else
+							online.Update(proverk);
+
 						remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
 					}
 				};
@@ -277,6 +281,7 @@ namespace Остатки.Classes
 					action, action, action, action, action, action,
 					action, action, action, action, action, action);
 			}
+			Message.AllErrors();
 		}
 
 		public static void GetAllProductFromTheBase(out List<Product> Remains, out List<Product> Wait, out List<Product> Archive, out List<Product> Del)
