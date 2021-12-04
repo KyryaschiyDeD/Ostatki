@@ -55,7 +55,7 @@ namespace Остатки.Pages.SettingPages.AddWhiteOrBlackStore
 
 		private void RedactOldShop_Click(object sender, RoutedEventArgs e)
 		{
-			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked);
+			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked, "Леонардо");
 			Zeroing();
 			GoToShopList();
 		}

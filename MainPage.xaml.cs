@@ -19,19 +19,9 @@ namespace Остатки
         {
             this.InitializeComponent();
             Global.GetWhiteBlackShopsLeroy();
-            //List<Product> allProducts = new List<Product>();
-            //
-            //using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
-            //{
-            //    var col = db.GetCollection<Product>("Products");
-            //    allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-            //}
-            //List<Product> allProducts0 = allProducts.Where(x => x.RemainsWhite == 0).ToList();
-            //List<Product> allProducts15 = allProducts.Where(x => x.RemainsWhite < 15).ToList();
-            //remains0.Text = allProducts0.Count().ToString();
-            //remains15.Text = allProducts15.Count().ToString();
-             myFrame.Navigate(typeof(MainInfoList));
-            TitleTextBlock.Text = "Остатки в 3D";
+            Global.GetWhiteBlackShopsLeonardo();
+            myFrame.Navigate(typeof(MainInfoList));
+            TitleTextBlock.Text = "Статка";
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -43,33 +33,18 @@ namespace Остатки
             }
             else if(remains.IsSelected)
             {
-                myFrame.Navigate(typeof(remains2));
+                myFrame.Navigate(typeof(RemainsMenu));
                 TitleTextBlock.Text = "Остатки в 3D";
             }
             else if (add.IsSelected)
             {
-                myFrame.Navigate(typeof(add));
-                TitleTextBlock.Text = "Добавить";
+                myFrame.Navigate(typeof(AddJobProductMenu));
+                TitleTextBlock.Text = "Воровать и добавлять";
             }
-            else if (viewAll.IsSelected)
+            else if (settings.IsSelected)
             {
-                myFrame.Navigate(typeof(Settings));
+                myFrame.Navigate(typeof(SettingsMenu));
                 TitleTextBlock.Text = "Настройки";
-            }
-            else if (waitRemains.IsSelected)
-            {
-                myFrame.Navigate(typeof(waitRemains));
-                TitleTextBlock.Text = "Ждём появления";
-            }
-            else if (archiveRemains.IsSelected)
-            {
-                myFrame.Navigate(typeof(archiveRemains));
-                TitleTextBlock.Text = "Архив :-(";
-            }
-            else if (spizdiliRemains.IsSelected)
-            {
-                myFrame.Navigate(typeof(StealProducts));
-                TitleTextBlock.Text = "Спиздили";
             }
             else if (EditingBalancesAndPrices.IsSelected)
             {

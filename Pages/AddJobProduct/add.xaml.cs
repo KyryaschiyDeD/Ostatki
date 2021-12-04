@@ -160,8 +160,15 @@ namespace Остатки
 						if (link.Contains("leonardo"))
 						{
 							Product newPos = null;
-							tasks2[i] = Task.Factory.StartNew(() => newPos =  LeonardoJobs.AddOneProduct(link, myLabels).Result);
-							tasks2[i].Wait();
+							try
+							{
+								tasks2[i] = Task.Factory.StartNew(() => newPos = LeonardoJobs.AddOneProduct(link, myLabels).Result);
+								tasks2[i].Wait();
+							}
+							catch (Exception)
+							{
+
+							}
 							if (newPos != null)
 								productsToAdd.Add(newPos);
 						}
@@ -192,7 +199,12 @@ namespace Остатки
 								() =>
 								{
 									if (item.IsChecked.Value)
-										oneProduct.AccauntOzonID.Add(item.Name, true);
+									{
+										if (!oneProduct.AccauntOzonID.ContainsKey(item.Name))
+											oneProduct.AccauntOzonID.Add(item.Name, true);
+										else
+											oneProduct.AccauntOzonID[item.Name] = true;
+									}	
 								});
 					}
 					productsToAdd.Add(oneProduct);

@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows;
-using Windows.Storage;
-using Windows.UI.Xaml.Controls;
+
 
 namespace Остатки.Classes
 {
+
+	public class ArticleNumber
+	{
+		public string OurArticle { get; set; }
+		public long ArticleOzon { get; set; }
+	}
+
 	public class Product
 	{
 		public Guid Id { get; set; }
 		public string ProductLink { get; set; } // Ссылка
 		public string Name { get; set; } // Наименование
+		public bool NameIsRedact { get; set; } // Менялось ли наименование?
 		public string ArticleNumberInShop { get; set; } // Артикул в магазине
-		//public Dictionary<string, long> ArticleNumberOzonDict { get; set; } = new Dictionary<string, long>();
 		public Dictionary<string, List<long>> ArticleNumberOzonDictList { get; set; } = new Dictionary<string, List<long>>(); // Словарь ClientID => список артикулов
+		public Dictionary<string, List<ArticleNumber>> ArticleNumberProductId { get; set; } = new Dictionary<string, List<ArticleNumber>>(); // Словарь 2.0 ClientID => список артикулов (и на)
 		public int GetCountArticleNumberOzonDictList
 		{
 			get
@@ -106,8 +108,10 @@ namespace Остатки.Classes
 		public string TypeOfShop { get; set; }
 		public override string ToString()
 		{
-			return ArticleNumberInShop;
+			return ProductLink;
+			//return ArticleNumberInShop;
 		}
+
 		public string ToStringInfo()
 		{
 			string data = "";
@@ -115,16 +119,23 @@ namespace Остатки.Classes
 
 			data += $"Аккаунты: \n";
 			int countAccaunt = 0;
+			Dictionary<ApiKeys, int> countProductonOnAccaunt = new Dictionary<ApiKeys, int>();
 			foreach (var item in ApiKeysesJob.GetAllApiList())
 			{
-				
 				long chID = ArticleNumberOzonDictGetByClientID(item.ClientId);
+				if (!countProductonOnAccaunt.ContainsKey(item))
+				{
+					countProductonOnAccaunt.Add(item, 0);
+				}
 				if (chID != -1)
 				{
+					data += $"\t {ApiKeysesJob.GetApiName(item)}: ";
 					foreach (var item1 in ArticleNumberOzonDictList[item.ClientId])
 					{
-						data += $"\t {ApiKeysesJob.GetApiName(item)}: {item1}\n";
+						data += $"{item1} ";
+						countProductonOnAccaunt[item]++;
 					}
+					data += $"\n";
 					countAccaunt++;
 				}
 			}
@@ -134,7 +145,10 @@ namespace Остатки.Classes
 			data += $"Кол-во аккаунтов: {ArticleNumberOzonDictCount} \n";
 			data += $"Остатки на белизне: {RemainsWhite} \n";
 			data += $"Остатки ин жопенн: {RemainsBlack} \n";
-			data += $"Послед. дата проверки: {DateHistoryRemains.Last()} \n";
+			if (DateHistoryRemains.Count > 0)
+				data += $"Послед. дата проверки: {DateHistoryRemains.Last()} \n";
+			else
+				data += $"Послед. дата проверки: отсутвует \n";
 			data += $"\tЦена: {NowPrice}\n";
 			if (OldPriceCh != 0)
 			{
@@ -145,7 +159,19 @@ namespace Остатки.Classes
 				data += $"\t Цена не менялась \n";
 			data += $"Вес: {Weight}\n";
 			data += $"Магазин: {TypeOfShop}\n";
-
+			data += $"-------\t-------\t-------\n";
+			data += $"Ожидаемое кол-во на одном акке: {ArticleNumberUnicList.Count}\n";
+			data += $"Фактическое: \n";
+			foreach (var item in countProductonOnAccaunt)
+			{
+				//data += $"\t{ApiKeysesJob.GetApiName(item.Key)}: {item.Value}. productID: {ArticleNumberProductId[item.Key.ClientId].Count()}\n";
+			}
+			data += $"-------\t-------\t-------\n";
+			data += $"Артикулы озон: \n";
+			foreach (var item in ArticleNumberUnicList)
+			{
+				data += $"\t{item}\n";
+			}
 			return data;
 		}
 		public string GetAccountIds
@@ -158,6 +184,25 @@ namespace Остатки.Classes
 					str += item.Key.Length + " ";
 				}
 				return str;
+			}
+		}
+		public bool IsTheTimeLineOzon
+		{
+			get {
+				if (ArticleNumberOzonDictList.ContainsKey("200744"))
+					if (ArticleNumberProductId["200744"].Count > 0)
+						return true;
+				return false;
+			}
+		}
+		public bool IsLymarEGOzon
+		{
+			get
+			{
+				if (ArticleNumberOzonDictList.ContainsKey("104333"))
+				 if (ArticleNumberProductId["104333"].Count > 0)
+					return true;
+				return false;
 			}
 		}
 	}

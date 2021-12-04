@@ -35,9 +35,9 @@ namespace Остатки.Classes
 			foreach (var item in list)
 			{
 				if (item.ShopType)
-					whiteListLeroy.Add(item.Code);
+					whiteListLeonardo.Add(item.Code);
 				else
-					blackListLeroy.Add(item.Code);
+					blackListLeonardo.Add(item.Code);
 			}
 		}
 

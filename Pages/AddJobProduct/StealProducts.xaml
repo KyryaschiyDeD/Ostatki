@@ -10,10 +10,16 @@
 
     <Grid>
 		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+			<CheckBox x:FieldModifier="public" x:Name="ProductCountComplect1" Content="1" IsChecked="True" HorizontalAlignment="Right" />
+			<CheckBox x:FieldModifier="public" x:Name="ProductCountComplect2" Content="2" IsChecked="False" HorizontalAlignment="Right" />
+			<CheckBox x:FieldModifier="public" x:Name="ProductCountComplect3" Content="3" IsChecked="False" HorizontalAlignment="Right" />
+			<CheckBox x:FieldModifier="public" x:Name="ProductCountComplect5" Content="5" IsChecked="False" HorizontalAlignment="Right" />
+			<CheckBox x:FieldModifier="public" x:Name="ProductCountComplect10" Content="10" IsChecked="False" HorizontalAlignment="Right" />
 			<CheckBox x:FieldModifier="public" x:Name="TrueProductsDatabase" Content="Учитывать ли товары в БД?" IsChecked="True" HorizontalAlignment="Right" />
 			<Button Content="Спиздить Leroy" CornerRadius="15" Width="400" x:Name="StealProductsLeroyButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductLeroys_Click"/>
 			<Button Content="Спиздить Леонардо" CornerRadius="15" Width="400" x:Name="StealProductsLeonardoButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductLeonardos_Click"/>
-			<Button Content="Проверка и сверка артикулов" CornerRadius="15" Width="400" x:Name="CheckingAndReconciliationOfArticles" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="CheckingAndReconciliationOfArticles_Click"/>
+			<Button Content="Спиздить Петрович" CornerRadius="15" Width="400" x:Name="StealProductsPetrovichButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductPetrovich_Click"/>
+			<!--<Button Content="Проверка и сверка артикулов" CornerRadius="15" Width="400" x:Name="CheckingAndReconciliationOfArticles" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="CheckingAndReconciliationOfArticles_Click"/>-->
 			<TextBlock x:Name="textBlock1" />
 		</StackPanel>
 	</Grid>

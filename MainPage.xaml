@@ -36,40 +36,22 @@
 							<TextBlock FontSize="24" Text="Остатки" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
-					<ListBoxItem Name="waitRemains">
-						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE850;" />
-							<TextBlock FontSize="24" Text="Остатки" Margin="10 0 0 0" />
-						</StackPanel>
-					</ListBoxItem>
 					<ListBoxItem Name="add">
 						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE710;" />
-							<TextBlock FontSize="24" Text="Добавить" Margin="10 0 0 0" />
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE72D;" />
+							<TextBlock FontSize="24" Text="Воруем" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
-					<ListBoxItem Name="viewAll">
+					<ListBoxItem Name="settings">
 						<StackPanel Orientation="Horizontal">
 							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE713;" />
-							<TextBlock FontSize="24" Text="Посмотреть все" Margin="10 0 0 0" />
-						</StackPanel>
-					</ListBoxItem>
-					<ListBoxItem Name="archiveRemains">
-						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" />
-							<TextBlock FontSize="24" Text="Архив" Margin="10 0 0 0" />
-						</StackPanel>
-					</ListBoxItem>
-					<ListBoxItem Name="spizdiliRemains">
-						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE72D;" />
-							<TextBlock FontSize="24" Text="Архив" Margin="10 0 0 0" />
+							<TextBlock FontSize="24" Text="Настройки" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
 					<ListBoxItem Name="EditingBalancesAndPrices">
 						<StackPanel Orientation="Horizontal">
 							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xED63;" />
-							<TextBlock FontSize="24" Text="Архив" Margin="10 0 0 0" />
+							<TextBlock FontSize="24" Text="Цены и остатки" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
 				</ListBox>
@@ -78,12 +60,5 @@
 				<Frame Name="myFrame" />
 			</SplitView.Content>
 		</SplitView>
-		<!--<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-			<TextBlock Text="Остатки в нуле: "/>
-			<TextBlock x:Name="remains0"/>
-			<TextBlock Text="Остатки &lt; 15: "/>
-			<TextBlock x:Name="remains15"/>
-		</StackPanel>-->
-		
 	</Grid>
 </Page>

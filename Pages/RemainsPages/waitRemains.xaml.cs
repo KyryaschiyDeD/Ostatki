@@ -130,8 +130,6 @@ namespace Остатки
             }
 
         }
-
-
         public ObservableCollection<Product> ProductListWait = new ObservableCollection<Product>();
         private void GoToMainRemains_Click(object sender, RoutedEventArgs e)
         {
@@ -144,10 +142,11 @@ namespace Остатки
         }
         private void rankLowFilter_Click(object sender, RoutedEventArgs e)
         {
-            ObservableCollection<Product> tmpFilterProduct;
-            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListWait
-                                                                 where item.Name.Contains(FindingTextBox.Text)
-                                                                 select item);
+            ObservableCollection<Product> tmpFilterProduct = new ObservableCollection<Product>();
+            
+            //tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListWait
+            //                                                     where item.Name.Contains(FindingTextBox.Text)
+            //                                                     select item);
             long myLong;
             bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
             if (tmpFilterProduct.Count == 0 && isNumerical)
@@ -170,7 +169,6 @@ namespace Остатки
 			this.InitializeComponent();
 			getRemainsWaitIsBaseThread();
 		}
-
         private void GoToArchiveRemains_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;

@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="Остатки.Pages.Settings"
+    x:Class="Остатки.Pages.SettingsMenu"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Остатки.Pages"
@@ -41,6 +41,12 @@
 						<StackPanel Orientation="Horizontal">
 							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE763;" />
 							<TextBlock FontSize="24" Text="Управление API ключами" Margin="10 0 0 0" />
+						</StackPanel>
+					</ListBoxItem>
+					<ListBoxItem Name="DelProductsToArchive">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE70D;" />
+							<TextBlock FontSize="24" Text="Убрать товары в архив файлом" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
 				</ListBox>

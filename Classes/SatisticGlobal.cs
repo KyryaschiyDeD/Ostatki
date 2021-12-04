@@ -13,6 +13,16 @@ namespace Остатки.Classes
 		public long AllProductsWait { get; set; } // Всего продуктов в ожидаем появления
 		public long AllProductsArchive { get; set; } // Всего продуктов в архиве
 		public long AllProductsDel { get; set; } // Всего продуктов удалено
+		public long AllProductsLeroy { get; set; } // Всего продуктов Леруа
+		public long AllProductsLeroy0 { get; set; } // Всего продуктов Леруа = 0
+		public long AllProductsLeroy50 { get; set; } // Всего продуктов Леруа меньше 50
+		public long AllProductsLeroy100 { get; set; } // Всего продуктов Леруа меньше 100
+		public long AllProductsLeonardo { get; set; } // Всего продуктов Леонардо
+		public Dictionary<string, long> AllProductsLeonardoPos { get; set; } = new Dictionary<string, long>(); // Всего позиций Леонардо 
+		public Dictionary<string, long> AllProductsLeroyPos { get; set; } = new Dictionary<string, long>(); // Всего позиций Leroy 
+		public long AllProductsLeonardo0 { get; set; } // Всего продуктов Леонардо 0 
+		public long AllProductsLeonardo50 { get; set; } // Всего продуктов Леонардо меньше 50
+		public long AllProductsLeonardo100 { get; set; } // Всего продуктов Леонардо меньше 100
 
 		public DateTime DateCreate { get; set; } // Дата создания
 

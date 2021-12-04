@@ -12,8 +12,6 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Остатки.Pages.SettingPages;
-using Остатки.Pages.SettinPages;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -22,30 +20,25 @@ namespace Остатки.Pages
 	/// <summary>
 	/// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
 	/// </summary>
-	public sealed partial class Settings : Page
+	public sealed partial class AddJobProductMenu : Page
 	{
-		public Settings()
+		public AddJobProductMenu()
 		{
 			this.InitializeComponent();
+			myFrame.Navigate(typeof(StealProducts));
 		}
 		private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if (AddWhiteOrBlackStore.IsSelected)
+			if (add.IsSelected)
 			{
-				myFrame.Navigate(typeof(AddWhiteOrBlackStore));
-				TitleTextBlock.Text = "Белый/Чёрный список";
+				myFrame.Navigate(typeof(add));
+				TitleTextBlock.Text = "Добавить";
 			}
-			else if (ManagementApiKeys.IsSelected)
+			else if (spizdiliRemains.IsSelected)
 			{
-				myFrame.Navigate(typeof(ManagementApiKeys));
-				TitleTextBlock.Text = "Управление API ключами";
+				myFrame.Navigate(typeof(StealProducts));
+				TitleTextBlock.Text = "Спиздили";
 			}
-			else if (AddUnicArticle.IsSelected)
-			{
-				myFrame.Navigate(typeof(AddUnicArticle));
-				TitleTextBlock.Text = "Управление артикулами";
-			}
-			
 		}
 
 		private void HamburgerButton_Click(object sender, RoutedEventArgs e)

@@ -137,12 +137,12 @@ namespace Остатки.Classes
 				var col = db.GetCollection<Product>("Products");
 				foreach (var item in product)
 				{
-					var proverk = col.FindOne(x => x.ArticleNumberInShop == item.ArticleNumberInShop);
-					if (proverk != null)
-					{
-						proverk = item;
-						col.Update(proverk);
-					}
+					//var proverk = col.FindOne(x => x.ProductLink == item.ProductLink);
+					//if (proverk != null)
+					//{
+						//proverk = item;
+						col.Update(item);
+					//}
 				}
 			}
 		}
@@ -231,6 +231,7 @@ namespace Остатки.Classes
 					{
 						Product OneProduct;
 						NewRemaintProductLerya.TryDequeue(out OneProduct);
+						bool error = false;
 						Product proverk = new Product();
 						try
 						{
@@ -238,9 +239,14 @@ namespace Остатки.Classes
 						}
 						catch (Exception)
 						{
-							Message.infoList.Add(OneProduct.ArticleNumberInShop);
+							error = true;
+							if (OneProduct.ProductLink.Contains("leonardo"))
+								ProductJobs.ocherLeonardo.Enqueue(OneProduct);
+							else
+							if (OneProduct.ProductLink.Contains("leroy"))
+								ProductJobs.ocherLeroy.Enqueue(OneProduct.ProductLink);
 						}
-						
+
 
 						bool ItsWait = false;
 						if (proverk == null)
@@ -264,27 +270,39 @@ namespace Остатки.Classes
 						{
 							proverk.OldPrice.Add(proverk.NowPrice);
 							proverk.NowPrice = OneProduct.NowPrice;
-							proverk.DateOldPrice.Add(System.DateTime.Now);
+							proverk.DateOldPrice.Add(DateTime.Now);
 						}
-						if (ItsWait)
+						if (OneProduct.Name != proverk.Name || String.IsNullOrEmpty(proverk.Name))
 						{
-							wait.Update(proverk);
+							proverk.Name = OneProduct.Name;
+							proverk.NameIsRedact = true;
 						}
-						else
-							online.Update(proverk);
+						if (!error)
+						{
+							if (ItsWait)
+							{
+								wait.Update(proverk);
+							}
+							else
+								online.Update(proverk);
+						}
 
 						remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
 					}
 				};
-				Parallel.Invoke(action, action, action, action, action, action,
-					action, action, action, action, action, action,
-					action, action, action, action, action, action,
-					action, action, action, action, action, action);
+				Parallel.Invoke(action);
 			}
-			Message.AllErrors();
+			if (ProductJobs.ocherLeroy.Count != 0)
+				remains2.GoUpdateAllDataBaseLerya();
 		}
 
-		public static void GetAllProductFromTheBase(out List<Product> Remains, out List<Product> Wait, out List<Product> Archive, out List<Product> Del)
+		public static void GetAllProductFromTheBase
+			(
+			out List<Product> Remains,
+			out List<Product> Wait,
+			out List<Product> Archive,
+			out List<Product> Del
+			)
 		{
 			Remains = new List<Product>();
 			Wait = new List<Product>();

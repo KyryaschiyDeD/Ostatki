@@ -30,6 +30,11 @@ namespace Остатки.Pages.SettinPages
 				myFrame.Navigate(typeof(AddWhiteOrBlackStoreLeonardo));
 				TitleTextBlock.Text = "Леонардо";
 			}
+			else if (Petrovich.IsSelected)
+			{
+				myFrame.Navigate(typeof(AddWhiteOrBlackStorePetrovich));
+				TitleTextBlock.Text = "Петрович";
+			}
 		}
 
 		private void HamburgerButton_Click(object sender, RoutedEventArgs e)

@@ -22,18 +22,19 @@ namespace Остатки.Pages.SettingPages.AddWhiteOrBlackStore
 	/// <summary>
 	/// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
 	/// </summary>
-	public sealed partial class AddWhiteOrBlackStoreLeroy : Page
+	public sealed partial class AddWhiteOrBlackStorePetrovich : Page
 	{
-		public AddWhiteOrBlackStoreLeroy()
+		public AddWhiteOrBlackStorePetrovich()
 		{
 			this.InitializeComponent();
 			GoToShopList();
 		}
+
 		public ObservableCollection<ShopWhiteOrBlack> ShopList = new ObservableCollection<ShopWhiteOrBlack>();
 
 		private void GoToShopList()
 		{
-			ShopList = new ObservableCollection<ShopWhiteOrBlack>(ShopWhiteOrBlackJob.GetShopListSpecifically("Леруа Мерлен"));
+			ShopList = new ObservableCollection<ShopWhiteOrBlack>(ShopWhiteOrBlackJob.GetShopListSpecifically("Петрович").OrderBy(x => x.Code));
 			CountOfshops.Text = $"Количество магазинов: {ShopList.Count}";
 		}
 
@@ -47,14 +48,15 @@ namespace Остатки.Pages.SettingPages.AddWhiteOrBlackStore
 
 		private void CreateNewShop_Click(object sender, RoutedEventArgs e)
 		{
-			ShopWhiteOrBlackJob.CreateNewShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked, "Леруа Мерлен");
+			ShopWhiteOrBlackJob.CreateNewShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked, "Петрович");
 			Zeroing();
 			GoToShopList();
+			this.InitializeComponent();
 		}
 
 		private void RedactOldShop_Click(object sender, RoutedEventArgs e)
 		{
-			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked, "Леруа Мерлен");
+			ShopWhiteOrBlackJob.RedactOldShop(ShopName.Text, ShopCode.Text, (bool)WhiteRadioButton.IsChecked, (bool)ShopIsOnlyThisCheckBox.IsChecked, "Петрович");
 			Zeroing();
 			GoToShopList();
 		}

@@ -58,7 +58,7 @@
 					<controls:DataGridTextColumn 
 						Header="Код"
 						Width="75"
-						Binding="{Binding Code}" 
+						Binding="{Binding GetCode}" 
 						FontSize="20" />
 
 					<controls:DataGridCheckBoxColumn 

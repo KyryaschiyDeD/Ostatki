@@ -28,7 +28,7 @@ namespace Остатки.Classes
 	{
 		static object locker = new object();
 		public static ConcurrentQueue<string> ocherLeroy = new ConcurrentQueue<string>();
-		public static ConcurrentQueue<string> ocherLeonardo = new ConcurrentQueue<string>();
+		public static ConcurrentQueue<Product> ocherLeonardo = new ConcurrentQueue<Product>();
 		public static List<Product> productToUpdate = new List<Product>();
 		public static ConcurrentQueue<Product> NewRemaintProduct = new ConcurrentQueue<Product>();
 
@@ -53,12 +53,7 @@ namespace Остатки.Classes
 		public static Dictionary<string, int> kolvoUpdatePopitka = new Dictionary<string, int>();
 		public static List<ShopWhiteOrBlack> shopsWhiteOrBlackLeroy = ShopWhiteOrBlackJob.GetShopListSpecifically("Леруа Мерлен");
 		public static List<ShopWhiteOrBlack> shopsWhiteOrBlackLeonardo = ShopWhiteOrBlackJob.GetShopListSpecifically("Леонардо");
-		public static List<int> shopWhiteOrBlacks = new List<int>();
-
-		ProductJobs()
-		{
-			shopWhiteOrBlacks = ShopWhiteOrBlackJob.GetAllShopList().Where(x => x.WhatIsShop == "Леонардо" && x.ShopType == true).Select(u => u.Code).ToList();
-		}
+		//public static List<int> shopWhiteOrBlacks = new List<int>();
 
 		private static string GetResponseUpdates(string uri)
 		{
@@ -154,218 +149,284 @@ namespace Остатки.Classes
 			string code = getResponse(link);
 			int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
 			int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
-			string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
-			string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
-
-			// Получаем строку с наименованием, артикулом и ценой
-			Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
-			Regex regexCount = new Regex(@"stock=""(\w+)""");
-			Regex regexLocation = new Regex(@"store-code=""(\w+)""");
-
-			string nextNameArticleId = "";
-			MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
-			if (matchesArticleNumberName.Count > 0)
+			if (indexOfStart > 0)
 			{
-				foreach (Match match in matchesArticleNumberName)
+				string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
+				string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
+
+				// Получаем строку с наименованием, артикулом и ценой
+				Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
+				Regex regexCount = new Regex(@"stock=""(\w+)""");
+				Regex regexLocation = new Regex(@"store-code=""(\w+)""");
+
+				string nextNameArticleId = "";
+				MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
+				if (matchesArticleNumberName.Count > 0)
 				{
-					nextNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Совпадений не найдено");
-			}
-			// Выделяем только наименование, артикул и цену
-			regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
-			matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
-
-			string finishNameArticleId = "";
-			if (matchesArticleNumberName.Count > 0)
-			{
-				foreach (Match match in matchesArticleNumberName)
-				{
-					finishNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
-			}
-			// Получаем чисто артикул, наименование и цену
-			regexArticleNumber = new Regex(@""".*?""");
-			matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
-
-			MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
-			MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
-			// Артикл и имя
-			string resultNameArticleId = "";
-			if (matchesArticleNumberName.Count > 0)
-			{
-				foreach (Match match in matchesArticleNumberName)
-				{
-					resultNameArticleId += match;
-				}
-			}
-			else
-			{
-				Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
-			}
-			string[] namesAndArticleId = resultNameArticleId.Split('"');
-			// Вносим в переменные 
-			try
-			{
-				onePos.Name = namesAndArticleId[3];
-				onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
-				onePos.ArticleNumberInShop = namesAndArticleId[1];
-			}
-			catch (Exception)
-			{
-				Message.errorsList.Add("Наименование, цена и артикул в неправильном формате!!!");
-			}
-
-			// Кол-во
-			if (matchesCount.Count > 0)
-			{
-				foreach (Match match in matchesCount)
-				{
-					string[] digits = Regex.Split(match.Value, @"\D+");
-					foreach (string value in digits)
+					foreach (Match match in matchesArticleNumberName)
 					{
-						int number = 0;
-						if (int.TryParse(value, out number))
-						{
-							productCount.Add(number);
-						}
+						nextNameArticleId += match;
 					}
 				}
-
-			}
-			else
-			{
-				Message.errorsList.Add("Не удалось найти и загрузить остатки!!!");
-			}
-			// Место
-			if (matchesLocation.Count > 0)
-			{
-				foreach (Match match in matchesLocation)
-				{
-					string[] digits = Regex.Split(match.Value, @"\D+");
-					foreach (string value in digits)
-					{
-						int number;
-						if (int.TryParse(value, out number))
-						{
-							productLocation.Add(number);
-						}
-					}
-				}
-
-			}
-			onePos.TypeOfShop = "LeroyMerlen";
-			foreach (var item in productLocation)
-			{
-				if (Global.whiteListLeroy.Contains(item))
-
-					onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
-
-
 				else
-				if (Global.blackListLeroy.Contains(item))
+				{
+					Message.errorsList.Add("Совпадений не найдено");
+				}
+				// Выделяем только наименование, артикул и цену
+				regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
+				matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
 
-					onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
+				string finishNameArticleId = "";
+				if (matchesArticleNumberName.Count > 0)
+				{
+					foreach (Match match in matchesArticleNumberName)
+					{
+						finishNameArticleId += match;
+					}
+				}
+				else
+				{
+					Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+				}
+				// Получаем чисто артикул, наименование и цену
+				regexArticleNumber = new Regex(@""".*?""");
+				matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
 
+				MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
+				MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
+				// Артикл и имя
+				string resultNameArticleId = "";
+				if (matchesArticleNumberName.Count > 0)
+				{
+					foreach (Match match in matchesArticleNumberName)
+					{
+						resultNameArticleId += match;
+					}
+				}
+				else
+				{
+					Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+				}
+				string[] namesAndArticleId = resultNameArticleId.Split('"');
+				// Вносим в переменные 
+				try
+				{
+					onePos.Name = namesAndArticleId[3];
+					onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
+					onePos.ArticleNumberInShop = namesAndArticleId[1];
+				}
+				catch (Exception)
+				{
+					Message.errorsList.Add("Наименование, цена и артикул в неправильном формате!!!");
+				}
+
+				// Кол-во
+				if (matchesCount.Count > 0)
+				{
+					foreach (Match match in matchesCount)
+					{
+						string[] digits = Regex.Split(match.Value, @"\D+");
+						foreach (string value in digits)
+						{
+							int number = 0;
+							if (int.TryParse(value, out number))
+							{
+								productCount.Add(number);
+							}
+						}
+					}
+
+				}
+				else
+				{
+					Message.errorsList.Add("Не удалось найти и загрузить остатки!!!");
+				}
+				// Место
+				if (matchesLocation.Count > 0)
+				{
+					foreach (Match match in matchesLocation)
+					{
+						string[] digits = Regex.Split(match.Value, @"\D+");
+						foreach (string value in digits)
+						{
+							int number;
+							if (int.TryParse(value, out number))
+							{
+								productLocation.Add(number);
+							}
+						}
+					}
+
+				}
+				onePos.TypeOfShop = "LeroyMerlen";
+				foreach (var item in productLocation)
+				{
+					if (Global.whiteListLeroy.Contains(item))
+						onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
+					else
+					if (Global.blackListLeroy.Contains(item))
+						onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
+				}
+				List<int> countOfComplect = new List<int>();
+				countOfComplect.Add(1);
+
+				if (onePos.NowPrice <= 500)
+				{
+					countOfComplect.Add(2);
+					countOfComplect.Add(3);
+					countOfComplect.Add(5);
+					countOfComplect.Add(10);
+				}
+				else
+				if (onePos.NowPrice <= 1000)
+				{
+					countOfComplect.Add(2);
+					countOfComplect.Add(3);
+					countOfComplect.Add(5);
+				}
+				else
+				if (onePos.NowPrice <= 2000)
+				{
+					countOfComplect.Add(2);
+					countOfComplect.Add(3);
+				}
+				else
+				if (onePos.NowPrice <= 3000)
+				{
+					countOfComplect.Add(2);
+				}
+
+				foreach (var item in countOfComplect)
+				{
+					onePos.ArticleNumberUnicList.Add("lm-" + onePos.ArticleNumberInShop + "-" + "x" + item.ToString());
+				}
+
+				lock (locker)
+				{
+					DataBaseJob.AddNewProduct(onePos);
+				}
 			}
-			lock (locker)
-			{
-				DataBaseJob.AddNewProduct(onePos);
-			}
+			
 		}
 
-		public static void parseLeonardoUpdate(object ink) 
+		public static void parseLeonardoUpdate(Product ink) 
 		{
 			if (ink != null)
 			{
-				string link = ink.ToString();
+				Product product = ink;
 				List<int> productCount = new List<int>(); // Кол-во
 				List<int> productLocation = new List<int>(); // Место
 				Product onePos = new Product();
-				onePos.ProductLink = link;
+				onePos.ProductLink = product.ProductLink;
 				onePos.RemainsWhite = 0;
 				onePos.RemainsBlack = 0;
 				onePos.DateHistoryRemains.Add(DateTime.Now);
-				Product product = productToUpdate.Find(x => x.ProductLink == link);
-				string remainsCode = LeonardoJobs.GetRemainsPostLeo(link, product.ArticleNumberInShop);
-				Regex regexLocation = new Regex(@"<label for=""(\w+)"">");
-				MatchCollection matchColLocation = regexLocation.Matches(remainsCode);
-				foreach (var item in matchColLocation)
-				{
-					int shopCode;
-					int.TryParse(string.Join("", item.ToString().Where(c => char.IsDigit(c))), out shopCode);
-					productLocation.Add(shopCode);
-				}
-				string colCount = "";
-				remainsCode = Regex.Replace(remainsCode, @"\\", "");
-
-				if (remainsCode.Contains(@"</td></tr><tr style=""height: 45px; "">"))
-					colCount = remainsCode.Substring(remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"), remainsCode.IndexOf(@"</td></tr><tr style=""height: 45px; "">") - remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"));
-				else
-					colCount = remainsCode;
-
-				Regex regexCount = new Regex(@"<td class=""imgbgr2.*?</td>");
-				MatchCollection matchColCount = regexCount.Matches(colCount);
-				foreach (var item in matchColCount)
-				{
-					if (item.ToString().Contains("no_exist"))
-						productCount.Add(0);
-					else
-					if (item.ToString().Contains("exist"))
-						productCount.Add(1);
-					else
-					if (item.ToString().Contains("мало"))
-						productCount.Add(1);
-					else
-					if (item.ToString().Contains("заканчивается"))
-						productCount.Add(2);
-					else
-					if (item.ToString().Contains("много"))
-						productCount.Add(3);
-					else
-						productCount.Add(0);
-				}
+				Dictionary<int, int> remainsDictionaryTMP = new Dictionary<int, int>();
 				int remaintWhiteTMP = 0;
 				int remaintBlackTMP = 0;
-
-				Dictionary<int, int> remainsDictionaryTMP = new Dictionary<int, int>();
-				for (int i = 0; i < productCount.Count - 1; i++)
+				string remainsCode = LeonardoJobs.GetRemainsPostLeo(product.ProductLink, product.ArticleNumberInShop);
+				if (remainsCode != null)
 				{
-					remainsDictionaryTMP.Add(productLocation[i], productCount[i]);
-					if (shopWhiteOrBlacks.Contains(productLocation[i]))
-						remaintWhiteTMP += productCount[i];
+					Regex regexLocation = new Regex(@"<label for=""(\w+)"">");
+					MatchCollection matchColLocation = regexLocation.Matches(remainsCode);
+					foreach (var item in matchColLocation)
+					{
+						int shopCode;
+						int.TryParse(string.Join("", item.ToString().Where(c => char.IsDigit(c))), out shopCode);
+						productLocation.Add(shopCode);
+					}
+					string colCount = "";
+					remainsCode = Regex.Replace(remainsCode, @"\\", "");
+
+					if (remainsCode.Contains(@"</td></tr><tr style=""height: 45px; "">"))
+						colCount = remainsCode.Substring(remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"), remainsCode.IndexOf(@"</td></tr><tr style=""height: 45px; "">") - remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"));
 					else
-						remaintBlackTMP += productCount[i];
-				}
+						colCount = remainsCode;
 
-				string code = LeonardoJobs.getResponse(link);
-				int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
-				int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
-				string priceTMP = code.Substring(startIndexPrice, 5).Trim();
-				string price = "";
-				foreach (var item in priceTMP)
-				{
-					if (Char.IsDigit(item) || item == ',')
-						price += item;
-				}
+					Regex regexCount = new Regex(@"<td class=""imgbgr2.*?</td>");
+					MatchCollection matchColCount = regexCount.Matches(colCount);
+					foreach (var item in matchColCount)
+					{
+						if (item.ToString().Contains("no_exist"))
+							productCount.Add(0);
+						else
+						if (item.ToString().Contains("exist"))
+							productCount.Add(1);
+						else
+						if (item.ToString().Contains("мало"))
+							productCount.Add(1);
+						else
+						if (item.ToString().Contains("заканчивается"))
+							productCount.Add(2);
+						else
+						if (item.ToString().Contains("много"))
+							productCount.Add(3);
+						else
+							productCount.Add(0);
+					}
+					
 
-				if (price.Length != 0)
-				{
-					onePos.NowPrice = Convert.ToDouble(price);
+					for (int i = 0; i < productCount.Count - 1; i++)
+					{
+						remainsDictionaryTMP.Add(productLocation[i], productCount[i]);
+						if (shopsWhiteOrBlackLeonardo.Find(x => x.Code == productLocation[i]) != null)
+						if (shopsWhiteOrBlackLeonardo.Find(x => x.Code == productLocation[i]).ShopIsOnly && productCount[i] >= 1)
+							remaintWhiteTMP += 3;
+						else
+							if (Global.whiteListLeonardo.Contains(productLocation[i]) && productCount[i] >= 1)
+							remaintWhiteTMP += productCount[i];
+						else
+							remaintBlackTMP += productCount[i];
+					}
 				}
 				else
-					onePos.NowPrice = -1;
+				{
+					remaintWhiteTMP = 0;
+					remaintBlackTMP = 0;
+				}
+			
+				
+				string code = LeonardoJobs.getResponse(product.ProductLink);
+				if (code.ToLower().Contains("В НАЛИЧИИ В ИНТЕРНЕТ-МАГАЗИНЕ".ToLower()))
+					remaintWhiteTMP += 10;
+				if (String.IsNullOrEmpty(product.Name) || product.Name.Length == 0)
+				{
+					int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
+					int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
+					if (startIndexName > @"<h1 class=""product-title-text"">".Length)
+					{
+						string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
+						onePos.Name = name;
+					}
+				}
+				if (!code.ToUpper().Contains("НЕТ В НАЛИЧИИ") && code.Length > 0)
+				{
+					int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
+					int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
+					string priceTMP = code.Substring(startIndexPrice, 5).Trim();
+					string price = "";
+					foreach (var item in priceTMP)
+					{
+						if (Char.IsDigit(item) || item == ',')
+							price += item;
+					}
 
+					if (price.Length != 0)
+					{
+						onePos.NowPrice = Convert.ToDouble(price);
+					}
+					else
+						onePos.NowPrice = -1;
+					onePos.RemainsWhite = remaintWhiteTMP;
+					onePos.RemainsBlack = remaintBlackTMP;
+				}
+				else
+				{
+					onePos.RemainsWhite = 0;
+					onePos.RemainsBlack = -100;
+				}
+				
 				onePos.ArticleNumberInShop = product.ArticleNumberInShop;
-				onePos.RemainsWhite = remaintWhiteTMP;
-				onePos.RemainsBlack = remaintBlackTMP;
 				onePos.remainsDictionary = remainsDictionaryTMP;
 				onePos.Weight = 2000;
 
@@ -422,6 +483,7 @@ namespace Остатки.Classes
 					{
 						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
 					}
+					
 					// Получаем чисто артикул, наименование и цену
 					regexArticleNumber = new Regex(@""".*?""");
 					matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
@@ -500,10 +562,10 @@ namespace Остатки.Classes
 					Dictionary<int, int> remainsDictionary = new Dictionary<int, int>();
 					foreach (var item in productLocation)
 					{
-						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) > 5)
+						if (Global.whiteListLeroy.Contains(item) && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
 						{
 							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
-							if (shopsWhiteOrBlackLeroy.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 10)
+							if (shopsWhiteOrBlackLeroy.Find(x => x.Code == item).ShopIsOnly && productCount.ElementAt(productLocation.IndexOf(item)) >= 15)
 								countOfWhoiteList += 3;
 							countOfWhoiteList ++;
 						}

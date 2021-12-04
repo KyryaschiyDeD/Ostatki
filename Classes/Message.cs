@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Остатки.Classes
 	{
 		public static List<string> errorsList = new List<string>();
 		public static List<string> infoList = new List<string>();
-		public static async void ShowInfo(object data)
+		public static void ShowInfo(object data)
 		{
 			ContentDialog errorDialog = new ContentDialog()
 			{
@@ -20,11 +21,8 @@ namespace Остатки.Classes
 				Content = data.ToString(),
 				PrimaryButtonText = "ОК"
 			};
-			await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-								() =>
-								{
-									var errorDialogRusult = errorDialog.ShowAsync();
-								});
+			var errorDialogRusult = errorDialog.ShowAsync();
+
 		}
 		public static async void ShowInfoProduct(string name, object data)
 		{
@@ -50,7 +48,7 @@ namespace Остатки.Classes
 			};
 			var errorDialogRusult = errorDialog.ShowAsync();
 		}
-		public static void AllErrors()
+		public static async void AllErrors()
 		{
 			if (errorsList.Count != 0)
 			{
@@ -69,9 +67,49 @@ namespace Остатки.Classes
 				{
 					data += item + "\n";
 				}
-				ShowInfo(data);
+				await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+								() =>
+								{
+									ShowInfo(data);
+								});
 				infoList.Clear();
 			}
+		}
+
+		public static void ShowAllToast()
+		{
+			if (errorsList.Count != 0)
+			{
+				string data = "";
+				foreach (var item in errorsList)
+				{
+					data += item + "\n";
+				}
+				errorsList.Clear();
+				new ToastContentBuilder()
+	.AddArgument("action", "viewConversation")
+	.AddArgument("conversationId", 9813)
+	.AddText("Ошибка!")
+	.AddText(data)
+	.Show();
+			}
+			else
+			if (infoList.Count != 0)
+			{
+				string data = "";
+				foreach (var item in infoList)
+				{
+					data += item + "\n";
+				}
+				infoList.Clear();
+				new ToastContentBuilder()
+	.AddArgument("action", "viewConversation")
+	.AddArgument("conversationId", 9813)
+	.AddText("Успех!")
+	.AddText(data)
+	.Show();
+			}
+
 		}
 	}
 }

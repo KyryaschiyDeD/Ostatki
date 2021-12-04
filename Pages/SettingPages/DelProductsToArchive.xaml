@@ -1,0 +1,18 @@
+﻿<Page
+    x:Class="Остатки.Pages.SettingPages.DelProductsToArchive"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Остатки.Pages.SettingPages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+			<CheckBox x:FieldModifier="public" x:Name="btn104333" Content="Лымарь Е.Г." IsChecked="False" HorizontalAlignment="Right" />
+			<CheckBox x:FieldModifier="public" x:Name="btn200744" Content="The Time Line" IsChecked="False" HorizontalAlignment="Right" />
+			<Button Content="Убрать" CornerRadius="15" Width="400" x:Name="GoToArchiveFromFile" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="GoToArchiveFromFile_Click"/>
+		</StackPanel>
+	</Grid>
+</Page>
