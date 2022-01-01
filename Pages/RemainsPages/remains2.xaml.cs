@@ -270,24 +270,53 @@ namespace Остатки
                 foreach (var item in allProducts)
                 {
                     if (product.Count <= 499)
-                    if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
-                        if (item.ArticleNumberProductId[keys.ClientId].First().ArticleOzon != 0 && ((item.RemainsWhite != item.RemainsBlack && item.TypeOfShop=="LeroyMerlen") || item.TypeOfShop == "Леонардо"))
-                        {
-                            if (item.RemainsWhite == 0 || (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1))
+					{
+                        if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
+						{
+                            if (item.ArticleNumberProductId[keys.ClientId].First().ArticleOzon != 0 && ((item.RemainsWhite != item.RemainsBlack && item.TypeOfShop == "LeroyMerlen") || item.TypeOfShop == "Леонардо"))
                             {
-                                foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
+                                if (item.RemainsWhite == 0 || (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1))
                                 {
-                                    product.Add(valueOzonApi.ArticleOzon);
+                                    foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
+                                    {
+                                        product.Add(valueOzonApi.ArticleOzon);
+                                    }
+                                    if (!countOfAPI.ContainsKey(item))
+                                        countOfAPI.Add(item, 1);
+                                    else
+                                        countOfAPI[item]++;
                                 }
-                                if (!countOfAPI.ContainsKey(item))
-                                    countOfAPI.Add(item, 1);
-                                else
-                                    countOfAPI[item]++;
                             }
                         }
+                    }
+                   
                 }
                 productAllDict.Add(keys, product);
             }
+			//foreach (var item in allProducts)
+			//{
+   //             int countAkk = 0;
+   //             int countApi = 0;
+			//	foreach (var key in ApiKeysesJob.GetAllApiList())
+			//	{
+   //                 if (item.ArticleNumberProductId.ContainsKey(key.ClientId))
+   //                 {
+   //                     countAkk++;
+   //                 }
+   //                 if (countAkk == 2)
+			//		{
+   //                     if (item.ArticleNumberProductId[key.ClientId].Count == 0)
+   //                     {
+   //                         countApi++;
+   //                     }
+   //                 }
+   //                 if (countApi == 0)
+			//		{
+   //                     ProductToDell.Add(item);
+   //                 }
+   //             }
+                
+   //         }
             foreach (var item in countOfAPI)
             {
                 ProductToDell.Add(item.Key);
@@ -354,7 +383,7 @@ namespace Остатки
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
-                List<Product> allProducts = col.Query().Where(x => x.TypeOfShop == "Петрович").OrderBy(x => x.RemainsWhite).ToList();
+                List<Product> allProducts = col.Query().Where(x => x.TypeOfShop == "petrovich").OrderBy(x => x.RemainsWhite).ToList();
                 dataGridProduct.ItemsSource = new ObservableCollection<Product>(allProducts);
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
@@ -373,6 +402,7 @@ namespace Остатки
         {
             CreateToastProductJob();
             GetAndSaveProductId.GetProductsId();
+            //GetAndSaveProductId.GetProductsId2();
         }
         public void UpdateProgress(double kolvo, double apply)
         {
@@ -406,16 +436,47 @@ namespace Остатки
                 var col = db.GetCollection<Product>("Products");
                 var wait = db.GetCollection<Product>("ProductsWait");
                 var archive = db.GetCollection<Product>("ProductsArchive");
+
+                List<Product> Remains = col.Query().ToList();
+                List<Product> WaitList = wait.Query().ToList();
+                List<Product> ArchiveList = archive.Query().ToList();
+
                 List<Product> allProducts = col.Query().ToList();
-                /*allProducts.AddRange(wait.Query().ToList());
-                allProducts.AddRange(archive.Query().ToList());
-                foreach (var item in allProducts)
-                {
-                    if (item.TypeOfShop == "Леонардо")
-                    {
-                        wait.Delete(item.Id);
-                    }
-                } */
+                
+
+				
+
+                /*  allProducts.AddRange(wait.Query().ToList());
+                  allProducts.AddRange(archive.Query().ToList());
+
+                  foreach (var item in allProducts)
+                  {
+                      if (item.IsLymarEGOzon || item.IsTheTimeLineOzon)
+                      {
+                          if (Remains.FindAll(x => x.ProductLink == item.ProductLink).Count >= 1)
+                          {
+                              if (WaitList.Contains(item))
+                                  wait.Delete(item.Id);
+                              if (ArchiveList.Contains(item))
+                                  archive.Delete(item.Id);
+                          }
+                          else
+                          {
+                              if (WaitList.Contains(item))
+                                  DataBaseJob.WaitToRemains(item);
+                              if (ArchiveList.Contains(item))
+                                  DataBaseJob.ArchiveToRemains(item);
+
+                              col = db.GetCollection<Product>("Products");
+                              wait = db.GetCollection<Product>("ProductsWait");
+                              archive = db.GetCollection<Product>("ProductsArchive");
+
+                              Remains = col.Query().ToList();
+                              WaitList = wait.Query().ToList();
+                              ArchiveList = archive.Query().ToList();
+                          }
+                      }
+                  }  */
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
             //DataBaseJob.UpdateList(ProductList1.ToList());
@@ -587,7 +648,7 @@ namespace Остатки
                     UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action, action1, action1, action1, action1, action1, action1, action1, action1, action1, action1);
+            Parallel.Invoke(action, action1);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);
         }

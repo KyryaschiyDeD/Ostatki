@@ -150,6 +150,7 @@ namespace Остатки.Pages
 			proxy_request.UserAgent = HTMLJob.userAgent[HTMLJob.CountOfUserAgent];
 			proxy_request.KeepAlive = false;
 			proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+			
 			HttpWebResponse resp = null;
 			string html = "";
 			bool isByll = false;
@@ -266,11 +267,14 @@ namespace Остатки.Pages
 				specificationsDict.Add("Цена + 40%", null);
 			if (!specificationsDict.ContainsKey("Г + Д через ,"))
 				specificationsDict.Add("Г + Д через ,", null);
-
+			if (!specificationsDict.ContainsKey("Начальная цена"))
+				specificationsDict.Add("Начальная цена", null);
+			if (!specificationsDict.ContainsKey("Цена в 0"))
+				specificationsDict.Add("Цена в 0", null);
 			Random rnd = new Random();
 			Action action = () =>
 			{
-				Thread.Sleep(rnd.Next(2500, 5500));
+				//Thread.Sleep(rnd.Next(2500, 5500));
 				while (!UnRedactLinksQueue.IsEmpty && HtmlQueue.Count != allCount)
 				{
 					string lnk = "";
@@ -289,7 +293,7 @@ namespace Остатки.Pages
 				}
 			};
 
-			Parallel.Invoke(action);
+			Parallel.Invoke(action, action, action, action, action);
 
 			string tag = "Product";
 			string group = "Lerya";
@@ -651,6 +655,7 @@ namespace Остатки.Pages
 									}
 								}
 							}
+							onePos.Weight = weight;
 							double tmpDouble;
 							if ((xaracterNameList[i].StartsWith("Ширина") || xaracterTextList[i].StartsWith("ширина")) && Double.TryParse(xaracterTextList[i].Replace(".", ","), out tmpDouble))
 							{
@@ -785,9 +790,12 @@ namespace Остатки.Pages
 						{
 							specificationsDict["Наименование"] += namesAndArticleId[3] + "\n";
 							specificationsDict["КолВо завод в отправл"] += item.ToString() + "\n";
-							int nowPrice = (int)(Convert.ToInt32(Convert.ToDouble(onePos.NowPrice) * item + 45 + 2000 / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
-							specificationsDict["Цена"] += nowPrice.ToString() + "\n";
-							specificationsDict["Цена + 40%"] += (nowPrice * 1.4).ToString() + "\n";
+							int newPrice = (int)(Convert.ToInt32(Convert.ToDouble(onePos.NowPrice) * item + 45 + onePos.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
+							int priceToNull = (int)(Convert.ToInt32(Convert.ToDouble(onePos.NowPrice) * item + 45 + onePos.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.1 + 5) / 10 * 10;
+							specificationsDict["Цена"] += newPrice.ToString() + "\n";
+							specificationsDict["Начальная цена"] += onePos.NowPrice + "\n";
+							specificationsDict["Цена в 0"] += priceToNull + "\n";
+							specificationsDict["Цена + 40%"] += (newPrice * 1.4).ToString() + "\n";
 							specificationsDict["Ссылка"] += onePos.ProductLink + "\n";
 							specificationsDict["Главные фото"] += Allimg[0] + "\n";
 							specificationsDict["Г + Д через ,"] += Allimg[0] + ",";
@@ -867,11 +875,11 @@ namespace Остатки.Pages
 			int allLinksCount = UnRedactLinksQueue.Count;
 			while (UnRedactLinksQueue.Count != 0 && trueLinksCount != allLinksCount)
 			{
-				Thread.Sleep(3000);
+				//Thread.Sleep(3000);
 				string lnk = "";
 				UnRedactLinksQueue.TryDequeue(out lnk);
 				string code = getResponse(lnk);
-				Thread.Sleep(3000);
+				//Thread.Sleep(3000);
 				Regex regexLinks = new Regex(@"<a href="".*?""");
 				MatchCollection matcheslinks = regexLinks.Matches(code);
 				string tmpLinks = "";
@@ -1002,7 +1010,7 @@ namespace Остатки.Pages
 		static List<Product> allProducts = new List<Product>();
 		static List<Product> allProductsUpdate = new List<Product>();
 
-		private void getComplect()
+		public void getComplect()
 		{
 			productCountComplect1 = ProductCountComplect1.IsChecked.Value;
 			productCountComplect2 = ProductCountComplect2.IsChecked.Value;
@@ -1075,9 +1083,20 @@ namespace Остатки.Pages
 			if (productCountComplect1 || productCountComplect2 || productCountComplect3 || productCountComplect5 || productCountComplect10)
 				LeonardoJobs.GetLinks(TrueProductsDatabase.IsChecked.Value);
 		}
-
+		public List<bool> GetComplectsList()
+		{
+			getComplect();
+			List<bool> listComplect = new List<bool>();
+			listComplect.Add(productCountComplect1);
+			listComplect.Add(productCountComplect2);
+			listComplect.Add(productCountComplect3);
+			listComplect.Add(productCountComplect5);
+			listComplect.Add(productCountComplect10);
+			return listComplect;
+		}
 		private void StealProductPetrovich_Click(object sender, RoutedEventArgs e)
 		{
+			Global.complects = GetComplectsList();
 			Frame.Navigate(typeof(PetrovichPage));
 		}
 	}

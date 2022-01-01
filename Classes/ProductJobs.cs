@@ -387,50 +387,58 @@ namespace Остатки.Classes
 			
 				
 				string code = LeonardoJobs.getResponse(product.ProductLink);
-				if (code.ToLower().Contains("В НАЛИЧИИ В ИНТЕРНЕТ-МАГАЗИНЕ".ToLower()))
-					remaintWhiteTMP += 10;
-				if (String.IsNullOrEmpty(product.Name) || product.Name.Length == 0)
+				if (!code.Contains("sorry"))
 				{
-					int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
-					int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
-					if (startIndexName > @"<h1 class=""product-title-text"">".Length)
+					if (code.ToLower().Contains("В НАЛИЧИИ В ИНТЕРНЕТ-МАГАЗИНЕ".ToLower()))
+						remaintWhiteTMP += 10;
+					if (String.IsNullOrEmpty(product.Name) || product.Name.Length == 0)
 					{
-						string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
-						onePos.Name = name;
+						int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
+						int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
+						if (startIndexName > @"<h1 class=""product-title-text"">".Length)
+						{
+							string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
+							onePos.Name = name;
+						}
 					}
-				}
-				if (!code.ToUpper().Contains("НЕТ В НАЛИЧИИ") && code.Length > 0)
-				{
-					int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
-					int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
-					string priceTMP = code.Substring(startIndexPrice, 5).Trim();
-					string price = "";
-					foreach (var item in priceTMP)
+					if (!code.ToUpper().Contains("НЕТ В НАЛИЧИИ") && code.Length > 0)
 					{
-						if (Char.IsDigit(item) || item == ',')
-							price += item;
-					}
+						int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
+						//int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
+						string priceTMP = code.Substring(startIndexPrice, 5).Trim();
+						string price = "";
+						foreach (var item in priceTMP)
+						{
+							if (Char.IsDigit(item) || item == ',')
+								price += item;
+						}
 
-					if (price.Length != 0)
-					{
-						onePos.NowPrice = Convert.ToDouble(price);
+						if (price.Length != 0)
+						{
+							onePos.NowPrice = Convert.ToDouble(price);
+						}
+						else
+							onePos.NowPrice = -1;
+						onePos.RemainsWhite = remaintWhiteTMP;
+						onePos.RemainsBlack = remaintBlackTMP;
 					}
 					else
-						onePos.NowPrice = -1;
-					onePos.RemainsWhite = remaintWhiteTMP;
-					onePos.RemainsBlack = remaintBlackTMP;
+					{
+						onePos.RemainsWhite = 0;
+						onePos.RemainsBlack = -100;
+					}
+
+					onePos.ArticleNumberInShop = product.ArticleNumberInShop;
+					onePos.remainsDictionary = remainsDictionaryTMP;
+					onePos.Weight = 2000;
+
+					NewRemaintProduct.Enqueue(onePos);
 				}
 				else
 				{
-					onePos.RemainsWhite = 0;
-					onePos.RemainsBlack = -100;
+					ocherLeonardo.Enqueue(ink);
+					Thread.Sleep(5000);
 				}
-				
-				onePos.ArticleNumberInShop = product.ArticleNumberInShop;
-				onePos.remainsDictionary = remainsDictionaryTMP;
-				onePos.Weight = 2000;
-
-				NewRemaintProduct.Enqueue(onePos);
 			}
 		}
 
@@ -581,6 +589,8 @@ namespace Остатки.Classes
 						onePos.RemainsBlack += onePos.RemainsWhite;
 						onePos.RemainsWhite = 0;
 					}
+					if (code.Contains("Товар закончился"))
+						onePos.RemainsBlack = -999;
 					string XaractCode = code.Substring(code.IndexOf(@"<dl class=""def-list"">"), code.IndexOf("</dl>") - code.IndexOf(@"<dl class=""def-list"">"));
 
 					Regex regexXaracterName = new Regex(@"<dt class=""def-list__term"">(.)*>");

@@ -3919,7 +3919,7 @@ namespace Остатки.Classes
 		private static readonly Regex _tags_ = new Regex(@"<[^>]+?>", RegexOptions.Multiline | RegexOptions.Compiled);
 
 		//add characters that are should not be removed to this regex
-		private static readonly Regex _notOkCharacter_ = new Regex(@"[^\w;&#@.:/\?=|%!() -]", RegexOptions.Compiled);
+		private static readonly Regex _notOkCharacter_ = new Regex(@"[^\w&#@:/\?=|%!() -]", RegexOptions.Compiled);
 
 		public static String UnHtml(String html)
 		{

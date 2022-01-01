@@ -20,15 +20,15 @@ namespace Остатки
             this.InitializeComponent();
             Global.GetWhiteBlackShopsLeroy();
             Global.GetWhiteBlackShopsLeonardo();
-            myFrame.Navigate(typeof(MainInfoList));
+            myFrame.Navigate(typeof(StatisticsMenu));
             TitleTextBlock.Text = "Статка";
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (MainInfoList.IsSelected)
+            if (StatisticsMenu.IsSelected)
             {
-                myFrame.Navigate(typeof(MainInfoList));
+                myFrame.Navigate(typeof(StatisticsMenu));
                 TitleTextBlock.Text = "Статистика";
             }
             else if(remains.IsSelected)

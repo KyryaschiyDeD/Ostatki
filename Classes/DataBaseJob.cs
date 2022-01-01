@@ -146,6 +146,22 @@ namespace Остатки.Classes
 				}
 			}
 		}
+
+		public static void DeleteListToArchive(List<Product> product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				var arhive = db.GetCollection<Product>("ProductsArchive");
+				foreach (var item in product)
+				{
+					if (arhive.FindById(item.Id) == null)
+						arhive.Insert(item);
+					col.Delete(item.Id);
+				}
+			}
+		}
+
 		public static void AddListToBackground(List<Product> product)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
@@ -294,6 +310,43 @@ namespace Остатки.Classes
 			}
 			if (ProductJobs.ocherLeroy.Count != 0)
 				remains2.GoUpdateAllDataBaseLerya();
+		}
+
+		public static void DeleteProduct(Product product)
+		{
+			
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				List<Product> Wait = db.GetCollection<Product>("ProductsWait").Query().ToList();
+				var WaitDB = db.GetCollection<Product>("ProductsWait");
+
+				List<Product> Archive = db.GetCollection<Product>("ProductsArchive").Query().ToList();
+				var ArchiveDB = db.GetCollection<Product>("ProductsArchive");
+
+				IEnumerable<Product> pr = Wait.Where(x => x.ProductLink == product.ProductLink);
+				foreach (var item in pr)
+				{
+					WaitDB.Delete(item.Id);
+				}
+
+				pr = Archive.Where(x => x.ProductLink == product.ProductLink);
+				foreach (var item in pr)
+				{
+					ArchiveDB.Delete(item.Id);
+				}
+			}
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
+			{
+				var col = db.GetCollection<Product>("Products").Query().ToList();
+				var colDb = db.GetCollection<Product>("Products");
+
+				IEnumerable<Product> pr = col.Where(x => x.ProductLink == product.ProductLink);
+
+				foreach (var item in pr)
+				{
+					colDb.Delete(item.Id);
+				}
+			}
 		}
 
 		public static void GetAllProductFromTheBase

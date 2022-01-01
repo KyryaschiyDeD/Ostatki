@@ -56,13 +56,14 @@ namespace Остатки.Pages.RemainsPages
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 			{
 				var col = db.GetCollection<Product>("Products");
-				var productsArchive = db.GetCollection<Product>("ProductsArchive");
-				var productsWait = db.GetCollection<Product>("ProductsWait");
+				//var productsArchive = db.GetCollection<Product>("ProductsArchive");
+				//var productsWait = db.GetCollection<Product>("ProductsWait");
 				allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-				allProducts.AddRange(productsArchive.Query().ToList());
-				allProducts.AddRange(productsWait.Query().ToList());
+				//allProducts.AddRange(productsArchive.Query().ToList());
+				//allProducts.AddRange(productsWait.Query().ToList());
 			}
 			List<string> productNuYandexNull = new List<string>();
+			List<string> productToAdd = new List<string>();
 			foreach (var item in UnRedactProductsQueue)
 			{
 				Product product = allProducts.Find(x => x.ArticleNumberUnicList.Contains(item));
@@ -70,27 +71,46 @@ namespace Остатки.Pages.RemainsPages
 				{
 					if (product.RemainsWhite == 0 || (product.TypeOfShop == "Леонардо" && product.RemainsWhite <= 1))
 						productNuYandexNull.Add(item);
+					else
+						productToAdd.Add(item);
 				}
 				else
 					productNuYandexNull.Add(item);
 			}
-			FolderPicker folderPicker = new FolderPicker();
-			folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-			folderPicker.FileTypeFilter.Add("*");
-			StorageFolder fileWithLinks = await folderPicker.PickSingleFolderAsync();
+			
+			
 			string allToDell = "";
 			foreach (var item in productNuYandexNull)
 			{
 				allToDell += item + "\n";
 			}
+			string allToAdd = "";
+			foreach (var item in productToAdd)
+			{
+				allToAdd += item + "\n";
+			}
 			DateTime timeDateNow = DateTime.Now;
 			string dateTimeStr = timeDateNow.ToString().Replace(":", ".");
+
+			FolderPicker folderPicker = new FolderPicker();
+			folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+			folderPicker.FileTypeFilter.Add("*");
+			StorageFolder fileWithLinks = await folderPicker.PickSingleFolderAsync();
+			
 			await fileWithLinks.CreateFileAsync("Удаление из яндекса от " + dateTimeStr + ".txt", CreationCollisionOption.ReplaceExisting);
 			StorageFile myFile = await fileWithLinks.GetFileAsync("Удаление из яндекса от " + dateTimeStr + ".txt");
 			string data = allToDell;
 			await FileIO.WriteTextAsync(myFile, data);
+
+			await fileWithLinks.CreateFileAsync("Правильные остатки яндекса от " + dateTimeStr + ".txt", CreationCollisionOption.ReplaceExisting);
+			myFile = await fileWithLinks.GetFileAsync("Правильные остатки яндекса от " + dateTimeStr + ".txt");
+			data = allToAdd;
+			await FileIO.WriteTextAsync(myFile, data);
+
+
 			UnRedactProductsQueue = new ConcurrentQueue<string>();
 			allToDell = "";
+			allToAdd = "";
 		}
 	}
 }

@@ -124,6 +124,20 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Classes\JobWhithApi\Analitics\GetTestFinancyByNovember.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Request\Filter.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Request\Root.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Request\With.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Cancellation.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\DeliveryMethod.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\FinancialData.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\ItemServices.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Posting.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\PostingServices.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Product.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Requirements.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Result.cs" />
+    <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Root.cs" />
     <Compile Include="Pages\AddJobProduct\add.xaml.cs">
       <DependentUpon>add.xaml</DependentUpon>
     </Compile>
@@ -186,6 +200,9 @@
     <Compile Include="Pages\SettingPages\DelProductsToArchive.xaml.cs">
       <DependentUpon>DelProductsToArchive.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\StatisticsMenu.xaml.cs">
+      <DependentUpon>StatisticsMenu.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Statistics\MainInfoList.xaml.cs">
       <DependentUpon>MainInfoList.xaml</DependentUpon>
     </Compile>
@@ -218,6 +235,9 @@
     </Compile>
     <Compile Include="Pages\AddJobProduct\StealProducts.xaml.cs">
       <DependentUpon>StealProducts.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Statistics\TestFinansy.xaml.cs">
+      <DependentUpon>TestFinansy.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\StealProducts_2_0.xaml.cs">
       <DependentUpon>StealProducts_2_0.xaml</DependentUpon>
@@ -281,6 +301,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\StatisticsMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Statistics\MainInfoList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -322,6 +346,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\AddJobProduct\StealProducts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Statistics\TestFinansy.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -370,7 +398,12 @@
   <ItemGroup>
     <None Include="Остатки_TemporaryKey.pfx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ConfirmationOfTheShipmentAssembly\ConfirmationOfTheShipmentAssembly.csproj">
+      <Project>{10c8ac5c-e082-4dcb-8c44-578c1ecff80a}</Project>
+      <Name>ConfirmationOfTheShipmentAssembly</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

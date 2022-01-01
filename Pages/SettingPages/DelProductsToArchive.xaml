@@ -13,6 +13,7 @@
 			<CheckBox x:FieldModifier="public" x:Name="btn104333" Content="Лымарь Е.Г." IsChecked="False" HorizontalAlignment="Right" />
 			<CheckBox x:FieldModifier="public" x:Name="btn200744" Content="The Time Line" IsChecked="False" HorizontalAlignment="Right" />
 			<Button Content="Убрать" CornerRadius="15" Width="400" x:Name="GoToArchiveFromFile" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="GoToArchiveFromFile_Click"/>
+			<Button Content="Убрать внутри" CornerRadius="15" Width="400" x:Name="GoToArchiveFromFileInUwp" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="GoToArchiveFromFileInUwp_Click"/>
 		</StackPanel>
 	</Grid>
 </Page>

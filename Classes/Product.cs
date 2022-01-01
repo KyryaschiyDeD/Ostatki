@@ -21,15 +21,6 @@ namespace Остатки.Classes
 		public string ArticleNumberInShop { get; set; } // Артикул в магазине
 		public Dictionary<string, List<long>> ArticleNumberOzonDictList { get; set; } = new Dictionary<string, List<long>>(); // Словарь ClientID => список артикулов
 		public Dictionary<string, List<ArticleNumber>> ArticleNumberProductId { get; set; } = new Dictionary<string, List<ArticleNumber>>(); // Словарь 2.0 ClientID => список артикулов (и на)
-		public int GetCountArticleNumberOzonDictList
-		{
-			get
-			{
-					return ArticleNumberOzonDictList.Count;
-			}
-
-		}
-		
 		public long ArticleNumberOzonDictGetByClientID(string clientID)
 		{
 			try
@@ -49,8 +40,6 @@ namespace Остатки.Classes
 			}
 		}  // Кол-во аккаунтов у товара
 		public List<string> ArticleNumberUnicList { get; set; } = new List<string>(); // Озон артикул, списком
-		public List<string> GetArticleNumberUnicList { 
-			get{ return ArticleNumberUnicList; } } // Озон артикул, списком
 		public int RemainsWhite { get; set; } // Остатки из белого списка
 		public Dictionary<int, int> remainsDictionary { get; set; } // Остатки по магазинам
 		public List<DateTime> DateHistoryRemains { get; set; } = new List<DateTime>();// Даты и время проверки остатков
@@ -71,47 +60,35 @@ namespace Остатки.Classes
 		public double Weight { get; set; } // Вес
 		public bool NewPriceIsSave { get; set; } // Изменён ли на Озон новый ценник
 		public bool ArticleError { get; set; } // Существует ли артикул на Озон у нас в БД
-		public bool ArticleErrorIgnore { get; set; } // Игнорируем ли мы конфликт
 		public List<double> OldPrice { get; set; } = new List<double>(); // Цена Леруа цена была
 		public List<DateTime> DateOldPrice { get; set; } = new List<DateTime>();
 		public Dictionary<string, bool> AccauntOzonID { get; set; } = new Dictionary<string, bool>();
-		public string ClientIDAPi
-		{
-			get
-			{
-				string APIs = "";
-				if (AccauntOzonID.Count > 0)
-				{
-					foreach (var item in AccauntOzonID.Keys)
-					{
-						APIs += item + " ";
-					}
-				}
-				else
-					return "Пуста";
-				return APIs;
-			}
-		}
-		public int CountOfTrueAccaunt
-		{
-			get
-			{
-				int kolvo = 0;
-				foreach (var item in AccauntOzonID)
-				{
-					if (item.Value)
-						kolvo++;
-				}
-				return kolvo;
-			}
-		}
 		public string TypeOfShop { get; set; }
 		public override string ToString()
 		{
 			return ProductLink;
 			//return ArticleNumberInShop;
 		}
-
+		public bool IsTheTimeLineOzon
+		{
+			get
+			{
+				if (ArticleNumberOzonDictList.ContainsKey("200744"))
+					if (ArticleNumberProductId["200744"].Count > 0)
+						return true;
+				return false;
+			}
+		}
+		public bool IsLymarEGOzon
+		{
+			get
+			{
+				if (ArticleNumberOzonDictList.ContainsKey("104333"))
+					if (ArticleNumberProductId["104333"].Count > 0)
+						return true;
+				return false;
+			}
+		}
 		public string ToStringInfo()
 		{
 			string data = "";
@@ -173,37 +150,6 @@ namespace Остатки.Classes
 				data += $"\t{item}\n";
 			}
 			return data;
-		}
-		public string GetAccountIds
-		{
-			get
-			{
-				string str = "";
-				foreach (var item in AccauntOzonID)
-				{
-					str += item.Key.Length + " ";
-				}
-				return str;
-			}
-		}
-		public bool IsTheTimeLineOzon
-		{
-			get {
-				if (ArticleNumberOzonDictList.ContainsKey("200744"))
-					if (ArticleNumberProductId["200744"].Count > 0)
-						return true;
-				return false;
-			}
-		}
-		public bool IsLymarEGOzon
-		{
-			get
-			{
-				if (ArticleNumberOzonDictList.ContainsKey("104333"))
-				 if (ArticleNumberProductId["104333"].Count > 0)
-					return true;
-				return false;
-			}
 		}
 	}
 }

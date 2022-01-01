@@ -17,6 +17,7 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
 				<AppBarButton Icon="Bullets" Grid.Column="0" Click="GetAllProducts_Click" HorizontalAlignment="Center" Label="Все"/>
 				
@@ -33,7 +34,7 @@
 				</AppBarButton>
 				
 				<AppBarButton Icon="FourBars"  Grid.Column="4" Click="GoToGetProductID_Click" HorizontalAlignment="Center" Label="Сверка по API"/>
-				<AppBarButton Icon="FourBars"  Grid.Column="4" Click="GoToGetArhiveByProductId_Click" HorizontalAlignment="Center" Label="В архив по product_ID"/>
+				<AppBarButton Icon="FourBars"  Grid.Column="5" Click="GoToGetArhiveByProductId_Click" HorizontalAlignment="Center" Label="В архив по product_ID"/>
 			</Grid>
 		</AppBar>
 	</Page.BottomAppBar>

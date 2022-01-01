@@ -18,6 +18,8 @@ namespace Остатки.Classes
 		public static List<int> whiteListLeonardo = new List<int>();
 		public static List<int> blackListLeonardo = new List<int>();
 
+		public static List<bool> complects = new List<bool>();
+
 		public static void GetWhiteBlackShopsLeroy()
 		{
 			List<ShopWhiteOrBlack> list = ShopWhiteOrBlackJob.GetShopListSpecifically("Леруа Мерлен");

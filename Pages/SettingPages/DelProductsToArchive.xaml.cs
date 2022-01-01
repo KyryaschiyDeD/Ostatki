@@ -209,5 +209,42 @@ namespace Остатки.Pages.SettingPages
 			if (accaunt104333 || accaunt200744)
 				GetIDsAndGoToArchive();
 		}
+		private async void GoToArchiveFromFileInUwp_Click(object sender, RoutedEventArgs e)
+		{
+			List<Product> allProducts = new List<Product>();
+			List<Product> allProductsToDell = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				//var productsArchive = db.GetCollection<Product>("ProductsArchive");
+				//var productsWait = db.GetCollection<Product>("ProductsWait");
+				allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+				//allProducts.AddRange(productsArchive.Query().ToList());
+				//allProducts.AddRange(productsWait.Query().ToList());
+			}
+			List<string> peoducts = new List<string>();
+			var picker = new FileOpenPicker();
+			picker.ViewMode = PickerViewMode.Thumbnail;
+			picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+			picker.FileTypeFilter.Add(".txt");
+			StorageFile file = await picker.PickSingleFileAsync();
+			if (file != null)
+			{
+				IList<string> linksProductTXT = await Windows.Storage.FileIO.ReadLinesAsync(file);
+				foreach (var item in linksProductTXT)
+				{
+					peoducts.Add(item);
+				}
+			}
+			foreach (var item in peoducts)
+			{
+				Product product = allProducts.Find(x => x.ArticleNumberUnicList.Contains(item));
+				if (product != null)
+					allProductsToDell.Add(product);
+			}
+			DataBaseJob.DeleteListToArchive(allProductsToDell);
+		}
+
+		
 	}
 }
