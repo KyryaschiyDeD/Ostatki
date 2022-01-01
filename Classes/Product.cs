@@ -15,7 +15,7 @@ namespace Остатки.Classes
 	public class Product
 	{
 		public Guid Id { get; set; }
-		public string ProductLink { get; set; } // Ссылка
+		public string ProductLink { get; set; } // Ссылка 
 		public string Name { get; set; } // Наименование
 		public bool NameIsRedact { get; set; } // Менялось ли наименование?
 		public string ArticleNumberInShop { get; set; } // Артикул в магазине
