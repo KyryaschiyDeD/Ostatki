@@ -45,6 +45,11 @@ namespace Остатки.Pages
 				myFrame.Navigate(typeof(AddUnicArticle));
 				TitleTextBlock.Text = "Управление артикулами";
 			}
+			else if (HostsPage.IsSelected)
+			{
+				myFrame.Navigate(typeof(HostsPage));
+				TitleTextBlock.Text = "Хостинги";
+			}
 			else if (DelProductsToArchive.IsSelected)
 			{
 				myFrame.Navigate(typeof(DelProductsToArchive));

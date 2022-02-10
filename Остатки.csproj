@@ -124,6 +124,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Classes\Hosts.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\GetTestFinancyByNovember.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Request\Filter.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Request\Root.cs" />
@@ -138,6 +139,9 @@
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Requirements.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Result.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Root.cs" />
+    <Compile Include="Classes\ProductsClasses\FulterStatuses.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductFromMarletplace.cs" />
+    <Compile Include="Classes\WebHostingsJob.cs" />
     <Compile Include="Pages\AddJobProduct\add.xaml.cs">
       <DependentUpon>add.xaml</DependentUpon>
     </Compile>
@@ -182,7 +186,7 @@
     <Compile Include="Classes\JobWhithApi\PetrovichJobs\Value.cs" />
     <Compile Include="Classes\JobWhithApi\PetrovichJobs\Value2.cs" />
     <Compile Include="Classes\Petrovich\PetrovichJobsWithCatalog.cs" />
-    <Compile Include="Classes\Product.cs" />
+    <Compile Include="Classes\ProductsClasses\Product.cs" />
     <Compile Include="Classes\ProductJobs.cs" />
     <Compile Include="Classes\SatisticGlobal.cs" />
     <Compile Include="Classes\ShopWhiteOrBlack.cs" />
@@ -194,11 +198,20 @@
     <Compile Include="Pages\EditingBalancesAndPrices.xaml.cs">
       <DependentUpon>EditingBalancesAndPrices.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\RemainsPages\errorsRemains.xaml.cs">
+      <DependentUpon>errorsRemains.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\RemainsPages\ExaminationYandex.xaml.cs">
       <DependentUpon>ExaminationYandex.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\RemainsPages\ProductFromMArket.xaml.cs">
+      <DependentUpon>ProductFromMArket.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\SettingPages\DelProductsToArchive.xaml.cs">
       <DependentUpon>DelProductsToArchive.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SettingPages\HostsPage.xaml.cs">
+      <DependentUpon>HostsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\StatisticsMenu.xaml.cs">
       <DependentUpon>StatisticsMenu.xaml</DependentUpon>
@@ -293,11 +306,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\RemainsPages\errorsRemains.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\RemainsPages\ExaminationYandex.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\RemainsPages\ProductFromMArket.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\SettingPages\DelProductsToArchive.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SettingPages\HostsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

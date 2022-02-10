@@ -138,7 +138,143 @@ namespace Остатки.Classes
 			HTMLJob.CountproxyPort++;
 			return htmlCode;
 		}
+		public static Product GetProductLeroyByLink(object ink)
+		{
+			string link = ink.ToString();
+			List<int> productCount = new List<int>(); // Кол-во
+			List<int> productLocation = new List<int>(); // Место
+			Product onePos = new Product();
+			onePos.ProductLink = link;
+			string code = getResponse(link);
+			int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
+			int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
+			if (indexOfStart > 0)
+			{
+				string countLocaionCode = code.Substring(indexOfStart, indexOfEnd - indexOfStart);
+				if (!code.Contains("ничего не найдено"))
+				{
+					string[] words = code.Split(new string[] { "<uc-store-stock", "</uc-store-stock>" }, StringSplitOptions.RemoveEmptyEntries);
 
+					// Получаем строку с наименованием, артикулом и ценой
+					Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
+					Regex regexCount = new Regex(@"stock=""(\w+)""");
+					Regex regexLocation = new Regex(@"store-code=""(\w+)""");
+
+					string nextNameArticleId = "";
+					MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							nextNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Совпадений не найдено");
+					}
+					// Выделяем только наименование, артикул и цену
+					regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
+
+					string finishNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							finishNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+					}
+					// Получаем чисто артикул, наименование и цену
+					regexArticleNumber = new Regex(@""".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
+
+					MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
+					MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
+					// Артикл и имя
+					string resultNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							resultNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Наименование, цена и артикул не найдены!!!");
+					}
+					string[] namesAndArticleId = resultNameArticleId.Split('"');
+					// Вносим в переменные 
+
+					onePos.Name = namesAndArticleId[3];
+					onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
+					onePos.ArticleNumberInShop = namesAndArticleId[1];
+
+
+					// Кол-во
+					if (matchesCount.Count > 0)
+					{
+						foreach (Match match in matchesCount)
+						{
+							string[] digits = Regex.Split(match.Value, @"\D+");
+							foreach (string value in digits)
+							{
+								int number = 0;
+								if (int.TryParse(value, out number))
+								{
+									productCount.Add(number);
+								}
+							}
+						}
+
+					}
+					else
+					{
+						Message.errorsList.Add("Не удалось найти и загрузить остатки!!!");
+					}
+					// Место
+					if (matchesLocation.Count > 0)
+					{
+						foreach (Match match in matchesLocation)
+						{
+							string[] digits = Regex.Split(match.Value, @"\D+");
+							foreach (string value in digits)
+							{
+								int number;
+								if (int.TryParse(value, out number))
+								{
+									productLocation.Add(number);
+								}
+							}
+						}
+
+					}
+					onePos.TypeOfShop = "LeroyMerlen";
+					foreach (var item in productLocation)
+					{
+						if (Global.whiteListLeroy.Contains(item))
+							onePos.RemainsWhite += productCount.ElementAt(productLocation.IndexOf(item));
+						else
+						if (Global.blackListLeroy.Contains(item))
+							onePos.RemainsBlack += productCount.ElementAt(productLocation.IndexOf(item));
+					}
+
+					return onePos;
+				}
+				else
+				{
+					return new Product() { Name = "error" };
+				}
+				
+			}
+			else
+				return null;
+		}
 		public static void parseLerya(object ink)
 		{
 			string link = ink.ToString();

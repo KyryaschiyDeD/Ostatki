@@ -15,6 +15,8 @@ namespace Остатки.Classes
 		public static List<int> whiteListLeroy = new List<int>();
 		public static List<int> blackListLeroy = new List<int>();
 
+		public static List<Hosts> WebHosting = new List<Hosts>();
+
 		public static List<int> whiteListLeonardo = new List<int>();
 		public static List<int> blackListLeonardo = new List<int>();
 

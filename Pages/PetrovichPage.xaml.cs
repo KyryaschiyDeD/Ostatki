@@ -25,6 +25,8 @@ namespace Остатки.Pages
 		private static LinkedList<int> HistoryListBack = new LinkedList<int>();
 		private static LinkedList<int> HistoryListForward = new LinkedList<int>();
 
+		private static List<string> BarcodeList = new List<string>();
+
 		public static bool CheckedProductInDataBase { get; set; }
 
 		public static bool productCountComplect1 = true;
@@ -229,24 +231,34 @@ namespace Остатки.Pages
 
 						if (item.images.Count > 0)
 						{
-							specificationsDict["Главные фото"] += item.images[0] + "\n";
+							specificationsDict["Главные фото"] += "https:" + item.images[0] + "\n";
 							specificationsDict["Г + Д через ,"] += item.images[0] + ",";
 							int countImg = item.images.Count;
 							if (countImg > 1)
 								for (int i = 1; i < countImg; i++)
 								{
-									specificationsDict["Доп фото"] += item.images[i] + " ";
-									specificationsDict["Г + Д через ,"] += item.images[i] + ",";
+									specificationsDict["Доп фото"] += "https:" + item.images[i] + " ";
+									specificationsDict["Г + Д через ,"] += "https:" + item.images[i] + ",";
 								}
 							specificationsDict["Доп фото"] += "\n";
 							specificationsDict["Г + Д через ,"] += "\n";
 						}
-
+						 
 						specificationsDict["Описание"] += HTMLJob.UnHtml(item.description) + "\n";
+						bool IsUnic = false;
 						DateTime date = DateTime.Now;
-						string dateStr = date.ToString("dd.MM.yyyy") + date.ToString("hh:mm:ss:ff");
-						dateStr = dateStr.Replace(".", "").Replace(":", "").Replace(" ", "");
-						specificationsDict["ШтрихКод"] += dateStr + item.ToString() + "\n";
+						while (!IsUnic)
+						{
+							string dateStr = date.ToString("dd.MM.yyyy") + date.ToString("hh:mm:ss:ff");
+							dateStr = dateStr.Replace(".", "").Replace(":", "").Replace(" ", "");
+							if (!BarcodeList.Contains(dateStr))
+							{
+								IsUnic = true;
+								specificationsDict["ШтрихКод"] += dateStr + "\n";
+								BarcodeList.Add(dateStr);
+							}
+							date.AddMinutes(1);
+						}
 						specificationsDict["Ширина в мм"] += item.width + "\n";
 						specificationsDict["Длина в мм"] += item.length + "\n";
 						specificationsDict["Высота в мм"] += item.height + "\n";

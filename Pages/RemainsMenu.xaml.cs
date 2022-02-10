@@ -51,6 +51,16 @@ namespace Остатки.Pages
 				myFrame.Navigate(typeof(ExaminationYandex));
 				TitleTextBlock.Text = "Проверить яндекс!";
 			}
+			else if (ProductsFromMarket.IsSelected)
+			{
+				myFrame.Navigate(typeof(ProductFromMArket));
+				TitleTextBlock.Text = "Продукты с маркета";
+			}
+			else if (ErrorsRemains.IsSelected)
+			{
+				myFrame.Navigate(typeof(errorsRemains));
+				TitleTextBlock.Text = "Продукты с ошибкой";
+			}
 		}
 
 		private void HamburgerButton_Click(object sender, RoutedEventArgs e)

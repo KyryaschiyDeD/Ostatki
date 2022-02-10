@@ -44,8 +44,6 @@ namespace Остатки
 
         private void dg_Sorting(object sender, DataGridColumnEventArgs e)
         {
-            //Clear the SortDirection in a previously sorted column when a different column is sorted
-            
             switch (e.Column.Tag.ToString())
 			{
 				case "ArticleNumberInShop":
@@ -251,11 +249,11 @@ namespace Остатки
         private void GoArchiveOOO_Click(object sender, RoutedEventArgs e)
         {
             List<Product> allProducts = new List<Product>();
-            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
-            {
-                var col = db.GetCollection<Product>("Products");
-                allProducts = col.Query().Where(x => x.RemainsWhite == 0).ToList();
-            }
+            //using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+            //{
+            //    var col = db.GetCollection<Product>("Products");
+            //    allProducts = col.Query().Where(x => x.RemainsWhite == 0).ToList();
+            //}
             List<Product> ProductToDell = new List<Product>();
             Dictionary<ApiKeys, List<long>> productAllDict = new Dictionary<ApiKeys, List<long>>();
             Dictionary<Product, int> countOfAPI = new Dictionary<Product, int>();
@@ -269,7 +267,7 @@ namespace Остатки
                 List<long> product = new List<long>();
                 foreach (var item in allProducts)
                 {
-                    if (product.Count <= 499)
+                    if (product.Count <= 899)
 					{
                         if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
 						{
@@ -401,7 +399,8 @@ namespace Остатки
         private void GoToGetProductID_Click(object sender, RoutedEventArgs e)
         {
             CreateToastProductJob();
-            GetAndSaveProductId.GetProductsId();
+            GetAndSaveProductId.GetProductsIdAndArticle();
+            //GetAndSaveProductId.GetProductsId();
             //GetAndSaveProductId.GetProductsId2();
         }
         public void UpdateProgress(double kolvo, double apply)
@@ -606,7 +605,7 @@ namespace Остатки
                 //linksProductTXT = online.Query().ToList();
 
                 linksProductLeroy.AddRange(online.Query().Where(x => x.TypeOfShop == "LeroyMerlen").ToList());
-                linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо").ToList());
+                //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо").ToList());
                 //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо" && x.DateHistoryRemains.Last().Date.Minute <= DateTime.Now.Date.Minute - 5).ToList());
             }
             List<string> allLinksGoToTasksLeroy = new List<string>(linksProductLeroy.ConvertAll(
@@ -648,7 +647,7 @@ namespace Остатки
                     UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action, action1);
+            Parallel.Invoke(action, action, action, action, action1);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);
         }

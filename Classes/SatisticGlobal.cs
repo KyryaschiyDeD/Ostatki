@@ -27,6 +27,8 @@ namespace Остатки.Classes
 		public DateTime DateCreate { get; set; } // Дата создания
 
 		public Dictionary<string, long> ProductsAtAccaunt { get; set; } // Словаь (ClientId, count) товаров в продаже
+		public long ProductProblemName { get; set; } // Продукты с пустыми наимнованиеями
+		public long DoubleProduct { get; set; } // Повторяющиеся продукты 
 
 	}
 }

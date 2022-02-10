@@ -69,26 +69,7 @@ namespace Остатки.Classes
 			return ProductLink;
 			//return ArticleNumberInShop;
 		}
-		public bool IsTheTimeLineOzon
-		{
-			get
-			{
-				if (ArticleNumberOzonDictList.ContainsKey("200744"))
-					if (ArticleNumberProductId["200744"].Count > 0)
-						return true;
-				return false;
-			}
-		}
-		public bool IsLymarEGOzon
-		{
-			get
-			{
-				if (ArticleNumberOzonDictList.ContainsKey("104333"))
-					if (ArticleNumberProductId["104333"].Count > 0)
-						return true;
-				return false;
-			}
-		}
+		
 		public string ToStringInfo()
 		{
 			string data = "";

@@ -18,8 +18,11 @@ namespace Остатки
         public MainPage()
         {
             this.InitializeComponent();
+
             Global.GetWhiteBlackShopsLeroy();
             Global.GetWhiteBlackShopsLeonardo();
+            Global.WebHosting = WebHostingsJob.GetHostsList();
+
             myFrame.Navigate(typeof(StatisticsMenu));
             TitleTextBlock.Text = "Статка";
         }

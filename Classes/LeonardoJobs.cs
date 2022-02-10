@@ -762,6 +762,140 @@ namespace Остатки.Classes
 			}
 			return null;
 		}
+
+		public static Product AddOneProductNoCombo(string lnk)
+		{
+			if (lnk.Length != 0)
+			{
+				string code = getResponse(lnk);
+				if (code.Contains("sorry"))
+					return null;
+				if (UnRedactLinksQueue.Count > 0)
+				{
+					while (UnRedactLinksQueue.Count != 0)
+					{
+						bool rt = UnRedactLinksQueue.TryDequeue(out lnk);
+						code = getResponse(lnk);
+					}
+				}
+				string prdctLink = lnk;
+				List<int> productCount = new List<int>(); // Кол-во
+				List<int> productLocation = new List<int>(); // Место
+
+				string id_goods = GetIdGoodsOnHTMLLeo(code);
+				string remainsCode = GetRemainsPostLeo(prdctLink, id_goods);
+
+				Regex regexLocation = new Regex(@"<label for=""(\w+)"">");
+				MatchCollection matchColLocation = regexLocation.Matches(remainsCode);
+				foreach (var item in matchColLocation)
+				{
+					int shopCode;
+					int.TryParse(string.Join("", item.ToString().Where(c => char.IsDigit(c))), out shopCode);
+					productLocation.Add(shopCode);
+				}
+
+				string colCount = "";
+				remainsCode = Regex.Replace(remainsCode, @"\\", "");
+
+				if (remainsCode.Contains(@"</td></tr><tr style=""height: 45px; "">"))
+					colCount = remainsCode.Substring(remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"), remainsCode.IndexOf(@"</td></tr><tr style=""height: 45px; "">") - remainsCode.IndexOf(@"<tr style=""height: 45px; ""><td class=""imgbgr2  bgr_tdnotfirst"">"));
+				else
+					colCount = remainsCode;
+
+				Regex regexCount = new Regex(@"<td class=""imgbgr2.*?</td>");
+
+				MatchCollection matchColCount = regexCount.Matches(colCount);
+				foreach (var item in matchColCount)
+				{
+					if (item.ToString().Contains("no_exist"))
+						productCount.Add(0);
+					else
+					if (item.ToString().Contains("exist"))
+						productCount.Add(1);
+					else
+					if (item.ToString().Contains("мало"))
+						productCount.Add(1);
+					else
+					if (item.ToString().Contains("заканчивается"))
+						productCount.Add(2);
+					else
+					if (item.ToString().Contains("много"))
+						productCount.Add(3);
+					else
+						productCount.Add(0);
+				}
+
+				int remaintWhiteTMP = 0;
+				int remaintBlackTMP = 0;
+
+				Dictionary<int, int> remainsDictionaryTMP = new Dictionary<int, int>();
+				for (int i = 0; i < productCount.Count - 1; i++)
+				{
+					remainsDictionaryTMP.Add(productLocation[i], productCount[i]);
+					if (shopWhiteOrBlacks.Contains(productLocation[i]))
+						remaintWhiteTMP += productCount[i];
+					else
+						remaintBlackTMP += productCount[i];
+				}
+				if (code.ToLower().Contains("В НАЛИЧИИ В ИНТЕРНЕТ-МАГАЗИНЕ".ToLower()))
+					remaintWhiteTMP += 10;
+
+				Product onePos = new Product();
+
+				int startIndexPrice = code.IndexOf(@"<div class=""actual-price"">") + @"<div class=""actual-price"">".Length;
+				try
+				{
+					int lenIndexPrice = code.IndexOf(@"<span", startIndexPrice) - startIndexPrice - @"<span".Length;
+				}
+				catch (Exception)
+				{
+					return null;
+				}
+
+				if (startIndexPrice > 1)
+				{
+					string priceTMP = code.Substring(startIndexPrice, 5).Trim();
+					string price = "";
+					foreach (var item in priceTMP)
+					{
+						if (Char.IsDigit(item) || item == ',')
+							price += item;
+					}
+					if (price.Length != 0)
+						onePos.NowPrice = Convert.ToDouble(price);
+
+					onePos.ProductLink = prdctLink;
+
+					long good;
+					long.TryParse(string.Join("", prdctLink.Where(c => char.IsDigit(c))), out good);
+
+					onePos.ArticleNumberInShop = id_goods.ToString();
+
+					int startIndexName = code.IndexOf(@"<h1 class=""product-title-text"">") + @"<h1 class=""product-title-text"">".Length;
+					int lenIndexName = code.IndexOf("</h1>") - startIndexName - "</h1>".Length;
+					if (startIndexName > @"<h1 class=""product-title-text"">".Length)
+					{
+						string name = code.Substring(startIndexName, lenIndexName).Replace("\n", "").Replace("  ", "").Trim();
+
+						onePos.Name = name;
+
+						onePos.RemainsWhite = remaintWhiteTMP;
+						onePos.RemainsBlack = remaintBlackTMP;
+						onePos.remainsDictionary = remainsDictionaryTMP;
+						onePos.DateHistoryRemains.Add(DateTime.Now);
+						onePos.Weight = 2000;
+						onePos.TypeOfShop = "Леонардо";
+					}
+				}
+				else
+				{
+					onePos.RemainsWhite = -1000;
+				}
+				return onePos;
+			}
+			return null;
+		}
+
 		public static void createProductThread()
 		{
 			CreateToastProductJob();

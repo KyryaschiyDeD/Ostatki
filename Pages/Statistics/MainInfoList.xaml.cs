@@ -113,6 +113,8 @@ namespace Остатки.Pages
 				{
 					statsBlock.Text += $"\t {item.Key}: {item.Value} \n";
 				}
+				statsBlock.Text += $"Всего проблем с наименованием: {satisticGlobal.ProductProblemName} \n";
+				statsBlock.Text += $"Дублирущихся продуктов: {satisticGlobal.DoubleProduct} \n";
 			}
 			else
 				statsBlock.Text = "Статистики нет :-(";
@@ -140,26 +142,50 @@ namespace Остатки.Pages
 		{
 			SatisticGlobal satisticGl = new SatisticGlobal();
 			DataBaseJob.GetAllProductFromTheBase(out List<Product> remainsProduct,out List<Product> waitProduct,out List<Product> archveProduct, out List<Product> delProduct);
-			
+
+			List<Product> AllProducts = new List<Product>();
+			AllProducts.AddRange(remainsProduct);
+			AllProducts.AddRange(waitProduct);
+			AllProducts.AddRange(archveProduct);
+			AllProducts.AddRange(delProduct);
+
 			satisticGl.AllProductsRemains = remainsProduct.Count();
 			satisticGl.AllProductsWait = waitProduct.Count();
 			satisticGl.AllProductsArchive = archveProduct.Count();
 			satisticGl.AllProductsDel = delProduct.Count();
 			satisticGl.AllProducts = satisticGl.AllProductsRemains + satisticGl.AllProductsWait + satisticGl.AllProductsArchive + satisticGl.AllProductsDel;
+
 			satisticGl.AllProductsLeroy = remainsProduct.Where(x => x.TypeOfShop == "LeroyMerlen").Count();
 			satisticGl.AllProductsLeroy0 = remainsProduct.Where(x => x.TypeOfShop == "LeroyMerlen" && x.RemainsWhite == 0).Count();
 			satisticGl.AllProductsLeroy50 = remainsProduct.Where(x => x.TypeOfShop == "LeroyMerlen" && x.RemainsWhite <= 50).Count();
 			satisticGl.AllProductsLeroy100 = remainsProduct.Where(x => x.TypeOfShop == "LeroyMerlen" && x.RemainsWhite > 50 && x.RemainsWhite <= 100).Count();
+
 			satisticGl.AllProductsLeonardo = remainsProduct.Where(x => x.TypeOfShop == "Леонардо").Count();
 			satisticGl.AllProductsLeonardo0 = remainsProduct.Where(x => x.TypeOfShop == "Леонардо" && x.RemainsWhite == 0).Count();
 			satisticGl.AllProductsLeonardo50 = remainsProduct.Where(x => x.TypeOfShop == "Леонардо" && x.RemainsWhite <= 50).Count();
 			satisticGl.AllProductsLeonardo100 = remainsProduct.Where(x => x.TypeOfShop == "Леонардо" && x.RemainsWhite > 50 && x.RemainsWhite <= 100).Count();
+
+			satisticGl.ProductProblemName = 0;
+			satisticGl.DoubleProduct = 0;
+			List<string> problemLink = new List<string>();
 
 			List<Product> leonardoPos = remainsProduct.Where(x => x.TypeOfShop == "Леонардо").ToList();
 			bool addKeyes = false;
 			satisticGl.AllProductsLeonardoPos = new Dictionary<string, long>();
 			foreach (var item in leonardoPos)
 			{
+				if (String.IsNullOrEmpty(item.Name))
+					satisticGl.ProductProblemName++;
+
+				if (!problemLink.Contains(item.ProductLink))
+				{
+					//if (AllProducts.Where(x => x.ProductLink.Equals(item.ProductLink) || x.ArticleNumberInShop.Equals(item.ArticleNumberInShop)).Count() > 1)
+					//{
+					//	problemLink.Add(item.ProductLink);
+					//	satisticGl.DoubleProduct++;
+					//}
+				}
+					
 				if (!addKeyes)
 				foreach (var itemKey in item.ArticleNumberProductId)
 				{

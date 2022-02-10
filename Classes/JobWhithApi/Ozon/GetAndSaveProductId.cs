@@ -1,4 +1,5 @@
-﻿using Nancy.Json;
+﻿using LiteDB;
+using Nancy.Json;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Остатки.Classes.ProductsClasses;
 
 namespace Остатки.Classes.JobWhithApi.Ozon
 {
@@ -76,7 +78,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             List<string> problemProduct = new List<string>(); 
             foreach (var key in apiKeys)
             {
-                Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1);
+                Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, "ALL");
                 int total = responseWhithProduct_id.result.total;
                 int allCount = total;
                 int AllOstatok = allCount;
@@ -89,7 +91,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                 while (AllOstatok > 0)
 				{
                     remains2.UpdateProgress(allCount, allCount - AllOstatok, $"Остаток " + AllOstatok);
-                    responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000);
+                    responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, "ALL");
                     truePage++;
                     AllOstatok -= responseWhithProduct_id.result.items.Count;
                     int countItems = 0;
@@ -238,6 +240,97 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                 await FileIO.WriteTextAsync(myFile, data);
             }
         }
+
+        public static void GetProductsIdAndArticle()
+        {
+            List<ApiKeys> apiKeys = ApiKeysesJob.GetAllApiList();
+            List<ProductFromMarletplace> productFromMarletplaces = new List<ProductFromMarletplace>();
+
+            foreach (var key in apiKeys)
+            {
+				foreach (var oneFilter in FulterStatuses.FilterList)
+				{
+                    Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, oneFilter);
+                    int total = responseWhithProduct_id.result.total;
+                    int allCount = total;
+                    int AllOstatok = allCount;
+
+                    remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
+                    remains2.UpdateProgress(0, 0, $"Всего " + allCount);
+
+                    int pageCount = total / 1000 + 1;
+                    int truePage = 1;
+                    while (AllOstatok > 0)
+                    {
+                        remains2.UpdateProgress(allCount, allCount - AllOstatok, $"{key.Name}, {oneFilter} Остаток: " + AllOstatok);
+                        responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, oneFilter);
+                        truePage++;
+                        AllOstatok -= responseWhithProduct_id.result.items.Count;
+                        int countItems = 0;
+                        foreach (var item in responseWhithProduct_id.result.items)
+                        {
+                            countItems++;
+                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"{key.Name}, {oneFilter} Остаток " + AllOstatok);
+                            ProductFromMarletplace oneProduct = productFromMarletplaces.Find(x => x.offer_id.Equals(item.offer_id));
+                            
+                            if (oneProduct == null)
+							{
+                                oneProduct = new ProductFromMarletplace();
+                                oneProduct.status = oneFilter;
+                                oneProduct.product_id = item.product_id;
+                                oneProduct.offer_id = item.offer_id;
+                                oneProduct.AccauntKey = new List<ApiKeys>();
+                                oneProduct.AccauntKey.Add(key);
+                                oneProduct.dateTimeCreate = DateTime.Now;
+                                productFromMarletplaces.Add(oneProduct);
+                            }
+                            else 
+							{
+                                if (!oneProduct.AccauntKey.Contains(key))
+								{
+                                    productFromMarletplaces.Remove(oneProduct);
+                                    oneProduct.AccauntKey.Add(key);
+                                    oneProduct.dateTimeRedact = DateTime.Now;
+                                    productFromMarletplaces.Add(oneProduct);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+           
+
+            remains2.UpdateProgress(0, 0, $"Сохраняем!!!!!!!!!!!!");
+            using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
+            {
+                int colAdd = 0;
+                var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
+                foreach (var item in productFromMarletplaces)
+                {
+                    colAdd++;
+
+                    remains2.UpdateProgress(colAdd, productFromMarletplaces.Count - colAdd, $"Сохраняем!");
+
+                    var proverk = col.FindOne(x => x.offer_id == item.offer_id);
+                    if (proverk == null)
+                    {
+                        col.Insert(item);
+                    }
+                    else
+                    {
+                        foreach (var newKeys in item.AccauntKey)
+                        {
+                            if (!proverk.AccauntKey.Contains(newKeys))
+                                proverk.AccauntKey.Add(newKeys);
+                        }
+                        col.Update(proverk);
+                    }
+                }
+            }
+
+        }
+
         public static void GetProductsId()
 		{
             List<Product> Remains = new List<Product>();
@@ -372,7 +465,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                 return JsonConvert.DeserializeObject<Root>(result);
             }
         }
-        private static Root PostRequestAsync2(string clientId, string apiKey, int page, int count)
+        private static Root PostRequestAsync2(string clientId, string apiKey, int page, int count, string status)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
             httpWebRequest.Headers.Add("Client-Id", clientId);
@@ -382,7 +475,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             RootRequest rootRequest = new RootRequest();
             rootRequest.page = page;
             rootRequest.page_size = count;
-
+            rootRequest.filter = new Filter() { visibility = status };
             var jsort = JsonConvert.SerializeObject(rootRequest);
             using (var requestStream = httpWebRequest.GetRequestStream())
             using (var writer = new StreamWriter(requestStream))
