@@ -20,6 +20,8 @@ using Newtonsoft.Json;
 using Product = Остатки.Classes.Product;
 using Остатки.Classes.JobWhithApi.Ozon;
 using Остатки.Classes.Petrovich;
+using Остатки.Classes.JobWhithApi.Ozon.StockUpdate;
+using Остатки.Classes.JobWhithApi.Ozon.PriceUpdate;
 
 namespace Остатки
 {
@@ -182,9 +184,9 @@ namespace Остатки
         private void rankLowFilter_Click(object sender, RoutedEventArgs e)
         {
             ObservableCollection<Product> tmpFilterProduct = new ObservableCollection<Product>();
-            //tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
-            //                                                     where item.Name.Contains(FindingTextBox.Text)
-            //                                                     select item);
+            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
+                                                                 where item.Name.Contains(FindingTextBox.Text)
+                                                                 select item);
             long myLong;
             bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
             if (tmpFilterProduct.Count == 0 && isNumerical)
@@ -196,11 +198,12 @@ namespace Остатки
 
         private void Article_Click(object sender, RoutedEventArgs e)
         {
-            ObservableCollection<Product> tmpFilterProduct;
-            tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
-                                                                 where String.IsNullOrEmpty(item.Name)
-                                                                 select item);
-            dataGridProduct.ItemsSource = tmpFilterProduct;
+            Stocks.GoUpdateStocks(ProductList1.ToList()) ;
+        }
+
+        private void PriceUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            Prices.GoUpdatePrices(ProductList1.ToList());
         }
         private void Update_Click(object sender, RoutedEventArgs e)
         {
@@ -214,7 +217,7 @@ namespace Остатки
             var jsort = JsonConvert.SerializeObject(pageOzon);
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/archive");
             httpWebRequest.Headers.Add("Client-Id", key.ClientId);
-            httpWebRequest.Headers.Add("Api-Key", key.ApiKey);
+            httpWebRequest.Headers.Add("Api-Key", key.ApiKey.Replace(" ",""));
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
 
@@ -249,11 +252,7 @@ namespace Остатки
         private void GoArchiveOOO_Click(object sender, RoutedEventArgs e)
         {
             List<Product> allProducts = new List<Product>();
-            //using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
-            //{
-            //    var col = db.GetCollection<Product>("Products");
-            //    allProducts = col.Query().Where(x => x.RemainsWhite == 0).ToList();
-            //}
+
             List<Product> ProductToDell = new List<Product>();
             Dictionary<ApiKeys, List<long>> productAllDict = new Dictionary<ApiKeys, List<long>>();
             Dictionary<Product, int> countOfAPI = new Dictionary<Product, int>();
@@ -267,13 +266,17 @@ namespace Остатки
                 List<long> product = new List<long>();
                 foreach (var item in allProducts)
                 {
-                    if (product.Count <= 899)
+                    if (product.Count <= 499)
 					{
                         if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
 						{
-                            if (item.ArticleNumberProductId[keys.ClientId].First().ArticleOzon != 0 && ((item.RemainsWhite != item.RemainsBlack && item.TypeOfShop == "LeroyMerlen") || item.TypeOfShop == "Леонардо"))
-                            {
-                                if (item.RemainsWhite == 0 || (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1))
+                            //if ((item.ArticleNumberProductId[keys.ClientId].First().ArticleOzon != 0 && (item.RemainsWhite != 0 && item.RemainsWhite != item.RemainsBlack && item.TypeOfShop == "LeroyMerlen")) || item.TypeOfShop == "Леонардо" || item.TypeOfShop == "petrovich")
+                            //{
+                            if ((item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite < 10 && item.RemainsWhite != item.RemainsBlack) || 
+                                (item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite == item.RemainsBlack && item.RemainsWhite < 10 && item.RemainsWhite > 0) ||
+                                (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1) || 
+                                (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 || 
+                                item.TypeOfShop == "petrovich" && item.ArticleNumberProductId.First().Value.Count > 2 && item.RemainsWhite <= 10))
                                 {
                                     foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
                                     {
@@ -284,37 +287,12 @@ namespace Остатки
                                     else
                                         countOfAPI[item]++;
                                 }
-                            }
+                           // }
                         }
                     }
-                   
                 }
                 productAllDict.Add(keys, product);
             }
-			//foreach (var item in allProducts)
-			//{
-   //             int countAkk = 0;
-   //             int countApi = 0;
-			//	foreach (var key in ApiKeysesJob.GetAllApiList())
-			//	{
-   //                 if (item.ArticleNumberProductId.ContainsKey(key.ClientId))
-   //                 {
-   //                     countAkk++;
-   //                 }
-   //                 if (countAkk == 2)
-			//		{
-   //                     if (item.ArticleNumberProductId[key.ClientId].Count == 0)
-   //                     {
-   //                         countApi++;
-   //                     }
-   //                 }
-   //                 if (countApi == 0)
-			//		{
-   //                     ProductToDell.Add(item);
-   //                 }
-   //             }
-                
-   //         }
             foreach (var item in countOfAPI)
             {
                 ProductToDell.Add(item.Key);
@@ -323,14 +301,14 @@ namespace Остатки
 
             foreach (var item in productAllDict)
             {
-                productsIdsss.Add(item.Key, new ProductsIdsss { product_id = new List<long>(item.Value) });
+                if (item.Value.Count != 0)
+                    productsIdsss.Add(item.Key, new ProductsIdsss { product_id = new List<long>(item.Value) });
             }
             int kolvoPost = 0;
             foreach (var item in productsIdsss)
             {
                 Message.infoList.Add($"Ключ: {item.Key.ClientId}, {item.Value.product_id.Count}");
             }
-            Message.ShowAllToast();
             foreach (var item in productsIdsss)
             {
                 Susseess susseess = PostRequestAsync(item.Key, item.Value);
@@ -339,13 +317,13 @@ namespace Остатки
                 {
                     kolvoPost++;
                 }
-                Message.ShowAllToast();
             }
+            Message.ShowAllToast();
             if (kolvoPost == productsIdsss.Count())
             {
                 foreach (var item in ProductToDell)
                 {
-                    DataBaseJob.RemainsToWait(item);
+                    DataBaseJob.RemainsToArchive(item);
                     ProductList1.Remove(item);
                 }
                 Message.infoList.Add($"Остатки зафиксированы. \n Кол-во: {kolvoPost}");
@@ -433,51 +411,62 @@ namespace Остатки
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
-                var wait = db.GetCollection<Product>("ProductsWait");
-                var archive = db.GetCollection<Product>("ProductsArchive");
+                //var wait = db.GetCollection<Product>("ProductsWait");
+                //var archive = db.GetCollection<Product>("ProductsArchive");
 
                 List<Product> Remains = col.Query().ToList();
-                List<Product> WaitList = wait.Query().ToList();
-                List<Product> ArchiveList = archive.Query().ToList();
+                //List<Product> WaitList = wait.Query().ToList();
+                //List<Product> ArchiveList = archive.Query().ToList();
 
                 List<Product> allProducts = col.Query().ToList();
-                
 
-				
 
-                /*  allProducts.AddRange(wait.Query().ToList());
-                  allProducts.AddRange(archive.Query().ToList());
 
-                  foreach (var item in allProducts)
-                  {
-                      if (item.IsLymarEGOzon || item.IsTheTimeLineOzon)
-                      {
-                          if (Remains.FindAll(x => x.ProductLink == item.ProductLink).Count >= 1)
-                          {
-                              if (WaitList.Contains(item))
-                                  wait.Delete(item.Id);
-                              if (ArchiveList.Contains(item))
-                                  archive.Delete(item.Id);
-                          }
-                          else
-                          {
-                              if (WaitList.Contains(item))
-                                  DataBaseJob.WaitToRemains(item);
-                              if (ArchiveList.Contains(item))
-                                  DataBaseJob.ArchiveToRemains(item);
+                /*
+                foreach (var item in ProductList1)
+            {
+                if (item.ArticleNumberProductId == null)
+                {
+                    DataBaseJob.RemainsToArchive(item);
+                }
+                else
+                if (item.ArticleNumberProductId.Count == 0)
+                    DataBaseJob.RemainsToArchive(item);
+            }
+                                                                             allProducts.AddRange(wait.Query().ToList());
+                                                                           allProducts.AddRange(archive.Query().ToList());
 
-                              col = db.GetCollection<Product>("Products");
-                              wait = db.GetCollection<Product>("ProductsWait");
-                              archive = db.GetCollection<Product>("ProductsArchive");
+                                                                           foreach (var item in allProducts)
+                                                                           {
+                                                                               if (item.IsLymarEGOzon || item.IsTheTimeLineOzon)
+                                                                               {
+                                                                                   if (Remains.FindAll(x => x.ProductLink == item.ProductLink).Count >= 1)
+                                                                                   {
+                                                                                       if (WaitList.Contains(item))
+                                                                                           wait.Delete(item.Id);
+                                                                                       if (ArchiveList.Contains(item))
+                                                                                           archive.Delete(item.Id);
+                                                                                   }
+                                                                                   else
+                                                                                   {
+                                                                                       if (WaitList.Contains(item))
+                                                                                           DataBaseJob.WaitToRemains(item);
+                                                                                       if (ArchiveList.Contains(item))
+                                                                                           DataBaseJob.ArchiveToRemains(item);
 
-                              Remains = col.Query().ToList();
-                              WaitList = wait.Query().ToList();
-                              ArchiveList = archive.Query().ToList();
-                          }
-                      }
-                  }  */
+                                                                                       col = db.GetCollection<Product>("Products");
+                                                                                       wait = db.GetCollection<Product>("ProductsWait");
+                                                                                       archive = db.GetCollection<Product>("ProductsArchive");
+
+                                                                                       Remains = col.Query().ToList();
+                                                                                       WaitList = wait.Query().ToList();
+                                                                                       ArchiveList = archive.Query().ToList();
+                                                                                   }
+                                                                               }
+                                                                           }  */
                 ProductList1 = new ObservableCollection<Product>(allProducts);
             }
+            
             //DataBaseJob.UpdateList(ProductList1.ToList());
         }
         private void GoOneUpdate_Click(object sender, RoutedEventArgs e)
@@ -595,6 +584,7 @@ namespace Остатки
             CreateToastProductJob();
             List<Product> linksProductLeroy = new List<Product>();
             List<Product> linksProductLeonardo = new List<Product>();
+            List<Product> linksProductPetrovich= new List<Product>();
             using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
             {
                 var wait = db.GetCollection<Product>("ProductsWait");
@@ -605,6 +595,8 @@ namespace Остатки
                 //linksProductTXT = online.Query().ToList();
 
                 linksProductLeroy.AddRange(online.Query().Where(x => x.TypeOfShop == "LeroyMerlen").ToList());
+                linksProductPetrovich.AddRange(online.Query().Where(x => x.TypeOfShop == "petrovich").ToList());
+
                 //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо").ToList());
                 //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо" && x.DateHistoryRemains.Last().Date.Minute <= DateTime.Now.Date.Minute - 5).ToList());
             }
@@ -614,11 +606,17 @@ namespace Остатки
             List<string> allLinksGoToTasksLeonardo = new List<string>(linksProductLeonardo.ConvertAll(
             new Converter<Product, string>(ProductJobs.GetProductLink)));
 
-            UpdateProgress(allLinksGoToTasksLeroy.Count() + allLinksGoToTasksLeonardo.Count(), 0,"Плучаем данные");
+            List<string> allLinksGoToTasksPetrovich = new List<string>(linksProductPetrovich.ConvertAll(
+            new Converter<Product, string>(ProductJobs.GetProductLink)));
+
+            UpdateProgress(allLinksGoToTasksLeroy.Count() + allLinksGoToTasksLeonardo.Count() + allLinksGoToTasksPetrovich.Count(), 0,"Плучаем данные");
             ProductJobs.ocherLeroy = new ConcurrentQueue<string>(allLinksGoToTasksLeroy);
             ProductJobs.ocherLeonardo = new ConcurrentQueue<Product>(linksProductLeonardo);
+            ProductJobs.ocherPetrovich = new ConcurrentQueue<Product>(linksProductPetrovich);
+
             ProductJobs.productToUpdate = new List<Product>(linksProductLeroy);
             ProductJobs.productToUpdate.AddRange(linksProductLeonardo);
+            ProductJobs.productToUpdate.AddRange(linksProductPetrovich);
 
             GoUpdateAllDataBaseLerya();
         }
@@ -626,6 +624,7 @@ namespace Остатки
 		{
             int kolvoToUpdateLeroy = ProductJobs.ocherLeroy.Count;
             int kolvoToUpdateLeonardo = ProductJobs.ocherLeonardo.Count;
+            int kolvoToUpdatePetrovich = ProductJobs.ocherPetrovich.Count;
             Action action = () =>
             {
                 while (!ProductJobs.ocherLeroy.IsEmpty)
@@ -633,7 +632,7 @@ namespace Остатки
                     string str = "";
                     ProductJobs.ocherLeroy.TryDequeue(out str);
                     ProductJobs.parseLeryaUpdate(str);
-                    UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
+                    UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo + kolvoToUpdatePetrovich, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
 
@@ -644,10 +643,23 @@ namespace Остатки
                     Product product = new Product();
                     ProductJobs.ocherLeonardo.TryDequeue(out product);
                     ProductJobs.parseLeonardoUpdate(product);
-                    UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
+                    UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo + kolvoToUpdatePetrovich, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
-            Parallel.Invoke(action, action, action, action, action1);
+
+            Action action2 = () =>
+            {
+                while (!ProductJobs.ocherPetrovich.IsEmpty)
+                {
+                    Product product = new Product();
+                    ProductJobs.ocherPetrovich.TryDequeue(out product);
+                    ProductJobs.parsePetrovichUpdate(product);
+                    UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo + kolvoToUpdatePetrovich, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
+                }
+            };
+
+            //Parallel.Invoke(action, action, action2, action2);
+            Parallel.Invoke(action2, action2);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);
         }

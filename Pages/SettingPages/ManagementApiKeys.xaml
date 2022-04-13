@@ -41,6 +41,16 @@
 						Width="250"
 						Binding="{Binding DateCreate}" 
 						FontSize="20" />
+				<controls:DataGridTextColumn 
+						Header="ClientId"
+						Width="250"
+						Binding="{Binding ClientId}" 
+						FontSize="20" />
+				<controls:DataGridTextColumn 
+						Header="ApiKey"
+						Width="250"
+						Binding="{Binding ApiKey}" 
+						FontSize="20" />
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>
 	</Grid>

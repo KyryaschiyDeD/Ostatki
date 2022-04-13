@@ -25,7 +25,7 @@ namespace Остатки.Classes
 		{
 			try
 			{
-				return ArticleNumberOzonDictList[clientID].First();
+				return ArticleNumberProductId[clientID].Count();
 			}
 			catch (Exception)
 			{
@@ -47,6 +47,7 @@ namespace Остатки.Classes
 		public int RemainsBlack { get; set; } // Остальные остатки
 		public List<int> HistoryRemainsBlack { get; set; } = new List<int>();// История Остальные остатки
 		public double NowPrice { get; set; } // Цена магазина сейчас
+		public bool PriceIsChanged { get; set; } // Изменилась ли цена?
 		public double OldPriceCh
 		{
 			get
@@ -54,7 +55,7 @@ namespace Остатки.Classes
 				if (OldPrice.Count > 0)
 					return OldPrice[OldPrice.Count() - 1];
 				else
-					return Convert.ToDouble(0);
+					return 0;
 			}
 		}
 		public double Weight { get; set; } // Вес
@@ -66,8 +67,8 @@ namespace Остатки.Classes
 		public string TypeOfShop { get; set; }
 		public override string ToString()
 		{
-			return ProductLink;
-			//return ArticleNumberInShop;
+			//return ProductLink;
+			return ArticleNumberInShop;
 		}
 		
 		public string ToStringInfo()
@@ -88,6 +89,7 @@ namespace Остатки.Classes
 				if (chID != -1)
 				{
 					data += $"\t {ApiKeysesJob.GetApiName(item)}: ";
+					if (ArticleNumberOzonDictList.ContainsKey(item.ClientId))
 					foreach (var item1 in ArticleNumberOzonDictList[item.ClientId])
 					{
 						data += $"{item1} ";
@@ -100,9 +102,9 @@ namespace Остатки.Classes
 			if (countAccaunt == 0)
 				data += $"\t Товар не найден в БД на озон!\n";
 
-			data += $"Кол-во аккаунтов: {ArticleNumberOzonDictCount} \n";
-			data += $"Остатки на белизне: {RemainsWhite} \n";
-			data += $"Остатки ин жопенн: {RemainsBlack} \n";
+			//data += $"Кол-во аккаунтов: {ArticleNumberOzonDictCount} \n";
+			//data += $"Остатки на белизне: {RemainsWhite} \n";
+			//data += $"Остатки ин жопенн: {RemainsBlack} \n";
 			if (DateHistoryRemains.Count > 0)
 				data += $"Послед. дата проверки: {DateHistoryRemains.Last()} \n";
 			else
@@ -122,13 +124,25 @@ namespace Остатки.Classes
 			data += $"Фактическое: \n";
 			foreach (var item in countProductonOnAccaunt)
 			{
-				//data += $"\t{ApiKeysesJob.GetApiName(item.Key)}: {item.Value}. productID: {ArticleNumberProductId[item.Key.ClientId].Count()}\n";
+				if (ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+					data += $"\t{ApiKeysesJob.GetApiName(item.Key)}: {ArticleNumberProductId[item.Key.ClientId].Count()}\n";
 			}
 			data += $"-------\t-------\t-------\n";
-			data += $"Артикулы озон: \n";
+			data += $"Offer Id: \n";
 			foreach (var item in ArticleNumberUnicList)
 			{
 				data += $"\t{item}\n";
+			}
+
+			data += $"Product Id: \n";
+			foreach (var item in ArticleNumberProductId)
+			{
+				data += $"\t{item.Key}:\n";
+				foreach (var article in item.Value)
+				{
+					data += $"\t{article.ArticleOzon}\n";
+				}
+				data += $"-------\t-------\t-------\n";
 			}
 			return data;
 		}

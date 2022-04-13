@@ -155,7 +155,17 @@ namespace Остатки.Classes.Petrovich
 			HTMLJob.CountOfUserAgent++;
 
 			var jOBj = new JObject();
-			var response = (HttpWebResponse)request.GetResponse();
+			HttpWebResponse response = null;
+
+			try
+            {
+				response = (HttpWebResponse)request.GetResponse();
+			}
+            catch (Exception)
+            {
+				return null;
+            }
+			
 			Stream resStream = response.GetResponseStream();
 			var t = ReadFully(resStream);
 			var y = Decompress(t);
@@ -168,6 +178,22 @@ namespace Остатки.Classes.Petrovich
 			Root ob = jOBj.ToObject<Root>();
 
 			return ob;
+		}
+
+		public static int GetRemainsBlack(Remains remains)
+        {
+			int remainsBlack = 0;
+			if (remains.supply_ways != null)
+				foreach (var supply_ways in remains.supply_ways)
+				{
+					if (supply_ways.subdivision_list != null)
+						foreach (var item in supply_ways.subdivision_list)
+						{
+							remainsBlack += item.remains_amount;
+						}
+				}
+			return remainsBlack - remains.total;
+
 		}
 	}
 }

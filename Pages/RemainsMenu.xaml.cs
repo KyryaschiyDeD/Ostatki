@@ -61,6 +61,12 @@ namespace Остатки.Pages
 				myFrame.Navigate(typeof(errorsRemains));
 				TitleTextBlock.Text = "Продукты с ошибкой";
 			}
+			else if (BlackProduct.IsSelected)
+			{
+				myFrame.Navigate(typeof(BlackProduct));
+				TitleTextBlock.Text = "Чёрный список продуктов";
+			}
+			
 		}
 
 		private void HamburgerButton_Click(object sender, RoutedEventArgs e)

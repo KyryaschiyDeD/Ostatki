@@ -258,7 +258,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                     remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
                     remains2.UpdateProgress(0, 0, $"Всего " + allCount);
 
-                    int pageCount = total / 1000 + 1;
+                    int pageCount = (int)Math.Ceiling((double)total / (double)1000);
                     int truePage = 1;
                     while (AllOstatok > 0)
                     {
@@ -270,31 +270,21 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                         foreach (var item in responseWhithProduct_id.result.items)
                         {
                             countItems++;
-                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"{key.Name}, {oneFilter} Остаток " + AllOstatok);
-                            ProductFromMarletplace oneProduct = productFromMarletplaces.Find(x => x.offer_id.Equals(item.offer_id));
-                            
-                            if (oneProduct == null)
-							{
-                                oneProduct = new ProductFromMarletplace();
-                                oneProduct.status = oneFilter;
-                                oneProduct.product_id = item.product_id;
-                                oneProduct.offer_id = item.offer_id;
-                                oneProduct.AccauntKey = new List<ApiKeys>();
-                                oneProduct.AccauntKey.Add(key);
-                                oneProduct.dateTimeCreate = DateTime.Now;
-                                productFromMarletplaces.Add(oneProduct);
-                            }
-                            else 
-							{
-                                if (!oneProduct.AccauntKey.Contains(key))
-								{
-                                    productFromMarletplaces.Remove(oneProduct);
-                                    oneProduct.AccauntKey.Add(key);
-                                    oneProduct.dateTimeRedact = DateTime.Now;
-                                    productFromMarletplaces.Add(oneProduct);
-                                }
-                            }
+                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"{key.Name}, Остаток " + AllOstatok);
+
+                            ArticleNumber art = new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id };
+
+                            ProductFromMarletplace oneProduct = new ProductFromMarletplace();
+                            oneProduct.productID_OfferID = art;
+                            oneProduct.status = oneFilter;
+                            oneProduct.Key = key;
+                            oneProduct.offer_id = item.offer_id;
+                            oneProduct.dateTimeCreate = DateTime.Now;
+                            productFromMarletplaces.Add(oneProduct);
+
                         }
+                        if (truePage * 1000 > total + 2000)
+                            break;
                     }
                 }
             }
@@ -304,31 +294,11 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             remains2.UpdateProgress(0, 0, $"Сохраняем!!!!!!!!!!!!");
             using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
             {
-                int colAdd = 0;
                 var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
-                foreach (var item in productFromMarletplaces)
-                {
-                    colAdd++;
-
-                    remains2.UpdateProgress(colAdd, productFromMarletplaces.Count - colAdd, $"Сохраняем!");
-
-                    var proverk = col.FindOne(x => x.offer_id == item.offer_id);
-                    if (proverk == null)
-                    {
-                        col.Insert(item);
-                    }
-                    else
-                    {
-                        foreach (var newKeys in item.AccauntKey)
-                        {
-                            if (!proverk.AccauntKey.Contains(newKeys))
-                                proverk.AccauntKey.Add(newKeys);
-                        }
-                        col.Update(proverk);
-                    }
-                }
+                col.DeleteAll();
+                col.InsertBulk(productFromMarletplaces);
             }
-
+            remains2.UpdateProgress(0, 0, $"Сохранили!!!!!!!!!!!!");
         }
 
         public static void GetProductsId()
@@ -482,6 +452,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             {
                 writer.Write(jsort);
             }
+            Thread.Sleep(500);
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
             {

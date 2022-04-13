@@ -52,13 +52,19 @@
 					</ListBoxItem>
 					<ListBoxItem Name="ProductsFromMarket">
 						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE705;" />
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE8D3;" />
 							<TextBlock FontSize="24" Text="Товары с маркета" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
 					<ListBoxItem Name="ErrorsRemains">
 						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE705;" />
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE8D8;" />
+							<TextBlock FontSize="24" Text="Товары с ошибка" Margin="10 0 0 0" />
+						</StackPanel>
+					</ListBoxItem>
+					<ListBoxItem Name="BlackProduct">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE8D8;" />
 							<TextBlock FontSize="24" Text="Товары с ошибка" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>

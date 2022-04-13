@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Остатки.Classes;
 using System.Threading;
+using Остатки.Classes.Petrovich;
 
 namespace Остатки.Classes
 {
@@ -26,9 +27,16 @@ namespace Остатки.Classes
 	}
 	class ProductJobs
 	{
+		static Random rnd = new Random();
+
+		static string qrator_jsid = "1648540037.594.SAiGJXIWC0U3gCWc-e0fs4h16fncc4b3atcg7ltdgdcssjoe2";
+		static int countOfQrator_jsid = 0;
+
 		static object locker = new object();
 		public static ConcurrentQueue<string> ocherLeroy = new ConcurrentQueue<string>();
 		public static ConcurrentQueue<Product> ocherLeonardo = new ConcurrentQueue<Product>();
+		public static ConcurrentQueue<Product> ocherPetrovich = new ConcurrentQueue<Product>();
+
 		public static List<Product> productToUpdate = new List<Product>();
 		public static ConcurrentQueue<Product> NewRemaintProduct = new ConcurrentQueue<Product>();
 
@@ -57,41 +65,86 @@ namespace Остатки.Classes
 
 		private static string GetResponseUpdates(string uri)
 		{
-			Thread.Sleep(3000);
+			//Thread.Sleep(rnd.Next(2750, 6000));
 			string htmlCode = "";
-			//driver.Navigate().GoToUrl(uri);
-			//driver.Url = uri;
+
 			HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(uri);
-			//proxy_request.Method = "GET";
-			proxy_request.ContentType = "application/x-www-form-urlencoded";
-			//proxy_request.Headers.Add("Accept-Language: ru-ru");
+			proxy_request.Method = "GET";
+			proxy_request.ContentType = "text/html;charset=utf-8";
 			proxy_request.UserAgent = HTMLJob.userAgent[HTMLJob.CountOfUserAgent];
 			proxy_request.KeepAlive = false;
-			proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+			//proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
 			proxy_request.Timeout = 20000;
 			proxy_request.Referer = @"https://leroymerlin.ru/";
 			proxy_request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
 			proxy_request.Host = "leroymerlin.ru";
 			proxy_request.Headers.Add("Bx-ajax", "true");
 			var cookieContainer = new CookieContainer();
+			proxy_request.Headers.Add("accept-language", "ru");
+			proxy_request.Headers.Add("sec-ch-ua", @""" Not A; Brand "";v=""99"", ""Chromium ""; v=""98"", ""Opera "";v=""84""");
+			proxy_request.Headers.Add("sec-ch-ua-platform", @"""Windows""");
+			proxy_request.Headers.Add("authority", @"leroymerlin.ru");
+			proxy_request.Headers.Add("scheme", "https");
+
+			
+
+			if (countOfQrator_jsid % 10 == 0)
+            {
+				HttpWebRequest proxy_request2 = (HttpWebRequest)WebRequest.Create("https://leroymerlin.ru/");
+				proxy_request2.Method = "GET";
+				proxy_request2.ContentType = "text/html;charset=utf-8";
+				proxy_request2.UserAgent = HTMLJob.userAgent[HTMLJob.CountOfUserAgent];
+				proxy_request2.KeepAlive = false;
+				//proxy_request.Proxy = new WebProxy(HTMLJob.proxyIp[HTMLJob.CountproxyIp], HTMLJob.proxyPort[HTMLJob.CountproxyPort]);
+				proxy_request2.Timeout = 20000;
+				proxy_request2.Referer = @"https://leroymerlin.ru/";
+				proxy_request2.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
+				proxy_request2.Host = "leroymerlin.ru";
+				proxy_request2.Headers.Add("Bx-ajax", "true");
+				var cookieContainer2 = new CookieContainer();
+				proxy_request2.Headers.Add("accept-language", "ru");
+				proxy_request2.Headers.Add("sec-ch-ua", @""" Not A; Brand "";v=""99"", ""Chromium ""; v=""98"", ""Opera "";v=""84""");
+				proxy_request2.Headers.Add("sec-ch-ua-platform", @"""Windows""");
+				proxy_request2.Headers.Add("authority", @"leroymerlin.ru");
+				proxy_request2.Headers.Add("scheme", "https");
+				proxy_request2.CookieContainer = cookieContainer2;
+				HttpWebResponse resp2 = null;
+				resp2 = proxy_request2.GetResponse() as HttpWebResponse;
+                foreach (Cookie cookie in resp2.Cookies)
+                {
+					cookieContainer.Add(cookie);
+				}
+				Thread.Sleep(1000);
+			}
+
 			proxy_request.CookieContainer = cookieContainer;
+			cookieContainer.Add(new Cookie("qrator_jsid", "1648540037.594.SAiGJXIWC0U3gCWc-e0fs4h16fncc4b3atcg7ltdgdcssjoe2", "/", ".leroymerlin.ru"));
+
 			HttpWebResponse resp = null;
 			string html = "";
 			try
 			{
 				resp = proxy_request.GetResponse() as HttpWebResponse;
+				countOfQrator_jsid++;
+
+				foreach (var item in resp.Cookies)
+                {
+					if (item.ToString().Contains(qrator_jsid) && !item.ToString().Equals("qrator_jsid" + "=" + qrator_jsid))
+						qrator_jsid = item.ToString().Replace("qrator_jsid=","");
+				}
+
 				if (resp != null)
 					using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
 						html = sr.ReadToEnd();
-				//htmlCode = driver.PageSource;
+
 				htmlCode = html.Trim();
-				//driver.Quit();
+
 				if (String.IsNullOrEmpty(htmlCode) || htmlCode.Contains("blocked"))
 				{
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 3))
+						if (!(kolvoUpdatePopitka[uri] > 2))
 							ocherLeroy.Enqueue(uri);
 					}
 					else
@@ -102,14 +155,15 @@ namespace Остатки.Classes
 						
 				}
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Thread.Sleep(6000);
 				if (!ocherLeroy.Contains(uri))
 				{
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 3))
+						if (!(kolvoUpdatePopitka[uri] > 2))
 							ocherLeroy.Enqueue(uri);
 					}
 					else
@@ -575,6 +629,57 @@ namespace Остатки.Classes
 					ocherLeonardo.Enqueue(ink);
 					Thread.Sleep(5000);
 				}
+			}
+		}
+
+		public static void parsePetrovichUpdate(Product oldProduct)
+		{
+			//Thread.Sleep(rnd.Next(1250, 3750));
+			JobWhithApi.PetrovichJobs.Root productRoot = PetrovichJobsWithCatalog.GetProduct(oldProduct.ArticleNumberInShop);
+			if (productRoot == null)
+			{
+				ocherPetrovich.Enqueue(oldProduct);
+				Thread.Sleep(3000);
+			}
+			else
+            {
+				JobWhithApi.PetrovichJobs.Product newProduct = productRoot.data.product;
+
+				if (!oldProduct.Name.Equals(newProduct.title))
+				{
+					oldProduct.Name = newProduct.title;
+					oldProduct.NameIsRedact = true;
+				}
+
+				oldProduct.HistoryRemainsWhite.Add(oldProduct.RemainsWhite);
+				oldProduct.HistoryRemainsBlack.Add(oldProduct.RemainsBlack);
+
+				if ((int)oldProduct.NowPrice != newProduct.price.retail)
+				{
+					oldProduct.OldPrice.Add(oldProduct.NowPrice);
+					oldProduct.DateOldPrice.Add(DateTime.Now);
+
+					oldProduct.PriceIsChanged = true;
+					oldProduct.NewPriceIsSave = false;
+
+					oldProduct.NowPrice = newProduct.price.retail;
+				}
+
+
+
+				if (newProduct.remains.total > 5)
+				{
+					oldProduct.RemainsWhite = newProduct.remains.total;
+					oldProduct.RemainsBlack = PetrovichJobsWithCatalog.GetRemainsBlack(newProduct.remains);
+				}
+				else
+				{
+					oldProduct.RemainsWhite = 0;
+					oldProduct.RemainsBlack = PetrovichJobsWithCatalog.GetRemainsBlack(newProduct.remains) + newProduct.remains.total;
+				}
+				oldProduct.DateHistoryRemains.Add(DateTime.Now);
+
+				NewRemaintProduct.Enqueue(oldProduct);
 			}
 		}
 

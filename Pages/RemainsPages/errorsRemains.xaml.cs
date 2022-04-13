@@ -44,6 +44,7 @@ namespace Остатки.Pages.RemainsPages
 				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(productFromMarletplacesTMP);
 			}
 			products.ItemsSource = productFromMarletplaces;
+			MainGrid.Children.Clear();
 			MainGrid.Children.Add(products);
 		}
 	}

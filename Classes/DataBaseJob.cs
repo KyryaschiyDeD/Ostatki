@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Остатки.Pages;
 
 namespace Остатки.Classes
 {
@@ -233,6 +234,7 @@ namespace Остатки.Classes
 		}
 		public static void SaveNewRemains(ConcurrentQueue<Product> NewRemaintProductLerya)
 		{
+			Dictionary<string, int> CountOfUpdate = new Dictionary<string, int>();
 			List<Product> lstPr = new List<Product>();
 			List<Product> UpdateWait = new List<Product>();
 			List<Product> UpdateOnline = new List<Product>();
@@ -261,6 +263,9 @@ namespace Остатки.Classes
 							else
 							if (OneProduct.ProductLink.Contains("leroy"))
 								ProductJobs.ocherLeroy.Enqueue(OneProduct.ProductLink);
+							else
+							if (OneProduct.ProductLink.Contains("petrovich"))
+								ProductJobs.ocherPetrovich.Enqueue(OneProduct);
 						}
 
 
@@ -271,6 +276,22 @@ namespace Остатки.Classes
 							ItsWait = true;
 						}
 						proverk.DateHistoryRemains.Add(DateTime.Now);
+
+						if (OneProduct.NameIsRedact)
+                        {
+							proverk.Name = OneProduct.Name;
+							proverk.NameIsRedact = OneProduct.NameIsRedact;
+
+						}
+						if (!ItsWait)
+                        {
+							if (CountOfUpdate.ContainsKey(proverk.TypeOfShop))
+							{
+								CountOfUpdate[proverk.TypeOfShop]++;
+							}
+							else
+								CountOfUpdate.Add(proverk.TypeOfShop, 1);
+						}
 
 						proverk.HistoryRemainsWhite.Add(proverk.RemainsWhite);
 						proverk.RemainsWhite = OneProduct.RemainsWhite;
@@ -287,12 +308,15 @@ namespace Остатки.Classes
 							proverk.OldPrice.Add(proverk.NowPrice);
 							proverk.NowPrice = OneProduct.NowPrice;
 							proverk.DateOldPrice.Add(DateTime.Now);
+							proverk.PriceIsChanged = true;
 						}
-						if (OneProduct.Name != proverk.Name || String.IsNullOrEmpty(proverk.Name))
+
+						if (OneProduct.Name != proverk.Name || String.IsNullOrEmpty(proverk.Name) || !proverk.Name.Equals(OneProduct.Name))
 						{
 							proverk.Name = OneProduct.Name;
 							proverk.NameIsRedact = true;
 						}
+
 						if (!error)
 						{
 							if (ItsWait)
@@ -308,8 +332,25 @@ namespace Остатки.Classes
 				};
 				Parallel.Invoke(action);
 			}
-			if (ProductJobs.ocherLeroy.Count != 0)
-				remains2.GoUpdateAllDataBaseLerya();
+            foreach (var item in CountOfUpdate)
+            {
+				if (MainInfoList.satisticGlobal.CountProductsUpdates == null)
+					MainInfoList.satisticGlobal.CountProductsUpdates = new Dictionary<string, List<int>>();
+				if (MainInfoList.satisticGlobal.CountProductsUpdates.ContainsKey(item.Key))
+				{
+					MainInfoList.satisticGlobal.CountProductsUpdates[item.Key].Add(item.Value);
+				}
+				else
+                {
+					MainInfoList.satisticGlobal.CountProductsUpdates.Add(item.Key, new List<int>());
+					MainInfoList.satisticGlobal.CountProductsUpdates[item.Key].Add(item.Value);
+				}
+			}
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<SatisticGlobal>("Statistic");
+				col.Insert(MainInfoList.satisticGlobal);
+			}
 		}
 
 		public static void DeleteProduct(Product product)
@@ -366,6 +407,7 @@ namespace Остатки.Classes
 				Wait = db.GetCollection<Product>("ProductsWait").Query().ToList();
 				Archive = db.GetCollection<Product>("ProductsArchive").Query().ToList();
 				Remains = db.GetCollection<Product>("Products").Query().ToList();
+				Del = db.GetCollection<Product>("ProductsBlackList").Query().ToList();
 			}
 		}
 	}

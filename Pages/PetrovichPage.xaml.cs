@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -127,146 +127,151 @@ namespace Остатки.Pages
 			foreach (Classes.JobWhithApi.PetrovichJobs.Product productFromList in newProduct)
 			{
 				Classes.JobWhithApi.PetrovichJobs.Root productRoot = PetrovichJobsWithCatalog.GetProduct(productFromList.code.ToString());
-				Classes.JobWhithApi.PetrovichJobs.Product item = productRoot.data.product;
-				if (item.remains.total > 5 && item.images != null)
-				{
-					Classes.Product onePos = new Classes.Product();
-					onePos.Name = item.title;
-					onePos.NowPrice = item.price.retail;
-					onePos.RemainsWhite = item.remains.total;
-					onePos.RemainsBlack = 0;
+				if (productRoot != null)
+				if (productRoot.data.product != null)
+                {
+					Classes.JobWhithApi.PetrovichJobs.Product item = productRoot.data.product;
+					if (item.remains.total > 5 && item.images != null)
+					{
+						Classes.Product onePos = new Classes.Product();
+						onePos.Name = item.title;
+						onePos.NowPrice = item.price.retail;
+						onePos.RemainsWhite = item.remains.total;
+						onePos.RemainsBlack = PetrovichJobsWithCatalog.GetRemainsBlack(item.remains);
 
-					List<int> countOfComplect = new List<int>();
-					if (productCountComplect1)
-						countOfComplect.Add(1);
+						List<int> countOfComplect = new List<int>();
+						if (productCountComplect1)
+							countOfComplect.Add(1);
 
-					if (onePos.NowPrice <= 500)
-					{
-						if (productCountComplect2)
-							countOfComplect.Add(2);
-						if (productCountComplect3)
-							countOfComplect.Add(3);
-						if (productCountComplect5)
-							countOfComplect.Add(5);
-						if (productCountComplect10)
-							countOfComplect.Add(10);
-					}
-					else
-					if (onePos.NowPrice <= 1000)
-					{
-						if (productCountComplect2)
-							countOfComplect.Add(2);
-						if (productCountComplect3)
-							countOfComplect.Add(3);
-						if (productCountComplect5)
-							countOfComplect.Add(5);
-					}
-					else
-					if (onePos.NowPrice <= 2000)
-					{
-						if (productCountComplect2)
-							countOfComplect.Add(2);
-						if (productCountComplect3)
-							countOfComplect.Add(3);
-					}
-					else
-					if (onePos.NowPrice <= 3000)
-					{
-						if (productCountComplect2)
-							countOfComplect.Add(2);
-					}
-
-					onePos.ProductLink = @"https://moscow.petrovich.ru/catalog/" + item.breadcrumbs[0].code + "/" + item.code;
-					onePos.ArticleNumberInShop = item.code.ToString();
-					onePos.ArticleNumberUnicList = new List<string>();
-					onePos.TypeOfShop = "petrovich";
-					onePos.Weight = item.weight;
-					onePos.DateHistoryRemains.Add(DateTime.Now);
-					specificationsDict["Ссылка One"] += onePos.ProductLink + "\n";
-					List<string> oneXaract = new List<string>();
-					foreach (var xaract in item.properties)
-					{
-						if (!StandardNamesOfXaract.Contains(xaract.title))
+						if (onePos.NowPrice <= 500)
 						{
-							StandardNamesOfXaract.Add(xaract.title);
-							specificationsDict.Add(xaract.title, "");
-							for (int k = 0; k < addCountProduct; k++)
+							if (productCountComplect2)
+								countOfComplect.Add(2);
+							if (productCountComplect3)
+								countOfComplect.Add(3);
+							if (productCountComplect5)
+								countOfComplect.Add(5);
+							if (productCountComplect10)
+								countOfComplect.Add(10);
+						}
+						else
+						if (onePos.NowPrice <= 1000)
+						{
+							if (productCountComplect2)
+								countOfComplect.Add(2);
+							if (productCountComplect3)
+								countOfComplect.Add(3);
+							if (productCountComplect5)
+								countOfComplect.Add(5);
+						}
+						else
+						if (onePos.NowPrice <= 2000)
+						{
+							if (productCountComplect2)
+								countOfComplect.Add(2);
+							if (productCountComplect3)
+								countOfComplect.Add(3);
+						}
+						else
+						if (onePos.NowPrice <= 3000)
+						{
+							if (productCountComplect2)
+								countOfComplect.Add(2);
+						}
+
+						onePos.ProductLink = @"https://moscow.petrovich.ru/catalog/" + item.breadcrumbs[0].code + "/" + item.code;
+						onePos.ArticleNumberInShop = item.code.ToString();
+						onePos.ArticleNumberUnicList = new List<string>();
+						onePos.TypeOfShop = "petrovich";
+						onePos.Weight = item.weight;
+						onePos.DateHistoryRemains.Add(DateTime.Now);
+						specificationsDict["Ссылка One"] += onePos.ProductLink + "\n";
+						List<string> oneXaract = new List<string>();
+						foreach (var xaract in item.properties)
+						{
+							if (!StandardNamesOfXaract.Contains(xaract.title))
+							{
+								StandardNamesOfXaract.Add(xaract.title);
+								specificationsDict.Add(xaract.title, "");
+								for (int k = 0; k < addCountProduct; k++)
+								{
+									for (int j = 0; j < countOfComplect.Count; j++)
+									{
+										specificationsDict[xaract.title] += "\n";
+									}
+								}
+							}
+							for (int j = 0; j < countOfComplect.Count; j++)
+							{
+								specificationsDict[xaract.title] += xaract.value[0].title + "\n";
+							}
+							oneXaract.Add(xaract.title);
+						}
+
+						foreach (var prOneXaract in StandardNamesOfXaract)
+						{
+							if (!oneXaract.Contains(prOneXaract))
 							{
 								for (int j = 0; j < countOfComplect.Count; j++)
 								{
-									specificationsDict[xaract.title] += "\n";
+									specificationsDict[prOneXaract] += "\n";
 								}
 							}
 						}
-						for (int j = 0; j < countOfComplect.Count; j++)
-						{
-							specificationsDict[xaract.title] += xaract.value[0].title + "\n";
-						}
-						oneXaract.Add(xaract.title);
-					}
 
-					foreach (var prOneXaract in StandardNamesOfXaract)
-					{
-						if (!oneXaract.Contains(prOneXaract))
+						foreach (var compl in countOfComplect)
 						{
-							for (int j = 0; j < countOfComplect.Count; j++)
+							onePos.ArticleNumberUnicList.Add("pv-" + onePos.ArticleNumberInShop + "-" + "x" + compl.ToString());
+							specificationsDict["Артикул"] += "pv-" + onePos.ArticleNumberInShop + "-" + "x" + compl.ToString() + "\n";
+							specificationsDict["Объединить на одной карточке"] += onePos.ArticleNumberInShop + "_one_cart\n";
+							specificationsDict["Наименование"] += item.title + "\n";
+							specificationsDict["КолВо завод в отправл"] += compl.ToString() + "\n";
+							specificationsDict["Вес расчётный (в граммах)"] += onePos.Weight * 1000 + "\n";
+							int nowPrice = (int)(Convert.ToInt32(Convert.ToDouble(onePos.NowPrice) * compl + 45 + onePos.Weight * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
+							specificationsDict["Цена"] += nowPrice.ToString() + "\n";
+							specificationsDict["Цена + 40%"] += (nowPrice * 1.4).ToString() + "\n";
+							specificationsDict["Ссылка"] += onePos.ProductLink + "\n";
+
+							if (item.images.Count > 0)
 							{
-								specificationsDict[prOneXaract] += "\n";
+								specificationsDict["Главные фото"] += "https:" + item.images[0] + "\n";
+								specificationsDict["Г + Д через ,"] += item.images[0] + ",";
+								int countImg = item.images.Count;
+								if (countImg > 1)
+									for (int i = 1; i < countImg; i++)
+									{
+										specificationsDict["Доп фото"] += "https:" + item.images[i] + " ";
+										specificationsDict["Г + Д через ,"] += "https:" + item.images[i] + ",";
+									}
+								specificationsDict["Доп фото"] += "\n";
+								specificationsDict["Г + Д через ,"] += "\n";
 							}
-						}
-					}
 
-					foreach (var compl in countOfComplect)
-					{
-						onePos.ArticleNumberUnicList.Add("pv-" + onePos.ArticleNumberInShop + "-" + "x" + compl.ToString());
-						specificationsDict["Артикул"] += "pv-" + onePos.ArticleNumberInShop + "-" + "x" + compl.ToString() + "\n";
-						specificationsDict["Объединить на одной карточке"] += onePos.ArticleNumberInShop + "_one_cart\n";
-						specificationsDict["Наименование"] += item.title + "\n";
-						specificationsDict["КолВо завод в отправл"] += compl.ToString() + "\n";
-						specificationsDict["Вес расчётный (в граммах)"] += onePos.Weight * 1000 + "\n";
-						int nowPrice = (int)(Convert.ToInt32(Convert.ToDouble(onePos.NowPrice) * compl + 45 + onePos.Weight * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
-						specificationsDict["Цена"] += nowPrice.ToString() + "\n";
-						specificationsDict["Цена + 40%"] += (nowPrice * 1.4).ToString() + "\n";
-						specificationsDict["Ссылка"] += onePos.ProductLink + "\n";
-
-						if (item.images.Count > 0)
-						{
-							specificationsDict["Главные фото"] += "https:" + item.images[0] + "\n";
-							specificationsDict["Г + Д через ,"] += item.images[0] + ",";
-							int countImg = item.images.Count;
-							if (countImg > 1)
-								for (int i = 1; i < countImg; i++)
+							specificationsDict["Описание"] += HTMLJob.UnHtml(item.description) + "\n";
+							bool IsUnic = false;
+							DateTime date = DateTime.Now;
+							while (!IsUnic)
+							{
+								string dateStr = date.ToString("dd.MM.yyyy") + date.ToString("hh:mm:ss:ff");
+								dateStr = dateStr.Replace(".", "").Replace(":", "").Replace(" ", "");
+								if (!BarcodeList.Contains(dateStr))
 								{
-									specificationsDict["Доп фото"] += "https:" + item.images[i] + " ";
-									specificationsDict["Г + Д через ,"] += "https:" + item.images[i] + ",";
+									IsUnic = true;
+									specificationsDict["ШтрихКод"] += dateStr + "\n";
+									BarcodeList.Add(dateStr);
 								}
-							specificationsDict["Доп фото"] += "\n";
-							specificationsDict["Г + Д через ,"] += "\n";
-						}
-						 
-						specificationsDict["Описание"] += HTMLJob.UnHtml(item.description) + "\n";
-						bool IsUnic = false;
-						DateTime date = DateTime.Now;
-						while (!IsUnic)
-						{
-							string dateStr = date.ToString("dd.MM.yyyy") + date.ToString("hh:mm:ss:ff");
-							dateStr = dateStr.Replace(".", "").Replace(":", "").Replace(" ", "");
-							if (!BarcodeList.Contains(dateStr))
-							{
+								date.AddMinutes(1);
 								IsUnic = true;
-								specificationsDict["ШтрихКод"] += dateStr + "\n";
-								BarcodeList.Add(dateStr);
 							}
-							date.AddMinutes(1);
+							specificationsDict["Ширина в мм"] += item.width + "\n";
+							specificationsDict["Длина в мм"] += item.length + "\n";
+							specificationsDict["Высота в мм"] += item.height + "\n";
+
 						}
-						specificationsDict["Ширина в мм"] += item.width + "\n";
-						specificationsDict["Длина в мм"] += item.length + "\n";
-						specificationsDict["Высота в мм"] += item.height + "\n";
 
+						addCountProduct++;
+						productListBackground.Add(onePos);
 					}
-
-					addCountProduct++;
-					productListBackground.Add(onePos);
 				}
 			}
 			GoToCreateFils();
@@ -336,7 +341,7 @@ namespace Остатки.Pages
 
 					stackPanel.Children.Add(button);
 					
-					if (nextCat.data.products != null)
+					//if (nextCat.data.products != null)
 						stackPanel.Children.Add(buttonGetProducts);
 					GridPetrovich.Children.Add(stackPanel);
 				}

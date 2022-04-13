@@ -10,22 +10,24 @@ namespace Остатки.Classes.ProductsClasses
 	{
         public static List<string> FilterList = new List<string>()
         {
-            //"VISIBLE", // видимый
-            "INVISIBLE", // невидимый
-            //"EMPTY_STOCK", // ПУСТОЙ ЗАПАС
-            //"NOT_MODERATED", // НЕ МОДЕРИРУЕТСЯ
-            //"MODERATED", // модерируемый
-            //"DISABLED", // отключенный
-            //"STATE_FAILED", // СОСТОЯНИЕ ЗАВЕРШЕНО
-            //"READY_TO_SUPPLY", // ГОТОВНОСТЬ К ПОСТАВКЕ
-            //"EMPTY_NAVIGATION_CATEGORY", // ПУСТАЯ КАТЕГОРИЯ НАВИГАЦИИ
-            //"VALIDATION_STATE_PENDING", // СОСТОЯНИЕ ПРОВЕРКИ В ОЖИДАНИИ
-            //"VALIDATION_STATE_FAIL", // СБОЙ СОСТОЯНИЯ ПРОВЕРКИ
-            //"VALIDATION_STATE_SUCCESS",// СОСТОЯНИЕ ПРОВЕРКИ УСПЕШНО
-            //"TO_SUPPLY", // Поставлять
-            //"IN_SALE", // В продаже
-            //"REMOVED_FROM_SALE", // Удалено из продаже
-            //"ARCHIVED", // В архиве
+            //"ALL", // все товары
+            //"VISIBLE", // товары, которые видны покупателям.
+            //"INVISIBLE", // товары, которые по какой-то из причин не видны покупателям.
+            //"EMPTY_STOCK", // товары, у которых не указано наличие.
+            //"NOT_MODERATED", //  товары, которые не прошли модерацию.
+            //"MODERATED", //  товары, которые прошли модерацию.
+            //"DISABLED", // товары, которые видны покупателям, но недоступны к покупке.
+            //"STATE_FAILED", // товары, создание которых завершилось ошибĸой.
+            //"READY_TO_SUPPLY", // товары, готовые к поставке.
+            //"VALIDATION_STATE_PENDING", // товары, которые проходят проверку на премодерации (валидатором).
+            //"VALIDATION_STATE_FAIL", // товары, которые не прошли проверку на премодерации (валидатором).
+            //"VALIDATION_STATE_SUCCESS",// товары, которые прошли проверку на премодерации (валидатором).
+            "TO_SUPPLY", // товары, готовые к продаже.
+            //"IN_SALE", // товары в продаже.
+            //"REMOVED_FROM_SALE", // товары, скрытые от покупателей.
+            //"ARCHIVED", // товары в архиве.
+            //"OVERPRICED_WITH_STOCK", //товары в продаже со стоимостью выше, чем у конкурентов.
+            //"PARTIAL_APPROVED", // товары в продаже с пустым или неполным описанием.
         };
 
         public static  List<string> FilterListRU = new List<string>()

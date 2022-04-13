@@ -26,11 +26,17 @@ namespace Остатки.Classes
 		}
 		public static async void ShowInfoProduct(string name, object data)
 		{
-			ContentDialog InfoProductDialog = new ContentDialog()
+			var InfoProductDialog = new ContentDialog()
 			{
 				Title = name,
-				Content = data.ToString(),
-				PrimaryButtonText = "ОК"
+				Content = new ScrollViewer()
+				{
+					Content = new TextBlock() { Text = data.ToString() },
+				},
+				CanBeScrollAnchor = true,
+				//Content = data.ToString(),
+				PrimaryButtonText = "ОК",
+				
 			};
 			await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
 								() =>

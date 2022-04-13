@@ -22,18 +22,18 @@
 				<AppBarButton Icon="Bullets" Grid.Column="0" Click="GetAllProducts_Click" HorizontalAlignment="Center" Label="Все"/>
 				
 				<AppBarButton Grid.Column="1" Click="GetLeroyProducts_Click" HorizontalAlignment="Center" Label="Леруа">
-					<Image Source="Resources/Icons/leroyIcon.jpg"/>
+					<Image Source="../../Resources/Icons/leroyIcon.jpg"/>
 				</AppBarButton>
 
 				<AppBarButton Grid.Column="2" Click="GetLeonardoProducts_Click" HorizontalAlignment="Center" Label="Леонардо">
-					<Image Source="Resources/Icons/leonardoIcon.jpg" VerticalAlignment="Center"/>
+					<Image Source="../../Resources/Icons/leonardoIcon.jpg" VerticalAlignment="Center"/>
 				</AppBarButton>
 				
 				<AppBarButton Grid.Column="3" Click="GetPetrovichProducts_Click" HorizontalAlignment="Center" Label="Петрович">
-					<Image Source="Resources/Icons/petrovichIcon.jpg" VerticalAlignment="Center"/>
+					<Image Source="../../Resources/Icons/petrovichIcon.jpg" VerticalAlignment="Center"/>
 				</AppBarButton>
 				
-				<AppBarButton Icon="FourBars"  Grid.Column="4" Click="GoToGetProductID_Click" HorizontalAlignment="Center" Label="Сверка по API"/>
+				<AppBarButton Icon="FourBars"  Grid.Column="4" Click="GoToGetProductID_Click" HorizontalAlignment="Center" Label="Получить товар с озон"/>
 				<AppBarButton Icon="FourBars"  Grid.Column="5" Click="GoToGetArhiveByProductId_Click" HorizontalAlignment="Center" Label="В архив по product_ID"/>
 			</Grid>
 		</AppBar>
@@ -63,6 +63,10 @@
 			<CommandBar.Content>
 				<TextBox Margin="4" VerticalAlignment="Center" Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
 			</CommandBar.Content>
+            <AppBarButton
+				Icon="ProtectedDocument"
+				Click="PriceUpdate_Click"
+				/>
 			<AppBarButton
 				Icon="Flag"
 				Click="Article_Click"
@@ -163,31 +167,7 @@
 						</Style>
 					</controls:DataGridTextColumn.ElementStyle>
 				</controls:DataGridTextColumn>
-				
-				<controls:DataGridCheckBoxColumn
-            Header="The Time Line" 
-            Width="SizeToHeader"
-            Binding="{Binding IsTheTimeLineOzon}" 
-					Tag="IsTheTimeLineOzon">
-					<controls:DataGridCheckBoxColumn.ElementStyle>
-						<Style TargetType="CheckBox">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridCheckBoxColumn.ElementStyle>
-				</controls:DataGridCheckBoxColumn>
-				
-				<controls:DataGridCheckBoxColumn
-            Header="Лымарь Е.Г." 
-            Width="SizeToHeader"
-            Binding="{Binding IsLymarEGOzon}" 
-					Tag="IsLymarEGOzon">
-					<controls:DataGridCheckBoxColumn.ElementStyle>
-						<Style TargetType="CheckBox">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridCheckBoxColumn.ElementStyle>
-				</controls:DataGridCheckBoxColumn>
-				
+
 				<controls:DataGridTemplateColumn Tag="FuncTemplate" Header="Фукнции :-)" CellTemplate="{StaticResource FuncTemplate}" />
 			</controls:DataGrid.Columns>
 		</controls:DataGrid>
