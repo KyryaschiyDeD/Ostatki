@@ -8,7 +8,7 @@
 	xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls" xmlns:muxc="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-	<Page.BottomAppBar>
+    <Page.BottomAppBar>
 		<AppBar IsSticky="true">
 			<Grid HorizontalAlignment="Center">
 				<Grid.ColumnDefinitions>
@@ -18,7 +18,8 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
-				</Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 				<AppBarButton Icon="Bullets" Grid.Column="0" Click="GetAllProducts_Click" HorizontalAlignment="Center" Label="Все"/>
 				
 				<AppBarButton Grid.Column="1" Click="GetLeroyProducts_Click" HorizontalAlignment="Center" Label="Леруа">
@@ -33,9 +34,18 @@
 					<Image Source="../../Resources/Icons/petrovichIcon.jpg" VerticalAlignment="Center"/>
 				</AppBarButton>
 				
-				<AppBarButton Icon="FourBars"  Grid.Column="4" Click="GoToGetProductID_Click" HorizontalAlignment="Center" Label="Получить товар с озон"/>
-				<AppBarButton Icon="FourBars"  Grid.Column="5" Click="GoToGetArhiveByProductId_Click" HorizontalAlignment="Center" Label="В архив по product_ID"/>
-			</Grid>
+				<AppBarButton Grid.Column="4" Click="GoToGetProductID_Click" HorizontalAlignment="Center" Label="Получить товар">
+                    <Image Source="../../Resources/Icons/getProductFromOzon.svg" VerticalAlignment="Center"/>
+                </AppBarButton>
+
+                <AppBarButton Grid.Column="5" Click="GoToGetInfoProductFromOzon_Click" HorizontalAlignment="Center" Label="Получить инф-цию о товарах">
+                    <Image Source="../../Resources/Icons/info.svg" VerticalAlignment="Center"/>
+                </AppBarButton>
+                
+                <AppBarButton Grid.Column="6" Click="GoToGetCommissionFromOzon_Click" HorizontalAlignment="Center" Label="Получить комиссии">
+                    <Image Source="../../Resources/Icons/commission.svg" VerticalAlignment="Center"/>
+                </AppBarButton>
+            </Grid>
 		</AppBar>
 	</Page.BottomAppBar>
 	<Grid>
@@ -63,11 +73,10 @@
 			<CommandBar.Content>
 				<TextBox Margin="4" VerticalAlignment="Center" Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
 			</CommandBar.Content>
+            <AppBarButton Click="PriceUpdate_Click">
+                <Image Source="../../Resources/Icons/dollar.svg"/>
+            </AppBarButton>
             <AppBarButton
-				Icon="ProtectedDocument"
-				Click="PriceUpdate_Click"
-				/>
-			<AppBarButton
 				Icon="Flag"
 				Click="Article_Click"
 				/>

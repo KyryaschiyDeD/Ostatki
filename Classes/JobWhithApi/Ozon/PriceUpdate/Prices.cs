@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Остатки.Classes.JobWhithApi.Ozon.StockUpdate;
+using Остатки.Classes.ProductsClasses.InfoPrices;
 
 namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
 {
@@ -38,13 +40,37 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
     }
     public class Prices
     {
+
+        public static bool ChechNewPriceOfFiveProcent(int a, string str)
+        {
+            double b;
+            bool ctr = double.TryParse(str.Replace('.',','), out b);
+
+            if (a > b)
+            {
+                if (((double)a / b - 1) >= 0.05)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                if ((b / (double)a - 1) >= 0.05)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
         public static async void GoUpdatePrices(List<Product> products)
         {
             List<Price> prices = new List<Price>();
             int countToUpdatePrice = 0;
             List<RootResp> resp = new List<RootResp>();
+
             foreach (var keys in ApiKeysesJob.GetAllApiList())
             {
+                List<ArticleNumber> DellFromSale = new List<ArticleNumber>();
                 foreach (Product product in products)
                 {
                     if (product.ArticleNumberProductId.ContainsKey(keys.ClientId) && product.ArticleNumberProductId[keys.ClientId].Count != 0)
@@ -69,12 +95,73 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                             else
                                 kolKompl = 1;
 
-                            int newPrice = (int)(Convert.ToInt32(Convert.ToDouble(product.NowPrice) * kolKompl + 45 + product.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
+                            int newPrice = 0;
+                            double koef = 0;
 
-                            prices.Add(new Price() { product_id = (int)item.ArticleOzon, price = newPrice.ToString(), old_price = (newPrice * 1.4).ToString() });
-                            countToUpdatePrice++;
+                            if (product.NowPrice * kolKompl < 100)
+                            {
+                                koef = 2;
+                            }
+                            else
+                            if (product.NowPrice * kolKompl < 200)
+                            {
+                                koef = 1.5;
+                            }
+                            else
+                            if (product.NowPrice * kolKompl < 500)
+                            {
+                                koef = 1.25;
+                            }
+                            else
+                            if (product.NowPrice * kolKompl < 1000)
+                            {
+                                koef = 1.1;
+                            }
+                            else
+                                koef = 1;
 
-                            if (countToUpdatePrice >= 450)
+                            bool ItIsNewPrice = false;
+
+                            if (item.productInfoPriceFromOzon != null)
+                            {
+                                if (item.productInfoPriceFromOzon.sales_percent == 0)
+                                {
+                                    Thread.Sleep(500);
+                                    RootInfoPrices rootInfoPrices = GetProductPriceInfo.PostRequestAsyncWhithList(keys.ClientId, keys.ApiKey, "", 1, new List<string>() { item.OurArticle });
+                                    if (rootInfoPrices.result.items.Count != 0)
+                                    {
+                                        newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.4 +
+                                        (rootInfoPrices.result.items.First().commissions.fbs_first_mile_max_amount + rootInfoPrices.result.items.First().commissions.fbs_direct_flow_trans_max_amount
+                                        + rootInfoPrices.result.items.First().commissions.fbs_deliv_to_customer_amount)) * 1.05 / (100 - rootInfoPrices.result.items.First().commissions.sales_percent) * 100) / 10 * 10;
+                                        ItIsNewPrice = true;
+                                    }
+                                }
+                                else
+                                {
+                                    newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.4 +
+                                        (item.productInfoPriceFromOzon.fbs_first_mile_max_amount + item.productInfoPriceFromOzon.fbs_direct_flow_trans_max_amount
+                                        + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100) / 10 * 10;
+                                    ItIsNewPrice = true;
+                                }
+                            }
+                            
+
+                            //newPrice = (int)(Convert.ToInt32(Convert.ToDouble(product.NowPrice) * kolKompl + 45 + product.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
+
+                            if(ItIsNewPrice)
+                            {
+                                if (ChechNewPriceOfFiveProcent(newPrice, item.productInfoFromOzon.result.price))
+                                {
+                                    prices.Add(new Price() { product_id = (int)item.ArticleOzon, price = newPrice.ToString(), old_price = (newPrice * 1.4).ToString() });
+                                    countToUpdatePrice++;
+                                }
+                            }
+                            else
+                            {
+                                DellFromSale.Add(item);
+                            }
+
+                            if (countToUpdatePrice >= 990)
                             {
                                 countToUpdatePrice = 0;
                                 resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, prices));
@@ -83,7 +170,11 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                         }
                     }
                 }
+
+                Stocks.GoUpdateStocksToNull(DellFromSale, keys);
                 countToUpdatePrice = 0;
+                DellFromSale.Clear();
+
                 resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, prices));
                 prices = new List<Price>();
             }

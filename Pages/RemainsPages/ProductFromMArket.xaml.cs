@@ -43,7 +43,7 @@ namespace Остатки.Pages.RemainsPages
 		}
 		public static string getLink(string lnk)
 		{
-			string code = StealProducts.getResponse(lnk);
+			string code = ProductJobs.GetResponseUpdates(lnk);
 			//Thread.Sleep(3000);
 			if (code.Contains("ничего не найдено"))
 			{
@@ -68,6 +68,16 @@ namespace Остатки.Pages.RemainsPages
 			return null;
 		}
 
+		private static bool ArticleNumberProductId(List<ArticleNumber> oldList, ArticleNumber newArticle)
+        {
+            foreach (var item in oldList)
+            {
+				if (item.ArticleOzon == newArticle.ArticleOzon && item.OurArticle.Equals(newArticle.OurArticle))
+					return true;
+            }
+			return false;
+        }
+
 		private void AddProduct_Click(object sender, RoutedEventArgs e)
 		{
 			List<ProductFromMarletplace> allProductsToAdd = new List<ProductFromMarletplace>();
@@ -91,7 +101,7 @@ namespace Остатки.Pages.RemainsPages
 			}
 
 			int offer = -1;
-
+			allProductsToAdd.Reverse();
 			Queue<ProductFromMarletplace> tovar = new Queue<ProductFromMarletplace>(allProductsToAdd);
 			List<Product> productList = new List<Product>();	
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
@@ -107,6 +117,7 @@ namespace Остатки.Pages.RemainsPages
 			while (tovar.Count > 0)
 			{
 				ProductFromMarletplace item = tovar.Dequeue();
+				
 				if (item == null)
 					while (item == null)
                     {
@@ -115,7 +126,7 @@ namespace Остатки.Pages.RemainsPages
 				using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 				{
 					var col = db.GetCollection<Product>("Products");
-					allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+					allProducts = col.Query().ToList();
 				}
 				/*
 							string article = "";
@@ -247,7 +258,7 @@ namespace Остатки.Pages.RemainsPages
 								hostsUseNow = 0;
 							if (oneProduct == null)
 							{
-								tovar.Enqueue(item);
+								//tovar.Enqueue(item);
 								Thread.Sleep(3000);
 
 								if (countError == 3)
@@ -300,7 +311,6 @@ namespace Остатки.Pages.RemainsPages
 
 						foreach (var ourProduct in allProducts)
 						{
-
 							if (isFindDB)
 								break;
 							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
@@ -309,7 +319,7 @@ namespace Остатки.Pages.RemainsPages
 								{
 									if (isFindDB)
 										break;
-									if (oneArt.OurArticle.Equals(article))
+									if (oneArt.OurArticle.Contains(article))
 									{
 										isFindDB = true;
 										findProductInDB = ourProduct;
@@ -327,7 +337,7 @@ namespace Остатки.Pages.RemainsPages
 							if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
 								findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
 
-							if (!findProductInDB.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
+							if (!ArticleNumberProductId(findProductInDB.ArticleNumberProductId[item.Key.ClientId], item.productID_OfferID))
 								findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
 
 							using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
@@ -393,7 +403,7 @@ namespace Остатки.Pages.RemainsPages
 								}
 								else
 								{
-									tovar.Enqueue(item);
+									//tovar.Enqueue(item);
 									Thread.Sleep(3000);
 
 									if (countError == 3)
@@ -409,13 +419,13 @@ namespace Остатки.Pages.RemainsPages
 							}
 							else
 							{
-								tovar.Enqueue(item);
+								//tovar.Enqueue(item);
 							}
 						}
 					}
-				if (item.offer_id.Contains("lm-"))
+					if (item.offer_id.Contains("lm-"))
 					{
-						/*string article = "";
+						string article = "";
 
 						if (item.offer_id.Contains("x10"))
 						{
@@ -432,8 +442,6 @@ namespace Остатки.Pages.RemainsPages
 
 						foreach (var ourProduct in allProducts)
 						{
-
-
 							if (isFindDB)
 								break;
 							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
@@ -452,20 +460,17 @@ namespace Остатки.Pages.RemainsPages
 
 						}
 
-
 						if (isFindDB)
 						{
+							if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+								findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
 
+							if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
+								findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
 
-								if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-									findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+							if (!ArticleNumberProductId(findProductInDB.ArticleNumberProductId[item.Key.ClientId], item.productID_OfferID))
+								findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
 
-								if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-									findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
-
-								if (!findProductInDB.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-									findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-							
 							using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 							{
 								var col = db.GetCollection<Product>("Products");
@@ -478,7 +483,7 @@ namespace Остатки.Pages.RemainsPages
 
 							if (linkProduct == null)
 							{
-								tovar.Enqueue(item);
+								//tovar.Enqueue(item);
 								Thread.Sleep(3000);
 
 								if (countError == 3)
@@ -515,12 +520,12 @@ namespace Остатки.Pages.RemainsPages
 												newProduct.ArticleNumberUnicList = new List<string>();
 												newProduct.ArticleNumberUnicList.Add(item.offer_id);
 												newProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
-		
-													if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-														newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-													if (!newProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-														newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-												
+
+												if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+													newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+												if (!newProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
+													newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 												using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 												{
 													var col = db.GetCollection<Product>("Products");
@@ -538,7 +543,7 @@ namespace Остатки.Pages.RemainsPages
 										}
 										else
 										{
-											tovar.Enqueue(item);
+											//tovar.Enqueue(item);
 											Thread.Sleep(3000);
 
 											if (countError == 3)
@@ -566,10 +571,10 @@ namespace Остатки.Pages.RemainsPages
 									}
 								}
 							}
-						} */
+						}
 					}
 					else
-				if (int.TryParse(item.offer_id, out offer))
+					if (int.TryParse(item.offer_id, out offer))
 					{
 						string article = offer.ToString();
 
@@ -578,37 +583,36 @@ namespace Остатки.Pages.RemainsPages
 
 						foreach (var ourProduct in allProducts)
 						{
-
-								if (isFindDB)
-									break;
-								List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
-								if (newLst != null && newLst.Count > 0)
-									foreach (var oneArt in newLst)
+							if (isFindDB)
+								break;
+							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
+							if (newLst != null && newLst.Count > 0)
+								foreach (var oneArt in newLst)
+								{
+									if (isFindDB)
+										break;
+									if (oneArt.OurArticle.Contains(article))
 									{
-										if (isFindDB)
-											break;
-										if (oneArt.OurArticle.Contains(article))
-										{
-											isFindDB = true;
-											findProductInDB = ourProduct;
-											break;
-										}
+										isFindDB = true;
+										findProductInDB = ourProduct;
+										break;
 									}
-							
+								}
+
 						}
 						if (isFindDB)
 						{
 
 
-								if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-									findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+							if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+								findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
 
-								if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-									findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
+							if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
+								findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
 
-								if (!findProductInDB.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-									findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-							
+							if (!ArticleNumberProductId(findProductInDB.ArticleNumberProductId[item.Key.ClientId], item.productID_OfferID))
+								findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 							using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 							{
 								var col = db.GetCollection<Product>("Products");
@@ -617,7 +621,7 @@ namespace Остатки.Pages.RemainsPages
 						}
 						else
 						{
-							/*string linkProduct = getLink("https://leroymerlin.ru/search/?q=" + article);
+							string linkProduct = getLink("https://leroymerlin.ru/search/?q=" + article);
 
 							if (linkProduct == null)
 							{
@@ -636,7 +640,7 @@ namespace Остатки.Pages.RemainsPages
 							}
 							else
 							{
-								
+
 								if (linkProduct.Equals("null"))
 								{
 									using (var db = new LiteDatabase($@"{Global.folder.Path}/ErrorArticle.db"))
@@ -648,7 +652,7 @@ namespace Остатки.Pages.RemainsPages
 								}
 								else
 								{
-									if (linkProduct != null)
+									if (linkProduct != null && !linkProduct.Equals("https://leroymerlin.ru/product/lampa-svetodiodnaya-lexman-clear-g53-175-250-v-6-vt-prozrachnaya-500-lm-teplyy-belyy-svet-82991617/"))
 									{
 										Product newProduct = ProductJobs.GetProductLeroyByLink(linkProduct);
 										if (!newProduct.Name.Equals("error"))
@@ -659,10 +663,10 @@ namespace Остатки.Pages.RemainsPages
 												newProduct.ArticleNumberUnicList.Add(item.offer_id);
 												newProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
 
-													if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-														newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-													newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-												
+												if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+													newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+												newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 												using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 												{
 													var col = db.GetCollection<Product>("Products");
@@ -710,7 +714,7 @@ namespace Остатки.Pages.RemainsPages
 								}
 							}
 
-							*/
+
 						}
 					}
 					else
@@ -811,7 +815,6 @@ namespace Остатки.Pages.RemainsPages
 				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
-
 		private void In_SaleProduct_Click(object sender, RoutedEventArgs e)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
@@ -821,7 +824,6 @@ namespace Остатки.Pages.RemainsPages
 				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
-
 		private void Removed_From_SaleProduct_Click(object sender, RoutedEventArgs e)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
@@ -831,7 +833,6 @@ namespace Остатки.Pages.RemainsPages
 				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
-
 		private void ArchivedProduct_Click(object sender, RoutedEventArgs e)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))

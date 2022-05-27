@@ -281,7 +281,7 @@ namespace Остатки.Pages
 					UnRedactLinksQueue.TryDequeue(out lnk);
 					if (lnk != null)
 					{
-						string Code = getResponse(lnk);
+						string Code = ProductJobs.GetResponseUpdates(lnk);
 						if (Code.Length != 0)
 							if (!LinksQueue.Contains(lnk))
 							{
@@ -293,7 +293,7 @@ namespace Остатки.Pages
 				}
 			};
 
-			Parallel.Invoke(action, action, action, action, action);
+			Parallel.Invoke(action);
 
 			string tag = "Product";
 			string group = "Lerya";
@@ -364,6 +364,66 @@ namespace Остатки.Pages
 				{
 					MatchCollection matchesCount = regexCount.Matches(countLocaionCode);
 					MatchCollection matchesLocation = regexLocation.Matches(countLocaionCode);
+
+
+
+					double weight = 5000;
+
+					// Получаем строку с наименованием, артикулом и ценой
+					Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
+
+
+					string nextNameArticleId = "";
+					MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							nextNameArticleId += match;
+						}
+					}
+					else
+					{
+						Message.errorsList.Add("Совпадений не найдено");
+					}
+					// Выделяем только наименование, артикул и цену
+					regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
+
+					string finishNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							finishNameArticleId += match;
+						}
+					}
+
+					// Получаем чисто артикул, наименование и цену
+					regexArticleNumber = new Regex(@""".*?""");
+					matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
+
+
+					// Артикл и имя
+					string resultNameArticleId = "";
+					if (matchesArticleNumberName.Count > 0)
+					{
+						foreach (Match match in matchesArticleNumberName)
+						{
+							resultNameArticleId += match;
+						}
+					}
+
+					string[] namesAndArticleId = resultNameArticleId.Split('"');
+
+
+					if (namesAndArticleId[3].Contains("»"))
+						namesAndArticleId[3].Replace("»", "");
+					if (namesAndArticleId[3].Contains("«"))
+						namesAndArticleId[3].Replace("«", "");
+
+
+					onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
 
 					// Кол-во
 					if (matchesCount.Count > 0)
@@ -443,17 +503,33 @@ namespace Остатки.Pages
 						}
 						onePos.remainsDictionary = remainsDictionary;
 						onePos.DateHistoryRemains.Add(DateTime.Now);
-						if (countOfWhoiteList < 3)
+						
+						if (onePos.NowPrice >= 12000 && onePos.RemainsWhite + onePos.RemainsBlack >= 10)
 						{
-							onePos.RemainsBlack += onePos.RemainsWhite;
-							onePos.RemainsWhite = 0;
+							onePos.RemainsWhite += onePos.RemainsBlack;
+							if (onePos.RemainsWhite < 15)
+								onePos.RemainsWhite += 10;
+
+
 						}
+						else
+                        {
+							if (countOfWhoiteList < 3)
+							{
+								onePos.RemainsBlack += onePos.RemainsWhite;
+								onePos.RemainsWhite = 0;
+							}
+						}
+						
 					}
 					else
 					{
 						onePos.RemainsBlack = 0;
 						onePos.RemainsWhite = 0;
 					}
+
+					
+
 					if (onePos.RemainsWhite >= 15)
 					{
 
@@ -498,64 +574,6 @@ namespace Остатки.Pages
 						}
 
 
-
-						double weight = 5000;
-
-						// Получаем строку с наименованием, артикулом и ценой
-						Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
-
-
-						string nextNameArticleId = "";
-						MatchCollection matchesArticleNumberName = regexArticleNumber.Matches(code);
-						if (matchesArticleNumberName.Count > 0)
-						{
-							foreach (Match match in matchesArticleNumberName)
-							{
-								nextNameArticleId += match;
-							}
-						}
-						else
-						{
-							Message.errorsList.Add("Совпадений не найдено");
-						}
-						// Выделяем только наименование, артикул и цену
-						regexArticleNumber = new Regex(@"data-product-id=""\w+"" data-product-name="".*?"" data-product-price="".*?""");
-						matchesArticleNumberName = regexArticleNumber.Matches(nextNameArticleId);
-
-						string finishNameArticleId = "";
-						if (matchesArticleNumberName.Count > 0)
-						{
-							foreach (Match match in matchesArticleNumberName)
-							{
-								finishNameArticleId += match;
-							}
-						}
-
-						// Получаем чисто артикул, наименование и цену
-						regexArticleNumber = new Regex(@""".*?""");
-						matchesArticleNumberName = regexArticleNumber.Matches(finishNameArticleId);
-
-
-						// Артикл и имя
-						string resultNameArticleId = "";
-						if (matchesArticleNumberName.Count > 0)
-						{
-							foreach (Match match in matchesArticleNumberName)
-							{
-								resultNameArticleId += match;
-							}
-						}
-
-						string[] namesAndArticleId = resultNameArticleId.Split('"');
-
-
-						if (namesAndArticleId[3].Contains("»"))
-							namesAndArticleId[3].Replace("»", "");
-						if (namesAndArticleId[3].Contains("«"))
-							namesAndArticleId[3].Replace("«", "");
-
-
-						onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
 
 						/*double newPrice = 0;
 						if (onePos.NowPrice < 400)
@@ -878,25 +896,36 @@ namespace Остатки.Pages
 				//Thread.Sleep(3000);
 				string lnk = "";
 				UnRedactLinksQueue.TryDequeue(out lnk);
-				string code = getResponse(lnk);
+				string code = ProductJobs.GetResponseUpdates(lnk);
 				//Thread.Sleep(3000);
-				Regex regexLinks = new Regex(@"<a href="".*?""");
-				MatchCollection matcheslinks = regexLinks.Matches(code);
-				string tmpLinks = "";
-				foreach (var item in matcheslinks)
-				{
-					tmpLinks += item.ToString();
-				}
-				regexLinks = new Regex(@""".*?""");
-				matcheslinks = regexLinks.Matches(tmpLinks);
+				Regex regexLinksWithOnline = new Regex(@"<a href=.*?a><div.*?a>");
+				//Regex regexLinks = new Regex(@"<a href="".*?""");
+				MatchCollection matcheslinksWithOnline = regexLinksWithOnline.Matches(code);
+                foreach (var tmpLinksWithOnlineObj in matcheslinksWithOnline)
+                {
+					string tmpLinksWithOnline = tmpLinksWithOnlineObj.ToString();
+					if (!tmpLinksWithOnline.Contains("Только онлайн"))
+                    {
+						Regex regexLinks = new Regex(@"<a href="".*?""");
+						MatchCollection matcheslinks = regexLinks.Matches(tmpLinksWithOnline);
+						string tmpLinks = "";
+						foreach (var item in matcheslinks)
+						{
+							tmpLinks += item.ToString();
+						}
+						regexLinks = new Regex(@""".*?""");
+						matcheslinks = regexLinks.Matches(tmpLinks);
 
-				foreach (var item in matcheslinks)
-				{
-					if (!fullLinks.Contains(item.ToString().Replace(@"""", "")))
-						if (!item.ToString().Contains("http"))
-							if (!item.ToString().Replace(@"""", "").StartsWith("/shop/") && !item.ToString().Replace(@"""", "").StartsWith("/catalogue/") && !item.ToString().Replace(@"""", "").StartsWith("/advice/") && !item.ToString().Replace(@"""", "").StartsWith("/offer/"))
-								fullLinks.Add(item.ToString().Replace(@"""", ""));
+						foreach (var item in matcheslinks)
+						{
+							if (!fullLinks.Contains(item.ToString().Replace(@"""", "")))
+								if (!item.ToString().Contains("http"))
+									if (!item.ToString().Replace(@"""", "").StartsWith("/shop/") && !item.ToString().Replace(@"""", "").StartsWith("/catalogue/") && !item.ToString().Replace(@"""", "").StartsWith("/advice/") && !item.ToString().Replace(@"""", "").StartsWith("/offer/"))
+										fullLinks.Add(item.ToString().Replace(@"""", ""));
+						}
+					}
 				}
+				
 				UpdateProgressLinks(fullLinks.Count.ToString(), (count - UnRedactLinksQueue.Count).ToString(), count.ToString(), ((double)fullLinks.Count / ((double)count)).ToString().Replace(",", "."));
 			}
 

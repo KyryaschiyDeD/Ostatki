@@ -34,9 +34,19 @@ namespace Остатки.Classes
 				var col = db.GetCollection<ApiKeys>("ApiKeyses");
 				return 
 				new List<string>(col.Query().ToList().ConvertAll(new Converter<ApiKeys, string>(ApiKeysesJob.GetApiName)));
-
 			}
 		}
+
+		public static string GetApiByKey(string clientID)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<ApiKeys>("ApiKeyses");
+				List<ApiKeys> str = col.Query().ToList().Where(x => x.ClientId.Equals(clientID)).ToList();
+				return str.First().ApiKey;
+			}
+		}
+
 		public static string GetApiName(ApiKeys pf)
 		{
 			return pf.Name;

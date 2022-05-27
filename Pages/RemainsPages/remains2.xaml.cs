@@ -198,7 +198,7 @@ namespace Остатки
 
         private void Article_Click(object sender, RoutedEventArgs e)
         {
-            Stocks.GoUpdateStocks(ProductList1.ToList()) ;
+            Stocks.GoUpdateStocks(ProductList1.ToList());
         }
 
         private void PriceUpdate_Click(object sender, RoutedEventArgs e)
@@ -330,10 +330,62 @@ namespace Остатки
                 Message.ShowAllToast();
             }
         }
-        private void GoToGetArhiveByProductId_Click(object sender, RoutedEventArgs e)
+        private void GoToGetInfoProductFromOzon_Click(object sender, RoutedEventArgs e)
         {
-            
+            Queue<Product> products = new Queue<Product>();
+            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+            {
+                var col = db.GetCollection<Product>("Products");
+                products = new Queue<Product>(col.Query().ToList());
+                while(products.Count != 0)
+                {
+                    Product oneProduct = products.Dequeue();
+                    foreach (var keyValuePair in oneProduct.ArticleNumberProductId)
+                    {
+                        foreach (var articleNumberOneProduct in keyValuePair.Value)
+                        {
+                            if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
+                            {
+                                oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon =
+                                GetProductInfo.PostRequestAsync(keyValuePair.Key, ApiKeysesJob.GetApiByKey(keyValuePair.Key), articleNumberOneProduct.OurArticle);
+                            }
+                        }
+                    }
+                    col.Update(oneProduct);
+                }
+            }
         }
+        private void GoToGetCommissionFromOzon_Click(object sender, RoutedEventArgs e)
+        {
+            GetProductPriceInfo.GetAndSaveProductPrice();
+            /*Queue<Product> products = new Queue<Product>();
+            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
+            {
+                var col = db.GetCollection<Product>("Products");
+                products = new Queue<Product>(col.Query().ToList());
+                while(products.Count != 0)
+                {
+                    Product oneProduct = products.Dequeue();
+                    foreach (var keyValuePair in oneProduct.ArticleNumberProductId)
+                    {
+                        foreach (var articleNumberOneProduct in keyValuePair.Value)
+                        {
+                            if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
+                            {
+                                oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon =
+                                GetProductInfo.PostRequestAsync(keyValuePair.Key, ApiKeysesJob.GetApiByKey(keyValuePair.Key), articleNumberOneProduct.OurArticle);
+                            }
+                        }
+                    }
+                    col.Update(oneProduct);
+                }
+            }*/
+        }
+
         private void GetLeroyProducts_Click(object sender, RoutedEventArgs e)
         {
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
@@ -658,8 +710,8 @@ namespace Остатки
                 }
             };
 
-            //Parallel.Invoke(action, action, action2, action2);
-            Parallel.Invoke(action2, action2);
+            Parallel.Invoke(action, action, action2, action2);
+            //Parallel.Invoke(action2, action2);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);
         }

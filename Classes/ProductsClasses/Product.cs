@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Остатки.Classes.JobWhithApi.Ozon;
+using Остатки.Classes.JobWhithApi.Ozon.ProductInfo;
+using Остатки.Classes.ProductsClasses.InfoPrices;
 
 namespace Остатки.Classes
 {
@@ -10,6 +12,8 @@ namespace Остатки.Classes
 	{
 		public string OurArticle { get; set; }
 		public long ArticleOzon { get; set; }
+		public ProductInfoFromOzon productInfoFromOzon { get; set; }
+		public CommissionsInfoPrice productInfoPriceFromOzon { get; set; }
 	}
 
 	public class Product
@@ -144,6 +148,65 @@ namespace Остатки.Classes
 				}
 				data += $"-------\t-------\t-------\n";
 			}
+
+			data += $"-------\t-------\t-------\n";
+			data += $"Инфа с озона: \n";
+			if (ArticleNumberProductId.First().Value.First().productInfoFromOzon != null)
+			{
+				ResultQInfo articleNumberContent = ArticleNumberProductId.First().Value.First().productInfoFromOzon.result;
+
+				data += $"{articleNumberContent.name} \n" +
+					$"Цены и комиссии: \n";
+
+				foreach (var key in ApiKeysesJob.GetAllApiList())
+				{
+					if (ArticleNumberProductId.ContainsKey(key.ClientId))
+					{
+						data += $"{key.ClientId}: \n" +
+							$"<------\t------>\n";
+						foreach (var item in ArticleNumberProductId[key.ClientId])
+						{
+							ResultQInfo infoFromOzon = item.productInfoFromOzon.result;
+
+							data += $"Артикул: {articleNumberContent.offer_id}\n";
+							data += $"Цена с учётом акций: {articleNumberContent.marketing_price}\n";
+							data += $"Цена: {articleNumberContent.price}\n";
+							data += $"Цена до скидки: {articleNumberContent.old_price}\n";
+							data += $"Комиссии: \n";
+
+							CommissionsInfoPrice commissionsInfoPriceOne = item.productInfoPriceFromOzon;
+
+							data += $"%: {commissionsInfoPriceOne.sales_percent}\n" +
+								$"FBO: \n" +
+								$"\tСборка: {commissionsInfoPriceOne.fbo_fulfillment_amount}\n" +
+								$"\tМагистраль: {commissionsInfoPriceOne.fbo_direct_flow_trans_min_amount}-{commissionsInfoPriceOne.fbo_direct_flow_trans_max_amount} \n" +
+								$"\tПоследняя миля: {commissionsInfoPriceOne.fbo_deliv_to_customer_amount}\n" +
+								$"\tКомиссия за возврат и отмену: {commissionsInfoPriceOne.fbo_return_flow_amount}\n" +
+								$"\tКомиссия за обратную логистику: {commissionsInfoPriceOne.fbo_return_flow_trans_min_amount}-{commissionsInfoPriceOne.fbo_return_flow_trans_max_amount} \n" +
+								$"FBS: \n" +
+								$"\tКомиссия за обработку отправления: {commissionsInfoPriceOne.fbs_first_mile_min_amount}-{commissionsInfoPriceOne.fbs_first_mile_max_amount} \n" +
+								$"\tМагистраль: {commissionsInfoPriceOne.fbs_direct_flow_trans_min_amount}-{commissionsInfoPriceOne.fbs_direct_flow_trans_max_amount} \n" +
+								$"\tПоследняя миля: {commissionsInfoPriceOne.fbs_deliv_to_customer_amount}\n" +
+								$"\tКомиссия за возврат, обработка: {commissionsInfoPriceOne.fbs_return_flow_amount}\n" +
+								$"\tКомиссия за возврат, магистраль: {commissionsInfoPriceOne.fbs_return_flow_trans_min_amount}-{commissionsInfoPriceOne.fbs_return_flow_trans_max_amount} \n";
+
+							data += $"-------\t-------\t-------\n";
+
+							data += $"Сейчас на складе: {articleNumberContent.stocks.present}\n";
+							data += $"Зарезервировано: {articleNumberContent.stocks.reserved}\n";
+
+							data += $"-------\t-------\t-------\n";
+
+							data += $"В продаже?: {articleNumberContent.visible}\n";
+							data += $"Создан: {articleNumberContent.created_at}\n";
+							data += $"<------>\n";
+						}
+						data += $"<-------\t-------\t------->\n";
+					}
+				}
+			}
+			data += $"-------\t-------\t-------\n";
+
 			return data;
 		}
 	}

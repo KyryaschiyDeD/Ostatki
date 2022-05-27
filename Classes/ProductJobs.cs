@@ -29,7 +29,7 @@ namespace Остатки.Classes
 	{
 		static Random rnd = new Random();
 
-		static string qrator_jsid = "1648540037.594.SAiGJXIWC0U3gCWc-e0fs4h16fncc4b3atcg7ltdgdcssjoe2";
+		static string qrator_jsid = "1653621030.450.7ZrdbzEIOXyxjs1D-ql98k873ttdd62f01lku6bfrm3qai06b";
 		static int countOfQrator_jsid = 0;
 
 		static object locker = new object();
@@ -63,7 +63,7 @@ namespace Остатки.Classes
 		public static List<ShopWhiteOrBlack> shopsWhiteOrBlackLeonardo = ShopWhiteOrBlackJob.GetShopListSpecifically("Леонардо");
 		//public static List<int> shopWhiteOrBlacks = new List<int>();
 
-		private static string GetResponseUpdates(string uri)
+		public static string GetResponseUpdates(string uri)
 		{
 			//Thread.Sleep(rnd.Next(2750, 6000));
 			string htmlCode = "";
@@ -86,8 +86,6 @@ namespace Остатки.Classes
 			proxy_request.Headers.Add("authority", @"leroymerlin.ru");
 			proxy_request.Headers.Add("scheme", "https");
 
-			
-
 			if (countOfQrator_jsid % 10 == 0)
             {
 				HttpWebRequest proxy_request2 = (HttpWebRequest)WebRequest.Create("https://leroymerlin.ru/");
@@ -108,17 +106,17 @@ namespace Остатки.Classes
 				proxy_request2.Headers.Add("authority", @"leroymerlin.ru");
 				proxy_request2.Headers.Add("scheme", "https");
 				proxy_request2.CookieContainer = cookieContainer2;
-				HttpWebResponse resp2 = null;
+				/*HttpWebResponse resp2 = null;
 				resp2 = proxy_request2.GetResponse() as HttpWebResponse;
                 foreach (Cookie cookie in resp2.Cookies)
                 {
 					cookieContainer.Add(cookie);
 				}
-				Thread.Sleep(1000);
+				Thread.Sleep(1000);*/
 			}
 
 			proxy_request.CookieContainer = cookieContainer;
-			cookieContainer.Add(new Cookie("qrator_jsid", "1648540037.594.SAiGJXIWC0U3gCWc-e0fs4h16fncc4b3atcg7ltdgdcssjoe2", "/", ".leroymerlin.ru"));
+			cookieContainer.Add(new Cookie("qrator_jsid", "1653621030.450.7ZrdbzEIOXyxjs1D-ql98k873ttdd62f01lku6bfrm3qai06b", "/", ".leroymerlin.ru"));
 
 			HttpWebResponse resp = null;
 			string html = "";
@@ -144,13 +142,13 @@ namespace Остатки.Classes
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 2))
-							ocherLeroy.Enqueue(uri);
+						//if (!(kolvoUpdatePopitka[uri] > 2))
+						//	ocherLeroy.Enqueue(uri);
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(uri,1);
-						ocherLeroy.Enqueue(uri);
+					//	ocherLeroy.Enqueue(uri);
 					}
 						
 				}
@@ -158,18 +156,18 @@ namespace Остатки.Classes
 			catch (Exception ex)
 			{
 				Thread.Sleep(6000);
-				if (!ocherLeroy.Contains(uri))
+				 if (!ocherLeroy.Contains(uri))
 				{
 					if (kolvoUpdatePopitka.ContainsKey(uri))
 					{
 						kolvoUpdatePopitka[uri]++;
-						if (!(kolvoUpdatePopitka[uri] > 2))
-							ocherLeroy.Enqueue(uri);
+						//if (!(kolvoUpdatePopitka[uri] > 2))
+						//ocherLeroy.Enqueue(uri);
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(uri, 1);
-						ocherLeroy.Enqueue(uri);
+						//ocherLeroy.Enqueue(uri);
 					}
 				}
 			}
@@ -178,18 +176,19 @@ namespace Остатки.Classes
 				if (kolvoUpdatePopitka.ContainsKey(uri))
 				{
 					kolvoUpdatePopitka[uri]++;
-					if (!(kolvoUpdatePopitka[uri] > 3))
-						ocherLeroy.Enqueue(uri);
+					//if (!(kolvoUpdatePopitka[uri] > 3))
+						//ocherLeroy.Enqueue(uri);
 				}
 				else
 				{
 					kolvoUpdatePopitka.Add(uri, 1);
-					ocherLeroy.Enqueue(uri);
+					//ocherLeroy.Enqueue(uri);
 				}
 			}
 			HTMLJob.CountOfUserAgent++;
 			HTMLJob.CountproxyIp++;
 			HTMLJob.CountproxyPort++;
+			//Thread.Sleep(3000);
 			return htmlCode;
 		}
 		public static Product GetProductLeroyByLink(object ink)
@@ -199,7 +198,7 @@ namespace Остатки.Classes
 			List<int> productLocation = new List<int>(); // Место
 			Product onePos = new Product();
 			onePos.ProductLink = link;
-			string code = getResponse(link);
+			string code = GetResponseUpdates(link);
 			int indexOfStart = code.IndexOf("<uc-elbrus-pdp-stocks-list");
 			int indexOfEnd = code.IndexOf("</uc-elbrus-pdp-stocks-list");
 			if (indexOfStart > 0)
@@ -211,7 +210,7 @@ namespace Остатки.Classes
 
 					// Получаем строку с наименованием, артикулом и ценой
 					Regex regexArticleNumber = new Regex(@"<div data-rel="".*?"" class="".*?"" data-ga-root data-path="".*?"" data-product-is-available="".*?"" data-product-id="".*?"" data-product-name="".*?"" data-product-price="".*?""");
-					Regex regexCount = new Regex(@"stock=""(\w+)""");
+					Regex regexCount = new Regex(@"stock=""(\S+)""");
 					Regex regexLocation = new Regex(@"store-code=""(\w+)""");
 
 					string nextNameArticleId = "";
@@ -278,14 +277,13 @@ namespace Остатки.Classes
 							string[] digits = Regex.Split(match.Value, @"\D+");
 							foreach (string value in digits)
 							{
-								int number = 0;
-								if (int.TryParse(value, out number))
+								double number = 0;
+								if (double.TryParse(value, out number))
 								{
-									productCount.Add(number);
+									productCount.Add((int)number);
 								}
 							}
 						}
-
 					}
 					else
 					{
@@ -882,14 +880,14 @@ namespace Остатки.Classes
 					{
 						if (kolvoUpdatePopitka[ink.ToString()] < 10)
 						{
-							ProductJobs.ocherLeroy.Enqueue(ink.ToString());
+						//	ProductJobs.ocherLeroy.Enqueue(ink.ToString());
 							kolvoUpdatePopitka[ink.ToString()]++;
 						}
 					}
 					else
 					{
 						kolvoUpdatePopitka.Add(ink.ToString(), 1);
-						ProductJobs.ocherLeroy.Enqueue(ink.ToString());
+						//ProductJobs.ocherLeroy.Enqueue(ink.ToString());
 					}
 				}
 			}

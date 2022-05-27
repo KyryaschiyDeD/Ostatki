@@ -139,7 +139,24 @@
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Requirements.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Result.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Root.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\GetProductInfo.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\GetProductPriceInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\PriceUpdate\Prices.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\CommissionsInfoPrice.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\FilterRequest.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\ItemInfoPrices.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\Price.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\RequestInfoPrices.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\ResultInfoPrices.cs" />
+    <Compile Include="Classes\ProductsClasses\InfoPrices\RootInfoPrices.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Commission.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Request.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\ResultQInfo.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\ProductInfoFromOzon.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Source.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Status.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Stocks.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\VisibilityDetails.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\StockUpdate\Stocks.cs" />
     <Compile Include="Classes\ProductsClasses\FulterStatuses.cs" />
     <Compile Include="Classes\ProductsClasses\ProductFromMarletplace.cs" />
@@ -281,6 +298,10 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Resources\Icons\commission.svg" />
+    <Content Include="Resources\Icons\dollar.svg" />
+    <Content Include="Resources\Icons\getProductFromOzon.svg" />
+    <Content Include="Resources\Icons\info.svg" />
     <Content Include="Resources\Icons\leonardoIcon.jpg" />
     <Content Include="Resources\Icons\leroyIcon.jpg" />
     <Content Include="Resources\Icons\petrovichIcon.jpg" />
@@ -431,6 +452,7 @@
   <ItemGroup>
     <None Include="Остатки_TemporaryKey.pfx" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

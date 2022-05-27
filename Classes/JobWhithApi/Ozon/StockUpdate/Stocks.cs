@@ -158,6 +158,67 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                 return JsonConvert.DeserializeObject<RootResp>(result);
             }
         }
+
+
+        public async static void GoUpdateStocksToNull(List<ArticleNumber> products, ApiKeys keys)
+        {
+            List<Stock> stocks = new List<Stock>();
+            int countToUpdateStock = 0;
+            List<RootResp> resp = new List<RootResp>();
+
+            foreach (var product in products)
+            {
+                Stock stock = new Stock();
+                stock.stock = 0;
+                stock.product_id = (int)product.ArticleOzon;
+                stock.offer_id = product.OurArticle;
+
+                stocks.Add(stock);
+                countToUpdateStock++;
+
+                if (countToUpdateStock >= 450)
+                {
+                    countToUpdateStock = 0;
+                    resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+                    stocks = new List<Stock>();
+                }
+            }
+
+            countToUpdateStock = 0;
+            resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+            stocks = new List<Stock>();
+            string str = "";
+            int kolErrors = 0;
+            foreach (var result in resp)
+            {
+                foreach (var oneResult in result.result)
+                {
+                    if (!oneResult.updated)
+                    {
+                        kolErrors++;
+                        str += oneResult.offer_id + " ";
+                        foreach (var item in oneResult.errors)
+                        {
+                            str += item.ToString() + " ";
+                        }
+
+                        str += "\n";
+                        str += "------------------------------------" + "\n";
+                    }
+                }
+            }
+            if (kolErrors > 0)
+            {
+                FolderPicker folderPicker = new FolderPicker();
+                folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                folderPicker.FileTypeFilter.Add("*");
+                StorageFolder fileWithLinks = await folderPicker.PickSingleFolderAsync();
+                await fileWithLinks.CreateFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt", CreationCollisionOption.ReplaceExisting);
+                StorageFile myFile = await fileWithLinks.GetFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt");
+                await FileIO.WriteTextAsync(myFile, str);
+            }
+
+        }
     }
 
 
