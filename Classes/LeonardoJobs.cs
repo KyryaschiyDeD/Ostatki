@@ -203,7 +203,6 @@ namespace Остатки.Classes
 			{
 				str += item;
 			}
-			int a = 0;
 			return str.Replace("data-good-id=","").Replace(@"""","");
 		}
 

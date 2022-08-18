@@ -130,7 +130,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                                     RootInfoPrices rootInfoPrices = GetProductPriceInfo.PostRequestAsyncWhithList(keys.ClientId, keys.ApiKey, "", 1, new List<string>() { item.OurArticle });
                                     if (rootInfoPrices.result.items.Count != 0)
                                     {
-                                        newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.4 +
+                                        newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.15 +
                                         (rootInfoPrices.result.items.First().commissions.fbs_first_mile_max_amount + rootInfoPrices.result.items.First().commissions.fbs_direct_flow_trans_max_amount
                                         + rootInfoPrices.result.items.First().commissions.fbs_deliv_to_customer_amount)) * 1.05 / (100 - rootInfoPrices.result.items.First().commissions.sales_percent) * 100) / 10 * 10;
                                         ItIsNewPrice = true;
@@ -138,14 +138,13 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                                 }
                                 else
                                 {
-                                    newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.4 +
+                                    newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.15 +
                                         (item.productInfoPriceFromOzon.fbs_first_mile_max_amount + item.productInfoPriceFromOzon.fbs_direct_flow_trans_max_amount
                                         + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100) / 10 * 10;
                                     ItIsNewPrice = true;
                                 }
                             }
                             
-
                             //newPrice = (int)(Convert.ToInt32(Convert.ToDouble(product.NowPrice) * kolKompl + 45 + product.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
 
                             if(ItIsNewPrice)

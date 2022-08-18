@@ -21,6 +21,7 @@ namespace Остатки.Classes
 		public static List<int> blackListLeonardo = new List<int>();
 
 		public static List<bool> complects = new List<bool>();
+		public static bool trueProductsDatabase = false;
 
 		public static void GetWhiteBlackShopsLeroy()
 		{

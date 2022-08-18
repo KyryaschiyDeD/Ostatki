@@ -16,8 +16,8 @@ namespace Остатки.Classes.JobWhithApi.Analitics
             TestAnalitics.Request.Root root = new TestAnalitics.Request.Root();
             root.dir = "ASC";
             root.filter = new TestAnalitics.Request.Filter();
-            root.filter.since = Convert.ToDateTime("2022-03-31T21:00:00.000Z");
-            root.filter.to = Convert.ToDateTime("2022-05-01T21:00:00.000Z");
+            root.filter.since = Convert.ToDateTime("2022-05-25T21:00:00.000Z");
+            root.filter.to = Convert.ToDateTime("2022-06-05T21:00:00.000Z");
             root.filter.status = status;
             root.limit = 1000;
             root.offset = offset;

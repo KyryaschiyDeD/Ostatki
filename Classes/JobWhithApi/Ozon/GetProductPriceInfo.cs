@@ -60,6 +60,8 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                                 {
                                     oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
                                 .IndexOf(articleNumberOneProduct)].productInfoPriceFromOzon = item.commissions;
+                                    oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                                .IndexOf(articleNumberOneProduct)].PriceOnOzon = item.price.price;
                                 }
                             }
                         }

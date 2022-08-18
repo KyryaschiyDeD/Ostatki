@@ -168,12 +168,18 @@ namespace Остатки
         public ObservableCollection<Product> ProductListArchive = new ObservableCollection<Product>();
         public void getRemainsArchiveIsBaseThread()
         {
+            List<Product> allProducts = new List<Product>();
             using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("ProductsArchive");
-                List<Product> allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+                allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
                 ProductListArchive = new ObservableCollection<Product>(allProducts);
             }
+           /* foreach (var item in allProducts)
+            {
+                DataBaseJob.ArchiveToRemains(item);
+                ProductListArchive.Remove(item);
+            }*/
         }
 
         public archiveRemains()

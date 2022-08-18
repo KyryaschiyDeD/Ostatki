@@ -12,6 +12,9 @@ namespace Остатки.Classes
 		public string Name { get; set; }
 		public string ClientId { get; set; }
 		public string ApiKey { get; set; }
+		public bool ItIsTop { get; set; }	
+		public bool InDB { get; set; }	
+		public int MaxCountTopProduct { get; set; }	
 		public DateTime DateCreate {get; set;}
 	}
 }

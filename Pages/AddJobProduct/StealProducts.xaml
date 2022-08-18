@@ -18,8 +18,18 @@
 			<CheckBox x:FieldModifier="public" x:Name="TrueProductsDatabase" Content="Учитывать ли товары в БД?" IsChecked="True" HorizontalAlignment="Right" />
 			<Button Content="Спиздить Leroy" CornerRadius="15" Width="400" x:Name="StealProductsLeroyButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductLeroys_Click"/>
 			<Button Content="Спиздить Леонардо" CornerRadius="15" Width="400" x:Name="StealProductsLeonardoButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductLeonardos_Click"/>
-			<Button Content="Спиздить Петрович" CornerRadius="15" Width="400" x:Name="StealProductsPetrovichButton" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="StealProductPetrovich_Click"/>
-			<!--<Button Content="Проверка и сверка артикулов" CornerRadius="15" Width="400" x:Name="CheckingAndReconciliationOfArticles" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="CheckingAndReconciliationOfArticles_Click"/>-->
+
+            <TextBlock VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center"> Спиздить петрович </TextBlock>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Content="Выборочно" CornerRadius="15" Grid.Column="0" Width="190" x:Name="StealProductsPetrovichButton" VerticalAlignment="Center" Margin="0,10,10,0" HorizontalAlignment="Center" Click="StealProductPetrovich_Click"/>
+                <Button Content="Всего" CornerRadius="15" Grid.Column="1" Width="190"  x:Name="StealProductsPetrovichAllButton" VerticalAlignment="Center" Margin="10,10,0,0" HorizontalAlignment="Center" Click="StealProductPetrovichAll_Click"/>
+            </Grid>
+            
+            <!--<Button Content="Проверка и сверка артикулов" CornerRadius="15" Width="400" x:Name="CheckingAndReconciliationOfArticles" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="CheckingAndReconciliationOfArticles_Click"/>-->
 			<TextBlock x:Name="textBlock1" />
 		</StackPanel>
 	</Grid>

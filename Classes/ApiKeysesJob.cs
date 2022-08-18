@@ -17,14 +17,57 @@ namespace Остатки.Classes
 				return col.Query().ToList();
 			}
 		}
-		public static void CreateNewApi(string name, string clientId, string apiKey)
+		public static void CreateNewApi(string name, string clientId, string apiKey, string MaxCountTopProduct, object itIsTop, object inDB)
 		{
+			bool chIsCreate = false;
+			int ch = 0;
+			if (MaxCountTopProduct.Length != 0)
+            {
+				if (int.TryParse(MaxCountTopProduct, out ch))
+					chIsCreate = true;
+			}
+			
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
 			{
 				var col = db.GetCollection<ApiKeys>("ApiKeyses");
 				var proverk = col.FindOne(x => x.ApiKey == apiKey);
 				if (proverk == null)
-					col.Insert(new ApiKeys() { Name = name, ClientId = clientId, ApiKey = apiKey, DateCreate = DateTime.Now });
+					col.Insert(new ApiKeys() { Name = name, ClientId = clientId, ApiKey = apiKey, DateCreate = DateTime.Now, MaxCountTopProduct = ch, ItIsTop = (bool)itIsTop, InDB = (bool)inDB });
+				
+					
+			}
+		}
+
+		public static void ReadctOldApi(string name, string clientId, string apiKey, string MaxCountTopProduct, object itIsTop, object inDB)
+		{
+			bool chIsCreate = false;
+			int ch = 0;
+			if (MaxCountTopProduct.Length != 0)
+			{
+				if (int.TryParse(MaxCountTopProduct, out ch))
+					chIsCreate = true;
+			}
+
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<ApiKeys>("ApiKeyses");
+				var proverk = col.FindOne(x => x.ClientId == clientId);
+				if (proverk != null)
+                {
+					proverk.MaxCountTopProduct = ch;
+					proverk.ItIsTop = (bool)itIsTop;
+					proverk.InDB = (bool)inDB;
+					col.Update(proverk);
+				}
+			}
+		}
+
+		public static void DeleteAllApi()
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<ApiKeys>("ApiKeyses");
+				col.DeleteAll();
 			}
 		}
 		public static List<string> GetNames()

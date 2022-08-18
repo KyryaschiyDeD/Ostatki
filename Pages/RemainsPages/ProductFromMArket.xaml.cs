@@ -102,92 +102,39 @@ namespace Остатки.Pages.RemainsPages
 
 			int offer = -1;
 			allProductsToAdd.Reverse();
-			Queue<ProductFromMarletplace> tovar = new Queue<ProductFromMarletplace>(allProductsToAdd);
-			List<Product> productList = new List<Product>();	
-			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
-			{
-				var col = db.GetCollection<Product>("Products");
-				productList = col.Query().OrderBy(x => x.RemainsWhite).ToList();
-			}
+			List<ProductFromMarletplace> tovar = new List<ProductFromMarletplace>(allProductsToAdd.Where(x => x.offer_id.Contains("pv-")));
+			List<Product> productList = new List<Product>();
 			int countError = 0;
 
 			List<Product> allProducts = new List<Product>();
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				allProducts = col.Query().ToList();
+			}
 			List<Product> Updates = new List<Product>();
-			
+
+			List<ApiKeys> Keyses = ApiKeysesJob.GetAllApiList();
+
 			while (tovar.Count > 0)
 			{
-				ProductFromMarletplace item = tovar.Dequeue();
-				
-				if (item == null)
-					while (item == null)
-                    {
-						item = tovar.Dequeue();
-					}
+				ProductFromMarletplace item = tovar.First();
+				tovar.Remove(item);
 				using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 				{
 					var col = db.GetCollection<Product>("Products");
-					allProducts = col.Query().ToList();
+					productList = col.Query().OrderBy(x => x.RemainsWhite).ToList();
 				}
-				/*
-							string article = "";
-
-							if (item.offer_id.Contains("x10"))
-							{
-								article = item.offer_id.Substring(0, item.offer_id.Length - 4).Replace("pv-", "").Replace("lm-", "");
-							}
-							else
-							{
-								article = item.offer_id.Substring(0, item.offer_id.Length - 3).Replace("pv-", "").Replace("lm-", "");
-							}
-							List<Product> allProductsFind = new List<Product>();
-							allProductsFind = allProducts.Where(x => x.ArticleNumberUnicList.Contains(item.offer_id)).ToList();
-
-							if (allProductsFind.Count == 0)
-							{
-								List<Product> allProductsFindUp = new List<Product>();
-								allProductsFindUp = Updates.Where(x => x.ArticleNumberUnicList.Contains(item.offer_id)).ToList();
-
-								foreach (var oneProduct in allProductsFindUp)
-								{
-									Updates.Remove(oneProduct);
-
-									if (!oneProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-										oneProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-
-									if (!oneProduct.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-										oneProduct.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
-
-									if (!oneProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-										oneProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-									Updates.Add(oneProduct);
-								}
-
-							}
-							else
-							{
-								foreach (var oneProduct in allProductsFind)
-								{
-									allProducts.Remove(oneProduct);
-
-									if (!oneProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-										oneProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-
-									if (!oneProduct.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-										oneProduct.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
-
-									if (!oneProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-										oneProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-
-									Updates.Add(oneProduct);
-								}
-
-							}
-							*/
+				if (item == null)
+					while (item == null)
+					{
+						item = tovar.First();
+					}
 
 				Product OneProductBR = ProductFromBackground.Find(x => x.ArticleNumberUnicList.Equals(item.offer_id));
 				if (OneProductBR == null)
 				{
-				if (item.offer_id.Contains("ld-") || item.offer_id.Contains("lnrd_"))
+					if (item.offer_id.Contains("ld-") || item.offer_id.Contains("lnrd_"))
 					{
 						string article = "";
 
@@ -208,22 +155,22 @@ namespace Остатки.Pages.RemainsPages
 							if (isFindDB)
 								break;
 
-								if (isFindDB)
-									break;
-								List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
-								if (newLst != null && newLst.Count > 0)
-									foreach (var oneArt in newLst)
+							if (isFindDB)
+								break;
+							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
+							if (newLst != null && newLst.Count > 0)
+								foreach (var oneArt in newLst)
+								{
+									if (isFindDB)
+										break;
+									if (oneArt.OurArticle.Contains(article))
 									{
-										if (isFindDB)
-											break;
-										if (oneArt.OurArticle.Contains(article))
-										{
-											isFindDB = true;
-											findProductInDB = ourProduct;
-											break;
-										}
+										isFindDB = true;
+										findProductInDB = ourProduct;
+										break;
 									}
-							
+								}
+
 						}
 
 
@@ -231,15 +178,15 @@ namespace Остатки.Pages.RemainsPages
 						{
 
 
-								if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-									findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+							if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+								findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
 
-								if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-									findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
+							if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
+								findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
 
-								if (!findProductInDB.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-									findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-							
+							if (!findProductInDB.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
+								findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 							using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 							{
 								var col = db.GetCollection<Product>("Products");
@@ -278,11 +225,11 @@ namespace Остатки.Pages.RemainsPages
 								oneProduct.ArticleNumberUnicList.Add(item.offer_id);
 								oneProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
 
-									if (!oneProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-										oneProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-									if (!oneProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-										oneProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-								
+								if (!oneProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+									oneProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+								if (!oneProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
+									oneProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 								using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 								{
 									var col = db.GetCollection<Product>("Products");
@@ -293,7 +240,7 @@ namespace Остатки.Pages.RemainsPages
 
 					}
 					else
-				if (item.offer_id.Contains("pv-"))
+					if (item.offer_id.Contains("pv-"))
 					{
 						string article = "";
 
@@ -302,43 +249,72 @@ namespace Остатки.Pages.RemainsPages
 							article = item.offer_id.Substring(0, item.offer_id.Length - 4).Replace("pv-", "");
 						}
 						else
+						if (item.offer_id.Contains("x"))
 						{
 							article = item.offer_id.Substring(0, item.offer_id.Length - 3).Replace("pv-", "");
 						}
-
+						else
+                        {
+							article = item.offer_id.Replace("pv-", "");
+						}
 						bool isFindDB = false;
-						Product findProductInDB = new Product();
+						Product findProductInDB = null;
 
-						foreach (var ourProduct in allProducts)
+
+						var finding = allProducts.Where(x => string.Compare(x.ArticleNumberInShop, article) == 0);
+						List<ProductFromMarletplace> analog = tovar.Where(x => x.offer_id.Contains(article)).ToList();
+						if (finding.Count() != 0)
 						{
-							if (isFindDB)
-								break;
+							isFindDB = true;
+							findProductInDB = finding.First();
+						}
+						
+						/*foreach (var ourProduct in allProducts)
+						{
 							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
+							foreach (var oneKeyOffFrom in Keyses)
+							{
+								newLst.AddRange(ourProduct.ArticleNumberProductId.GetValueOrDefault(oneKeyOffFrom.ClientId));
+							}
+
+							if (string.Compare(ourProduct.ArticleNumberInShop, article) == 0)
+                            {
+								isFindDB = true;
+								findProductInDB = ourProduct;
+								break;
+							}
+
 							if (newLst != null && newLst.Count > 0)
 								foreach (var oneArt in newLst)
 								{
-									if (isFindDB)
-										break;
+									//if (isFindDB)
+									//	break;
 									if (oneArt.OurArticle.Contains(article))
 									{
 										isFindDB = true;
 										findProductInDB = ourProduct;
 										break;
 									}
-								}
-
-						}
+								} 
+						}*/
 
 						if (isFindDB)
 						{
-							if (!findProductInDB.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-								findProductInDB.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+							analog.Add(item);
 
-							if (!findProductInDB.ArticleNumberUnicList.Contains(item.productID_OfferID.OurArticle))
-								findProductInDB.ArticleNumberUnicList.Add(item.productID_OfferID.OurArticle);
+                            foreach (var OneAnalogitem in analog)
+                            {
+								if (!findProductInDB.ArticleNumberProductId.ContainsKey(OneAnalogitem.Key.ClientId))
+									findProductInDB.ArticleNumberProductId.Add(OneAnalogitem.Key.ClientId, new List<ArticleNumber>());
 
-							if (!ArticleNumberProductId(findProductInDB.ArticleNumberProductId[item.Key.ClientId], item.productID_OfferID))
-								findProductInDB.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+								if (!findProductInDB.ArticleNumberUnicList.Contains(OneAnalogitem.productID_OfferID.OurArticle))
+									findProductInDB.ArticleNumberUnicList.Add(OneAnalogitem.productID_OfferID.OurArticle);
+
+								if (!ArticleNumberProductId(findProductInDB.ArticleNumberProductId[OneAnalogitem.Key.ClientId], OneAnalogitem.productID_OfferID))
+									findProductInDB.ArticleNumberProductId[OneAnalogitem.Key.ClientId].Add(OneAnalogitem.productID_OfferID);
+
+								tovar.Remove(OneAnalogitem);
+							}
 
 							using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 							{
@@ -385,6 +361,20 @@ namespace Остатки.Pages.RemainsPages
 										if (!newProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
 											newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
 
+										foreach (var OneAnalogitem in analog)
+										{
+											if (!newProduct.ArticleNumberProductId.ContainsKey(OneAnalogitem.Key.ClientId))
+												newProduct.ArticleNumberProductId.Add(OneAnalogitem.Key.ClientId, new List<ArticleNumber>());
+
+											if (!newProduct.ArticleNumberUnicList.Contains(OneAnalogitem.productID_OfferID.OurArticle))
+												newProduct.ArticleNumberUnicList.Add(OneAnalogitem.productID_OfferID.OurArticle);
+
+											if (!ArticleNumberProductId(newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId], OneAnalogitem.productID_OfferID))
+												newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId].Add(OneAnalogitem.productID_OfferID);
+
+											tovar.Remove(OneAnalogitem);
+										}
+
 										using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 										{
 											var col = db.GetCollection<Product>("Products");
@@ -423,7 +413,7 @@ namespace Остатки.Pages.RemainsPages
 							}
 						}
 					}
-					if (item.offer_id.Contains("lm-"))
+					/*if (item.offer_id.Contains("lm-"))
 					{
 						string article = "";
 
@@ -725,7 +715,7 @@ namespace Остатки.Pages.RemainsPages
 							if (col.FindById(item.Id) == null)
 								col.Insert(item);
 						}
-					}
+					}*/
 				}
 				else
 				{
@@ -738,10 +728,10 @@ namespace Остатки.Pages.RemainsPages
 						newProduct.ArticleNumberUnicList.Add(item.offer_id);
 						newProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
 
-							if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-								newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-							newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-						
+						if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+							newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+						newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
+
 						using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
 						{
 							var col = db.GetCollection<Product>("Products");
@@ -755,7 +745,7 @@ namespace Остатки.Pages.RemainsPages
 						}
 					}
 				}
-			
+
 			}
 
 

@@ -17,15 +17,16 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
-    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+    <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <PackageCertificateThumbprint>B0359FE5213766B0C9102F079FE1D3BC17F76E9A</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <AppInstallerUri>C:\Users\micma\AppData</AppInstallerUri>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -141,6 +142,25 @@
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Root.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\GetProductInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\GetProductPriceInfo.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Answer\Posting.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Filter.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Filter.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Root.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\With.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\AnalyticsData.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\FinancialData.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\ItemServices.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\PostingServices.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\Product.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\Result.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\ResponseFBO\Root.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Cancellation.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\DeliveryMethod.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Posting.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Product.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Requirements.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Result.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\Response\Root.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\PriceUpdate\Prices.cs" />
     <Compile Include="Classes\ProductsClasses\InfoPrices\CommissionsInfoPrice.cs" />
     <Compile Include="Classes\ProductsClasses\InfoPrices\FilterRequest.cs" />
@@ -237,6 +257,9 @@
     <Compile Include="Pages\StatisticsMenu.xaml.cs">
       <DependentUpon>StatisticsMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Statistics\BestStore.xaml.cs">
+      <DependentUpon>BestStore.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Statistics\MainInfoList.xaml.cs">
       <DependentUpon>MainInfoList.xaml</DependentUpon>
     </Compile>
@@ -305,6 +328,7 @@
     <Content Include="Resources\Icons\leonardoIcon.jpg" />
     <Content Include="Resources\Icons\leroyIcon.jpg" />
     <Content Include="Resources\Icons\petrovichIcon.jpg" />
+    <Content Include="Resources\Icons\Yandex_znak.svg" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -356,6 +380,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\StatisticsMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Statistics\BestStore.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -421,6 +449,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="EPPlus">
+      <Version>6.0.6</Version>
+    </PackageReference>
     <PackageReference Include="HtmlAgilityPack">
       <Version>1.11.42</Version>
     </PackageReference>

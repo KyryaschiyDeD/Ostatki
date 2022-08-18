@@ -46,7 +46,8 @@
 					</ListBoxItem>
 					<ListBoxItem Name="ExaminationYandex">
 						<StackPanel Orientation="Horizontal">
-							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE705;" />
+                            <Image Height="36" Source="../../Resources/Icons/Yandex_znak.svg" VerticalAlignment="Center"/>
+                            <!-- <TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE705;" /> -->
 							<TextBlock FontSize="24" Text="Янднекс проверка" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>

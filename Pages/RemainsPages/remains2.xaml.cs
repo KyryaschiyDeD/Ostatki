@@ -193,6 +193,13 @@ namespace Остатки
                 tmpFilterProduct = new ObservableCollection<Product>(from item in ProductList1
                                                                      where item.ArticleNumberInShop == myLong.ToString()
                                                                      select item);
+
+            if (tmpFilterProduct.Count == 0 && isNumerical)
+            {
+                tmpFilterProduct = new ObservableCollection<Product>(ProductList1.Where(x => x.ArticleNumberProductId.Values.SelectMany(y => y).Where(z => z.ArticleOzon == myLong).Count() > 0));
+            }
+            
+
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
 
@@ -212,7 +219,7 @@ namespace Остатки
             thread.Join();
         }
         
-        private static Susseess PostRequestAsync(ApiKeys key,ProductsIdsss pageOzon)
+        public static Susseess PostRequestAsync(ApiKeys key,ProductsIdsss pageOzon)
         {
             var jsort = JsonConvert.SerializeObject(pageOzon);
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/archive");
@@ -266,28 +273,25 @@ namespace Остатки
                 List<long> product = new List<long>();
                 foreach (var item in allProducts)
                 {
-                    if (product.Count <= 499)
+                    if (product.Count <= 100)
 					{
                         if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
-						{
-                            //if ((item.ArticleNumberProductId[keys.ClientId].First().ArticleOzon != 0 && (item.RemainsWhite != 0 && item.RemainsWhite != item.RemainsBlack && item.TypeOfShop == "LeroyMerlen")) || item.TypeOfShop == "Леонардо" || item.TypeOfShop == "petrovich")
-                            //{
-                            if ((item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite < 10 && item.RemainsWhite != item.RemainsBlack) || 
+                        {
+                            if ((item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite < 10 && item.RemainsWhite != item.RemainsBlack) ||
                                 (item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite == item.RemainsBlack && item.RemainsWhite < 10 && item.RemainsWhite > 0) ||
-                                (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1) || 
-                                (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 || 
+                                (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1) ||
+                                (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 ||
                                 item.TypeOfShop == "petrovich" && item.ArticleNumberProductId.First().Value.Count > 2 && item.RemainsWhite <= 10))
+                            {
+                                foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
                                 {
-                                    foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
-                                    {
                                         product.Add(valueOzonApi.ArticleOzon);
-                                    }
-                                    if (!countOfAPI.ContainsKey(item))
-                                        countOfAPI.Add(item, 1);
-                                    else
-                                        countOfAPI[item]++;
                                 }
-                           // }
+                                if (!countOfAPI.ContainsKey(item))
+                                    countOfAPI.Add(item, 1);
+                                else
+                                    countOfAPI[item]++;
+                            }
                         }
                     }
                 }
@@ -311,7 +315,11 @@ namespace Остатки
             }
             foreach (var item in productsIdsss)
             {
-                Susseess susseess = PostRequestAsync(item.Key, item.Value);
+                Susseess susseess = new Susseess();
+                foreach (var one in item.Value.product_id)
+                {
+                    susseess = PostRequestAsync(item.Key, new ProductsIdsss { product_id = new List<long>() { one } });
+                }
                 Message.infoList.Add(susseess.message);
                 if (susseess.result)
                 {
@@ -344,13 +352,13 @@ namespace Остатки
                     {
                         foreach (var articleNumberOneProduct in keyValuePair.Value)
                         {
-                            if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
-                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
-                            {
+                            //if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
+                            //    .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
+                           // {
                                 oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
                                 .IndexOf(articleNumberOneProduct)].productInfoFromOzon =
                                 GetProductInfo.PostRequestAsync(keyValuePair.Key, ApiKeysesJob.GetApiByKey(keyValuePair.Key), articleNumberOneProduct.OurArticle);
-                            }
+                           // }
                         }
                     }
                     col.Update(oneProduct);
@@ -571,7 +579,6 @@ namespace Остатки
             Message.ShowInfoProduct(item.Name, item.ToStringInfo());
         }
         
-        
         private static void CreateToastProductJob()
         {
             string tag = "Update";
@@ -719,11 +726,11 @@ namespace Остатки
         public remains2()
         {
             InitializeComponent();
+            //ApiKeysesJob.DeleteAllApi();
             getRemainsIsBaseThread();
             //Message.errorsList.Add(PetrovichJobsWithCatalog.GetStr());
             Message.AllErrors();
         }
-
     }
 
 }

@@ -78,136 +78,139 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             List<string> problemProduct = new List<string>(); 
             foreach (var key in apiKeys)
             {
-                Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, "ALL");
-                int total = responseWhithProduct_id.result.total;
-                int allCount = total;
-                int AllOstatok = allCount;
+                
+                    Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, "ALL");
+                    int total = responseWhithProduct_id.result.total;
+                    int allCount = total;
+                    int AllOstatok = allCount;
 
-                remains2.UpdateProgress(0, 0, $"Стартуем "+ key.Name);
-                remains2.UpdateProgress(0, 0, $"Всего "+ allCount);
+                    remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
+                    remains2.UpdateProgress(0, 0, $"Всего " + allCount);
 
-                int pageCount = total / 1000 + 1;
-                int truePage = 1;
-                while (AllOstatok > 0)
-				{
-                    remains2.UpdateProgress(allCount, allCount - AllOstatok, $"Остаток " + AllOstatok);
-                    responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, "ALL");
-                    truePage++;
-                    AllOstatok -= responseWhithProduct_id.result.items.Count;
-                    int countItems = 0;
-					foreach (var item in responseWhithProduct_id.result.items)
-					{
-                        countItems++;
-                        remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"Остаток " + AllOstatok);
+                    int pageCount = total / 1000 + 1;
+                    int truePage = 1;
+                    while (AllOstatok > 0)
+                    {
+                        remains2.UpdateProgress(allCount, allCount - AllOstatok, $"Остаток " + AllOstatok);
+                        responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, "ALL");
+                        truePage++;
+                        AllOstatok -= responseWhithProduct_id.result.items.Count;
+                        int countItems = 0;
+                        foreach (var item in responseWhithProduct_id.result.items)
+                        {
+                            countItems++;
+                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"Остаток " + AllOstatok);
 
-                        string offerId = item.offer_id;
-                        string offerIdWhithLNRD = "";
-                        if (offerId.Contains("lnrd"))
-						{
-                            offerIdWhithLNRD = offerId;
-                            offerId = offerId.Replace("lnrd", "ld");
-                            offerId = offerId.Replace("_", "-");
-                        }
-
-                        if (offerId.Contains("ld"))
-						{
-                            offerId = offerId.Substring(3);
-
-                            if (offerId.Contains("x10"))
-                                offerId = offerId.Substring(0, offerId.Length - 4);
-                            else
-                                if (offerId.Contains("x"))
-                                offerId = offerId.Substring(0, offerId.Length - 3);
-                            
-                            Product pr = productsTOAdd.Find(x => x.ProductLink == "https://leonardo.ru/ishop/good_" + offerId + "/");
-                            if (pr != null)
+                            string offerId = item.offer_id;
+                            string offerIdWhithLNRD = "";
+                            if (offerId.Contains("lnrd"))
                             {
-                                productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(item.offer_id);
-                                if (offerIdWhithLNRD.Length != 0)
-                                    productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(offerIdWhithLNRD);
-
-                                if (!productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.ContainsKey(key.ClientId))
-                                    productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-
-                                productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
+                                offerIdWhithLNRD = offerId;
+                                offerId = offerId.Replace("lnrd", "ld");
+                                offerId = offerId.Replace("_", "-");
                             }
-                            else
-							{
-                                //Thread.Sleep(1500);
-                                Product newPos = LeonardoJobs.AddOneProductRT("https://leonardo.ru/ishop/good_" + offerId);
-                                if (newPos != null)
-								{
-                                    newPos.ArticleNumberUnicList.Clear();
-                                    newPos.ArticleNumberProductId.Clear();
-                                    newPos.ArticleNumberUnicList.Add(item.offer_id);
-                                    if (!newPos.ArticleNumberProductId.ContainsKey(key.ClientId))
-                                        newPos.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-                                    newPos.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                    productsTOAdd.Add(newPos);
-                                    productsTODell.Add(newPos);
-                                }
-                                else
-								{
-                                    problemProduct.Add(item.offer_id);
-                                }
-                            }
-                        }
-                        else
-						{
-                            if (offerId.Contains("lm"))
+
+                            if (offerId.Contains("ld"))
+                            {
                                 offerId = offerId.Substring(3);
 
-                            if (offerId.Contains("x10"))
-                                offerId = offerId.Substring(0, offerId.Length - 4);
-                            else
-                                if (offerId.Contains("x"))
-                                offerId = offerId.Substring(0, offerId.Length - 3);
+                                if (offerId.Contains("x10"))
+                                    offerId = offerId.Substring(0, offerId.Length - 4);
+                                else
+                                    if (offerId.Contains("x"))
+                                    offerId = offerId.Substring(0, offerId.Length - 3);
 
-                            Product product = AllProductsInTheBase.Find(x => x.ArticleNumberInShop.Equals(offerId));
-                            if (product != null)
-							{
-                                Product pr = productsTOAdd.Find(x => x.ProductLink == product.ProductLink);
+                                Product pr = productsTOAdd.Find(x => x.ProductLink == "https://leonardo.ru/ishop/good_" + offerId + "/");
                                 if (pr != null)
-								{
+                                {
                                     productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(item.offer_id);
+                                    if (offerIdWhithLNRD.Length != 0)
+                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(offerIdWhithLNRD);
+
                                     if (!productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.ContainsKey(key.ClientId))
                                         productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
+
                                     productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
                                 }
                                 else
-								{
-                                    productsTODell.Add(product);
-                                    product.ArticleNumberUnicList.Clear();
-                                    product.ArticleNumberProductId.Clear();
-                                    product.ArticleNumberUnicList.Add(item.offer_id);
-                                    if (!product.ArticleNumberProductId.ContainsKey(key.ClientId))
-                                        product.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-                                    product.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                    productsTOAdd.Add(product);
+                                {
+                                    //Thread.Sleep(1500);
+                                    Product newPos = LeonardoJobs.AddOneProductRT("https://leonardo.ru/ishop/good_" + offerId);
+                                    if (newPos != null)
+                                    {
+                                        newPos.ArticleNumberUnicList.Clear();
+                                        newPos.ArticleNumberProductId.Clear();
+                                        newPos.ArticleNumberUnicList.Add(item.offer_id);
+                                        if (!newPos.ArticleNumberProductId.ContainsKey(key.ClientId))
+                                            newPos.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
+                                        newPos.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
+                                        productsTOAdd.Add(newPos);
+                                        productsTODell.Add(newPos);
+                                    }
+                                    else
+                                    {
+                                        problemProduct.Add(item.offer_id);
+                                    }
                                 }
-                                
-                                //DataBaseJob.DeleteProduct(product);
-                                
                             }
                             else
-							{
-                                problemProduct.Add(item.offer_id);
+                            {
+                                if (offerId.Contains("lm"))
+                                    offerId = offerId.Substring(3);
+
+                                if (offerId.Contains("x10"))
+                                    offerId = offerId.Substring(0, offerId.Length - 4);
+                                else
+                                    if (offerId.Contains("x"))
+                                    offerId = offerId.Substring(0, offerId.Length - 3);
+
+                                Product product = AllProductsInTheBase.Find(x => x.ArticleNumberInShop.Equals(offerId));
+                                if (product != null)
+                                {
+                                    Product pr = productsTOAdd.Find(x => x.ProductLink == product.ProductLink);
+                                    if (pr != null)
+                                    {
+                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(item.offer_id);
+                                        if (!productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.ContainsKey(key.ClientId))
+                                            productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
+                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
+                                    }
+                                    else
+                                    {
+                                        productsTODell.Add(product);
+                                        product.ArticleNumberUnicList.Clear();
+                                        product.ArticleNumberProductId.Clear();
+                                        product.ArticleNumberUnicList.Add(item.offer_id);
+                                        if (!product.ArticleNumberProductId.ContainsKey(key.ClientId))
+                                            product.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
+                                        product.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
+                                        productsTOAdd.Add(product);
+                                    }
+
+                                    //DataBaseJob.DeleteProduct(product);
+
+                                }
+                                else
+                                {
+                                    problemProduct.Add(item.offer_id);
+                                }
                             }
+
+
                         }
-                        
+                    }
+                    string problem = "";
+                    foreach (var item in problemProduct)
+                    {
+                        problem += item + "\n";
+                    }
+                    if (problem.Length > 0)
+                    {
+                        SaveDataInFile(problem, "Проблемы на аккаунте " + key.Name);
 
                     }
-                }
-                string problem = "";
-                foreach (var item in problemProduct)
-				{
-                    problem += item + "\n";
-                }
-                if (problem.Length > 0)
-				{
-                    SaveDataInFile(problem, "Проблемы на аккаунте " + key.Name);
-
-                }
+                
+                
             }
 
             DataBaseJob.AddListToRemains(productsTOAdd);
@@ -248,7 +251,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
 
             foreach (var key in apiKeys)
             {
-				foreach (var oneFilter in FulterStatuses.FilterList)
+                foreach (var oneFilter in FulterStatuses.FilterList)
 				{
                     Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, oneFilter);
                     int total = responseWhithProduct_id.result.total;

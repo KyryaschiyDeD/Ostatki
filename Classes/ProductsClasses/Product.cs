@@ -14,6 +14,7 @@ namespace Остатки.Classes
 		public long ArticleOzon { get; set; }
 		public ProductInfoFromOzon productInfoFromOzon { get; set; }
 		public CommissionsInfoPrice productInfoPriceFromOzon { get; set; }
+		public string PriceOnOzon { get; set; }
 	}
 
 	public class Product
@@ -168,7 +169,7 @@ namespace Остатки.Classes
 						{
 							ResultQInfo infoFromOzon = item.productInfoFromOzon.result;
 
-							data += $"Артикул: {articleNumberContent.offer_id}\n";
+							data += $"Артикул: {item.OurArticle}\n";
 							data += $"Цена с учётом акций: {articleNumberContent.marketing_price}\n";
 							data += $"Цена: {articleNumberContent.price}\n";
 							data += $"Цена до скидки: {articleNumberContent.old_price}\n";

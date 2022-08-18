@@ -9,7 +9,7 @@
   <Identity
     Name="5bdd5521-921f-4c3e-b5c9-211286ff1412"
     Publisher="CN=Курящий Дед"
-    Version="0.0.1.0" />
+    Version="0.0.4.0" />
 
   <mp:PhoneIdentity PhoneProductId="5bdd5521-921f-4c3e-b5c9-211286ff1412" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

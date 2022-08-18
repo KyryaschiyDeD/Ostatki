@@ -29,7 +29,7 @@ namespace Остатки.Classes
 	{
 		static Random rnd = new Random();
 
-		static string qrator_jsid = "1653621030.450.7ZrdbzEIOXyxjs1D-ql98k873ttdd62f01lku6bfrm3qai06b";
+		static string qrator_jsid = "1653842678.163.n93jYUcZGHkJUCgq-hcal6pg4pchn1r8ggmgbe647e076e3c9";
 		static int countOfQrator_jsid = 0;
 
 		static object locker = new object();
@@ -39,6 +39,8 @@ namespace Остатки.Classes
 
 		public static List<Product> productToUpdate = new List<Product>();
 		public static ConcurrentQueue<Product> NewRemaintProduct = new ConcurrentQueue<Product>();
+
+		public static Dictionary<string, int> countPopitkaUpdate = new Dictionary<string, int>();
 
 		public static string getResponse(string uri)
 		{
@@ -116,7 +118,7 @@ namespace Остатки.Classes
 			}
 
 			proxy_request.CookieContainer = cookieContainer;
-			cookieContainer.Add(new Cookie("qrator_jsid", "1653621030.450.7ZrdbzEIOXyxjs1D-ql98k873ttdd62f01lku6bfrm3qai06b", "/", ".leroymerlin.ru"));
+			cookieContainer.Add(new Cookie("qrator_jsid", "1653842678.163.n93jYUcZGHkJUCgq-hcal6pg4pchn1r8ggmgbe647e076e3c9", "/", ".leroymerlin.ru"));
 
 			HttpWebResponse resp = null;
 			string html = "";
@@ -634,10 +636,27 @@ namespace Остатки.Classes
 		{
 			//Thread.Sleep(rnd.Next(1250, 3750));
 			JobWhithApi.PetrovichJobs.Root productRoot = PetrovichJobsWithCatalog.GetProduct(oldProduct.ArticleNumberInShop);
+
 			if (productRoot == null)
 			{
-				ocherPetrovich.Enqueue(oldProduct);
-				Thread.Sleep(3000);
+				if (!countPopitkaUpdate.ContainsKey(oldProduct.ArticleNumberInShop))
+					countPopitkaUpdate.Add(oldProduct.ArticleNumberInShop, 1);
+				else
+					countPopitkaUpdate[oldProduct.ArticleNumberInShop]++;
+
+				if (countPopitkaUpdate[oldProduct.ArticleNumberInShop] <= 5)
+				{
+					ocherPetrovich.Enqueue(oldProduct);
+					Thread.Sleep(3000);
+				}
+				else
+                {
+					oldProduct.RemainsWhite = 0;
+					oldProduct.RemainsBlack = 0;
+					NewRemaintProduct.Enqueue(oldProduct);
+				}
+				
+				
 			}
 			else
             {

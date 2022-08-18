@@ -17,6 +17,7 @@ using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
+using Остатки.Classes.Petrovich;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -416,11 +417,14 @@ namespace Остатки.Pages
 
 					string[] namesAndArticleId = resultNameArticleId.Split('"');
 
-
-					if (namesAndArticleId[3].Contains("»"))
-						namesAndArticleId[3].Replace("»", "");
-					if (namesAndArticleId[3].Contains("«"))
-						namesAndArticleId[3].Replace("«", "");
+					if (namesAndArticleId[3].Length != 0)
+					{
+						if (namesAndArticleId[3].Contains("»"))
+							namesAndArticleId[3].Replace("»", "");
+						if (namesAndArticleId[3].Contains("«"))
+							namesAndArticleId[3].Replace("«", "");
+					}
+					
 
 
 					onePos.NowPrice = Convert.ToDouble(namesAndArticleId[5].Replace('.', ','));
@@ -572,17 +576,6 @@ namespace Остатки.Pages
 							if (StealProducts.productCountComplect2)
 								countOfComplect.Add(2);
 						}
-
-
-
-						/*double newPrice = 0;
-						if (onePos.NowPrice < 400)
-							newPrice = (onePos.NowPrice + 45 + weight / 1000 * 20 + 50 + 50) * 1.075 * 1.1 * 1.35;
-						else
-							newPrice = (onePos.NowPrice + 45 + 20 * weight / 1000) * 1.075 * 1.044 * 1.1 * 1.35;
-						int nowPrice = Convert.ToInt32(newPrice) / 10 * 10; */
-
-
 
 						int indexOfStartOpis = code.IndexOf("<h2>Описание<");
 						int indexOfEndOpis = code.IndexOf("</uc-pdp-section-vlimited>");
@@ -1089,16 +1082,11 @@ namespace Остатки.Pages
 						{
 							AllErrorsProduct.Add(item1);
 						}
-						//writeToTxtExperiense += $"Наш артикул: {item.offer_id}  Озон артикул: {item.product_id}\n";
 					}
 				}
 			}
 			DataBaseJob.UpdateList(allProductsUpdate);
 			DataBaseJob.ErrorArticle(AllErrorsProduct);
-			//StorageFile helloFile = await Global.folder.CreateFileAsync("hello.txt",
-			//									CreationCollisionOption.ReplaceExisting);
-
-			//await FileIO.WriteTextAsync(helloFile, writeToTxtExperiense);
 		}
 		private void StealProductLeroys_Click(object sender, RoutedEventArgs e)
 		{
@@ -1126,7 +1114,18 @@ namespace Остатки.Pages
 		private void StealProductPetrovich_Click(object sender, RoutedEventArgs e)
 		{
 			Global.complects = GetComplectsList();
+			Global.trueProductsDatabase = TrueProductsDatabase.IsChecked.Value;
 			Frame.Navigate(typeof(PetrovichPage));
+		}
+
+		private void StealProductPetrovichAll_Click(object sender, RoutedEventArgs e)
+		{
+			Classes.JobWhithApi.PetrovichJobs.Root list = PetrovichJobsWithCatalog.GetCatalog();
+			foreach (var item in list.data.sections)
+			{
+				Classes.JobWhithApi.PetrovichJobs.Root nextCat = PetrovichJobsWithCatalog.GetCatalogDop(item.code.ToString(), 0);
+
+			}
 		}
 	}
 }

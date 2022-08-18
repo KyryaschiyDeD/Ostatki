@@ -78,13 +78,7 @@ namespace Остатки.Classes.Petrovich
 			}
 			//return new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("utf-8")).ReadToEnd();
 			Root ob = jOBj.ToObject<Root>();
-			/*string str = "";
-			int count = 1;
-			foreach (var item in ob.data.products)
-			{
-				str += count++.ToString() + ": " + item.title + "\n";
-			}
-			return str; */
+
 			return ob;
 		}
 

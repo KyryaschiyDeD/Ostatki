@@ -9,8 +9,9 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-			<Button Content="Проверить" CornerRadius="15" Width="400" x:Name="GoToArchiveFromFile" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="ExaminationYandexFile_Click"/>
-		</StackPanel>
-	</Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Content="Проверить остатки" CornerRadius="15" Width="400" x:Name="GoToArchiveFromFile" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="ExaminationYandexFile_Click"/>
+            <Button Content="Проверить остатки и цены" CornerRadius="15" Width="400" x:Name="GoToUpdateYzndexPriceFromFile" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="GoToUpdateYzndexPriceFromFile_Click"/>
+        </StackPanel>
+    </Grid>
 </Page>

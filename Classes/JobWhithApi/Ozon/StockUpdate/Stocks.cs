@@ -83,7 +83,11 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                                 if (countToUpdateStock >= 450)
                                 {
                                     countToUpdateStock = 0;
-                                    resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+                                    if (!keys.ClientId.Contains("181882"))
+                                    {
+                                        resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+                                    }
+
                                     stocks = new List<Stock>();
                                 }
                             }
@@ -92,28 +96,33 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                     }
                 }
                 countToUpdateStock = 0;
-                resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
                 stocks = new List<Stock>();
                 string str = "";
                 int kolErrors = 0;
-                foreach (var result in resp)
-                {
-                    foreach (var oneResult in result.result)
-                    {
-                        if (!oneResult.updated)
-                        {
-                            kolErrors++;
-                            str += oneResult.offer_id + " ";
-                            foreach (var item in oneResult.errors)
-                            {
-                                str += item.ToString() + " ";
-                            }
 
-                            str += "\n";
-                            str += "------------------------------------" + "\n";
+                    resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+                    
+                    foreach (var result in resp)
+                    {
+                        foreach (var oneResult in result.result)
+                        {
+                            if (!oneResult.updated)
+                            {
+                                kolErrors++;
+                                str += oneResult.offer_id + " ";
+                                foreach (var item in oneResult.errors)
+                                {
+                                    str += item.ToString() + " ";
+                                }
+
+                                str += "\n";
+                                str += "------------------------------------" + "\n";
+                            }
                         }
                     }
-                }
+
+
+                   
                 if (kolErrors > 0)
                 {
                     FolderPicker folderPicker = new FolderPicker();
@@ -131,32 +140,34 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
 
         private static RootResp SendReqwest(string clientId, string apiKey, List<Stock> stocks)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/import/stocks");
-            httpWebRequest.Headers.Add("Client-Id", clientId);
-            httpWebRequest.Headers.Add("Api-Key", apiKey);
-            httpWebRequest.ContentType = "application/json";
-            httpWebRequest.Method = "POST";
+           
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/import/stocks");
+                httpWebRequest.Headers.Add("Client-Id", clientId);
+                httpWebRequest.Headers.Add("Api-Key", apiKey);
+                httpWebRequest.ContentType = "application/json";
+                httpWebRequest.Method = "POST";
 
-            Root rootRequest = new Root();
-            rootRequest.stocks = stocks;
+                Root rootRequest = new Root();
+                rootRequest.stocks = stocks;
 
 
-            var jsort = JsonConvert.SerializeObject(rootRequest);
-            using (var requestStream = httpWebRequest.GetRequestStream())
-            using (var writer = new StreamWriter(requestStream))
-            {
-                writer.Write(jsort);
-            }
-            Thread.Sleep(500);
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                //ответ от сервера
-                var result = streamReader.ReadToEnd();
+                var jsort = JsonConvert.SerializeObject(rootRequest);
+                using (var requestStream = httpWebRequest.GetRequestStream())
+                using (var writer = new StreamWriter(requestStream))
+                {
+                    writer.Write(jsort);
+                }
+                Thread.Sleep(500);
+                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    //ответ от сервера
+                    var result = streamReader.ReadToEnd();
 
-                //Сериализация
-                return JsonConvert.DeserializeObject<RootResp>(result);
-            }
+                    //Сериализация
+                    return JsonConvert.DeserializeObject<RootResp>(result);
+                }
+
         }
 
 
