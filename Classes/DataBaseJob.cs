@@ -165,14 +165,30 @@ namespace Остатки.Classes
 
 		public static void AddListToBackground(List<Product> product)
 		{
+			List<Product> productBG = new List<Product>();
+			List<Product> productToAddBG = new List<Product>();
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
 			{
 				var col = db.GetCollection<Product>("Products");
-				col.InsertBulk(product);
-				/*foreach (var item in product)
-				{
-					col.Insert(item);
-				}*/
+				productBG = col.Query().ToList(); ;
+			}
+
+
+
+            foreach (var oneNewProduct in product)
+            {
+				var test = productBG.Where(x => x.ArticleNumberInShop == oneNewProduct.ArticleNumberInShop).ToList();
+				if (test.Count() == 0)
+                {
+					productToAddBG.Add(oneNewProduct);
+				}
+            }
+			
+
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Background.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				col.InsertBulk(productToAddBG);
 			}
 		}
 		public static void AddListToRemains(List<Product> product)
@@ -243,9 +259,16 @@ namespace Остатки.Classes
 				var online = db.GetCollection<Product>("Products");
 				var wait = db.GetCollection<Product>("ProductsWait");
 				int kollvo = NewRemaintProductLerya.Count();
+				int countUpdate = 0;
 				Action action = () =>
 				{
-					while (!NewRemaintProductLerya.IsEmpty)
+                    foreach (var item in NewRemaintProductLerya)
+                    {
+						online.Update(item);
+						countUpdate++;
+						remains2.UpdateProgress(kollvo, countUpdate, "Сохраняем...");
+					}
+					/*while (!NewRemaintProductLerya.IsEmpty)
 					{
 						Product OneProduct;
 						NewRemaintProductLerya.TryDequeue(out OneProduct);
@@ -253,7 +276,8 @@ namespace Остатки.Classes
 						Product proverk = new Product();
 						try
 						{
-							proverk = online.FindOne(x => x.ProductLink == OneProduct.ProductLink);
+							//proverk = online.FindOne(x => x.ProductLink == OneProduct.ProductLink);
+							
 						}
 						catch (Exception)
 						{
@@ -316,7 +340,7 @@ namespace Остатки.Classes
 							proverk.Name = OneProduct.Name;
 							proverk.NameIsRedact = true;
 						}
-
+						
 						if (!error)
 						{
 							if (ItsWait)
@@ -326,9 +350,9 @@ namespace Остатки.Classes
 							else
 								online.Update(proverk);
 						}
-
-						remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
-					}
+					
+					remains2.UpdateProgress(kollvo, kollvo - NewRemaintProductLerya.Count(), "Сохраняем...");
+					}*/
 				};
 				Parallel.Invoke(action);
 			}

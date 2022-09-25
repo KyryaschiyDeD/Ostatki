@@ -26,6 +26,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon
     {
         public List<Item> items { get; set; }
         public int total { get; set; }
+        public string last_id { get; set; }
     }
 
     public class Root
@@ -37,6 +38,8 @@ namespace Остатки.Classes.JobWhithApi.Ozon
     {
         [JsonProperty("offer_id")]
         public List<string> offer_id { get; set; }
+        [JsonProperty("product_id")]
+        public List<string> product_id { get; set; }
         [JsonProperty("visibility")]
         public string visibility { get; set; }
     }
@@ -45,191 +48,15 @@ namespace Остатки.Classes.JobWhithApi.Ozon
     {
         [JsonProperty("filter")]
         public Filter filter { get; set; }
-        [JsonProperty("page")]
-        public int page { get; set; }
-        [JsonProperty("page_size")]
-        public int page_size { get; set; }
+        [JsonProperty("last_id")]
+        public string last_id { get; set; }
+        [JsonProperty("limit")]
+        public int limit { get; set; }
     }
 
 
     public class GetAndSaveProductId
 	{
-        public static void GetProductsId2()
-        {
-            List<Product> Remains = new List<Product>();
-            List<Product> Wait = new List<Product>();
-            List<Product> Archive = new List<Product>();
-            List<Product> Del = new List<Product>();
-
-            DataBaseJob.GetAllProductFromTheBase(out Remains, out Wait, out Archive, out Del);
-            List<Product> AllProductsInTheBase = new List<Product>();
-
-            AllProductsInTheBase.AddRange(Remains);
-            AllProductsInTheBase.AddRange(Wait);
-            AllProductsInTheBase.AddRange(Archive);
-            AllProductsInTheBase.AddRange(Del);
-
-            List<ApiKeys> apiKeys = ApiKeysesJob.GetAllApiList();
-
-            ConcurrentBag<Product> productToUpdate = new ConcurrentBag<Product>();
-            Dictionary<ApiKeys, int> counApiProductId = new Dictionary<ApiKeys, int>();
-            List<Product> productsTOAdd = new List<Product>(); 
-            List<Product> productsTODell = new List<Product>(); 
-            List<string> problemProduct = new List<string>(); 
-            foreach (var key in apiKeys)
-            {
-                
-                    Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, "ALL");
-                    int total = responseWhithProduct_id.result.total;
-                    int allCount = total;
-                    int AllOstatok = allCount;
-
-                    remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
-                    remains2.UpdateProgress(0, 0, $"Всего " + allCount);
-
-                    int pageCount = total / 1000 + 1;
-                    int truePage = 1;
-                    while (AllOstatok > 0)
-                    {
-                        remains2.UpdateProgress(allCount, allCount - AllOstatok, $"Остаток " + AllOstatok);
-                        responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, "ALL");
-                        truePage++;
-                        AllOstatok -= responseWhithProduct_id.result.items.Count;
-                        int countItems = 0;
-                        foreach (var item in responseWhithProduct_id.result.items)
-                        {
-                            countItems++;
-                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"Остаток " + AllOstatok);
-
-                            string offerId = item.offer_id;
-                            string offerIdWhithLNRD = "";
-                            if (offerId.Contains("lnrd"))
-                            {
-                                offerIdWhithLNRD = offerId;
-                                offerId = offerId.Replace("lnrd", "ld");
-                                offerId = offerId.Replace("_", "-");
-                            }
-
-                            if (offerId.Contains("ld"))
-                            {
-                                offerId = offerId.Substring(3);
-
-                                if (offerId.Contains("x10"))
-                                    offerId = offerId.Substring(0, offerId.Length - 4);
-                                else
-                                    if (offerId.Contains("x"))
-                                    offerId = offerId.Substring(0, offerId.Length - 3);
-
-                                Product pr = productsTOAdd.Find(x => x.ProductLink == "https://leonardo.ru/ishop/good_" + offerId + "/");
-                                if (pr != null)
-                                {
-                                    productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(item.offer_id);
-                                    if (offerIdWhithLNRD.Length != 0)
-                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(offerIdWhithLNRD);
-
-                                    if (!productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.ContainsKey(key.ClientId))
-                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-
-                                    productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                }
-                                else
-                                {
-                                    //Thread.Sleep(1500);
-                                    Product newPos = LeonardoJobs.AddOneProductRT("https://leonardo.ru/ishop/good_" + offerId);
-                                    if (newPos != null)
-                                    {
-                                        newPos.ArticleNumberUnicList.Clear();
-                                        newPos.ArticleNumberProductId.Clear();
-                                        newPos.ArticleNumberUnicList.Add(item.offer_id);
-                                        if (!newPos.ArticleNumberProductId.ContainsKey(key.ClientId))
-                                            newPos.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-                                        newPos.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                        productsTOAdd.Add(newPos);
-                                        productsTODell.Add(newPos);
-                                    }
-                                    else
-                                    {
-                                        problemProduct.Add(item.offer_id);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (offerId.Contains("lm"))
-                                    offerId = offerId.Substring(3);
-
-                                if (offerId.Contains("x10"))
-                                    offerId = offerId.Substring(0, offerId.Length - 4);
-                                else
-                                    if (offerId.Contains("x"))
-                                    offerId = offerId.Substring(0, offerId.Length - 3);
-
-                                Product product = AllProductsInTheBase.Find(x => x.ArticleNumberInShop.Equals(offerId));
-                                if (product != null)
-                                {
-                                    Product pr = productsTOAdd.Find(x => x.ProductLink == product.ProductLink);
-                                    if (pr != null)
-                                    {
-                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberUnicList.Add(item.offer_id);
-                                        if (!productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.ContainsKey(key.ClientId))
-                                            productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-                                        productsTOAdd[productsTOAdd.IndexOf(pr)].ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                    }
-                                    else
-                                    {
-                                        productsTODell.Add(product);
-                                        product.ArticleNumberUnicList.Clear();
-                                        product.ArticleNumberProductId.Clear();
-                                        product.ArticleNumberUnicList.Add(item.offer_id);
-                                        if (!product.ArticleNumberProductId.ContainsKey(key.ClientId))
-                                            product.ArticleNumberProductId.Add(key.ClientId, new List<ArticleNumber>());
-                                        product.ArticleNumberProductId[key.ClientId].Add(new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id });
-                                        productsTOAdd.Add(product);
-                                    }
-
-                                    //DataBaseJob.DeleteProduct(product);
-
-                                }
-                                else
-                                {
-                                    problemProduct.Add(item.offer_id);
-                                }
-                            }
-
-
-                        }
-                    }
-                    string problem = "";
-                    foreach (var item in problemProduct)
-                    {
-                        problem += item + "\n";
-                    }
-                    if (problem.Length > 0)
-                    {
-                        SaveDataInFile(problem, "Проблемы на аккаунте " + key.Name);
-
-                    }
-                
-                
-            }
-
-            DataBaseJob.AddListToRemains(productsTOAdd);
-
-			foreach (var item in productsTODell)
-			{
-                DataBaseJob.DeleteProduct(item);
-            }
-            
-
-            remains2.UpdateProgress(0, 0, $"Сохраняем!!!!!!!!!!!!");
-            DataBaseJob.UpdateList(productToUpdate.ToList());
-            string req = "";
-            foreach (var item in counApiProductId)
-            {
-                req += item.Key.Name + ": " + item.Value + " ";
-            }
-            remains2.UpdateProgress(0, 0, req);
-        }
         private static async void SaveDataInFile(string data, string nameFile)
         {
             FolderPicker folderPicker = new FolderPicker();
@@ -251,43 +78,46 @@ namespace Остатки.Classes.JobWhithApi.Ozon
 
             foreach (var key in apiKeys)
             {
-                foreach (var oneFilter in FulterStatuses.FilterList)
-				{
-                    Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, 1, 1, oneFilter);
-                    int total = responseWhithProduct_id.result.total;
-                    int allCount = total;
-                    int AllOstatok = allCount;
-
-                    remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
-                    remains2.UpdateProgress(0, 0, $"Всего " + allCount);
-
-                    int pageCount = (int)Math.Ceiling((double)total / (double)1000);
-                    int truePage = 1;
-                    while (AllOstatok > 0)
+                if (key.IsOstatkiUpdate)
+                {
+                    foreach (var oneFilter in FulterStatuses.FilterList)
                     {
-                        remains2.UpdateProgress(allCount, allCount - AllOstatok, $"{key.Name}, {oneFilter} Остаток: " + AllOstatok);
-                        responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, truePage, 1000, oneFilter);
-                        truePage++;
-                        AllOstatok -= responseWhithProduct_id.result.items.Count;
-                        int countItems = 0;
-                        foreach (var item in responseWhithProduct_id.result.items)
+                        Root responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, null, 1, oneFilter);
+                        int total = responseWhithProduct_id.result.total;
+                        int allCount = total;
+                        int AllOstatok = allCount;
+
+                        remains2.UpdateProgress(0, 0, $"Стартуем " + key.Name);
+                        remains2.UpdateProgress(0, 0, $"Всего " + allCount);
+
+                        int pageCount = (int)Math.Ceiling((double)total / (double)1000);
+                        int truePage = 1;
+                        while (AllOstatok > 0)
                         {
-                            countItems++;
-                            remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"{key.Name}, Остаток " + AllOstatok);
+                            remains2.UpdateProgress(allCount, allCount - AllOstatok, $"{key.Name}, {oneFilter} Остаток: " + AllOstatok);
+                            responseWhithProduct_id = PostRequestAsync2(key.ClientId, key.ApiKey, responseWhithProduct_id.result.last_id, 1000, oneFilter);
+                            truePage++;
+                            AllOstatok -= responseWhithProduct_id.result.items.Count;
+                            int countItems = 0;
+                            foreach (var item in responseWhithProduct_id.result.items)
+                            {
+                                countItems++;
+                                remains2.UpdateProgress(responseWhithProduct_id.result.items.Count, responseWhithProduct_id.result.items.Count - countItems, $"{key.Name}, Остаток " + AllOstatok);
 
-                            ArticleNumber art = new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id };
+                                ArticleNumber art = new ArticleNumber() { ArticleOzon = item.product_id, OurArticle = item.offer_id };
 
-                            ProductFromMarletplace oneProduct = new ProductFromMarletplace();
-                            oneProduct.productID_OfferID = art;
-                            oneProduct.status = oneFilter;
-                            oneProduct.Key = key;
-                            oneProduct.offer_id = item.offer_id;
-                            oneProduct.dateTimeCreate = DateTime.Now;
-                            productFromMarletplaces.Add(oneProduct);
+                                ProductFromMarletplace oneProduct = new ProductFromMarletplace();
+                                oneProduct.productID_OfferID = art;
+                                oneProduct.status = oneFilter;
+                                oneProduct.Key = key;
+                                oneProduct.offer_id = item.offer_id;
+                                oneProduct.dateTimeCreate = DateTime.Now;
+                                productFromMarletplaces.Add(oneProduct);
 
+                            }
+                            if (truePage * 1000 > total + 2000)
+                                break;
                         }
-                        if (truePage * 1000 > total + 2000)
-                            break;
                     }
                 }
             }
@@ -299,7 +129,11 @@ namespace Остатки.Classes.JobWhithApi.Ozon
             {
                 var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
                 col.DeleteAll();
-                col.InsertBulk(productFromMarletplaces);
+                foreach (var item in productFromMarletplaces)
+                {
+                    col.Insert(item);
+                }
+                //col.InsertBulk(productFromMarletplaces);
             }
             remains2.UpdateProgress(0, 0, $"Сохранили!!!!!!!!!!!!");
         }
@@ -438,16 +272,16 @@ namespace Остатки.Classes.JobWhithApi.Ozon
                 return JsonConvert.DeserializeObject<Root>(result);
             }
         }
-        private static Root PostRequestAsync2(string clientId, string apiKey, int page, int count, string status)
+        private static Root PostRequestAsync2(string clientId, string apiKey, string last_id, int count, string status)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/list");
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v2/product/list");
             httpWebRequest.Headers.Add("Client-Id", clientId);
             httpWebRequest.Headers.Add("Api-Key", apiKey);
             httpWebRequest.ContentType = "application/json";
             httpWebRequest.Method = "POST";
             RootRequest rootRequest = new RootRequest();
-            rootRequest.page = page;
-            rootRequest.page_size = count;
+            rootRequest.last_id = last_id;
+            rootRequest.limit = count;
             rootRequest.filter = new Filter() { visibility = status };
             var jsort = JsonConvert.SerializeObject(rootRequest);
             using (var requestStream = httpWebRequest.GetRequestStream())

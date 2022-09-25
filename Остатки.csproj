@@ -140,10 +140,12 @@
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Requirements.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Result.cs" />
     <Compile Include="Classes\JobWhithApi\Analitics\TestAnalitics\Response\Root.cs" />
-    <Compile Include="Classes\JobWhithApi\Ozon\GetProductInfo.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\GetProductInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\GetProductPriceInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Answer\Posting.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Filter.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingSave.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingSaveJob.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Filter.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Root.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\With.cs" />
@@ -170,7 +172,9 @@
     <Compile Include="Classes\ProductsClasses\InfoPrices\ResultInfoPrices.cs" />
     <Compile Include="Classes\ProductsClasses\InfoPrices\RootInfoPrices.cs" />
     <Compile Include="Classes\ProductsClasses\ProductInfo\Commission.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Reasons.cs" />
     <Compile Include="Classes\ProductsClasses\ProductInfo\Request.cs" />
+    <Compile Include="Classes\ProductsClasses\ProductInfo\Result.cs" />
     <Compile Include="Classes\ProductsClasses\ProductInfo\ResultQInfo.cs" />
     <Compile Include="Classes\ProductsClasses\ProductInfo\ProductInfoFromOzon.cs" />
     <Compile Include="Classes\ProductsClasses\ProductInfo\Source.cs" />
@@ -293,6 +297,9 @@
     <Compile Include="Pages\AddJobProduct\StealProducts.xaml.cs">
       <DependentUpon>StealProducts.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Statistics\PostingsJobPage.xaml.cs">
+      <DependentUpon>PostingsJobPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Statistics\TestFinansy.xaml.cs">
       <DependentUpon>TestFinansy.xaml</DependentUpon>
     </Compile>
@@ -328,6 +335,7 @@
     <Content Include="Resources\Icons\leonardoIcon.jpg" />
     <Content Include="Resources\Icons\leroyIcon.jpg" />
     <Content Include="Resources\Icons\petrovichIcon.jpg" />
+    <Content Include="Resources\Icons\UnArchiveIcon.svg" />
     <Content Include="Resources\Icons\Yandex_znak.svg" />
   </ItemGroup>
   <ItemGroup>
@@ -428,6 +436,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\AddJobProduct\StealProducts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Statistics\PostingsJobPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

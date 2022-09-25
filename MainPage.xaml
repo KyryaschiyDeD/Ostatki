@@ -54,6 +54,12 @@
 							<TextBlock FontSize="24" Text="Цены и остатки" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
+                    <ListBoxItem Name="PostingsJobPage">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xED39;" />
+                            <TextBlock FontSize="24" Text="Отправления" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ListBoxItem>
 				</ListBox>
 			</SplitView.Pane>
 			<SplitView.Content>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace Остатки.Classes.JobWhithApi.Ozon.ProductInfo
 {
     public class ProductInfoFromOzon
     {
-        public ResultQInfo result { get; set; }
+        public Остатки.Classes.ProductsClasses.ProductInfo.Result result { get; set; }
     }
 }

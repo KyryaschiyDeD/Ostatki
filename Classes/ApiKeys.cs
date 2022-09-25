@@ -14,6 +14,9 @@ namespace Остатки.Classes
 		public string ApiKey { get; set; }
 		public bool ItIsTop { get; set; }	
 		public bool InDB { get; set; }	
+		public bool IsOstatkiUpdate { get; set; }
+		public bool IsPriceUpdate { get; set; }
+		public bool IsTheMaximumPrice { get; set; }
 		public int MaxCountTopProduct { get; set; }	
 		public DateTime DateCreate {get; set;}
 	}

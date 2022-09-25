@@ -17,7 +17,18 @@ namespace Остатки.Classes
 				return col.Query().ToList();
 			}
 		}
-		public static void CreateNewApi(string name, string clientId, string apiKey, string MaxCountTopProduct, object itIsTop, object inDB)
+		public static void CreateNewApi
+			(
+			string name, 
+			string clientId, 
+			string apiKey, 
+			string MaxCountTopProduct, 
+			object itIsTop, 
+			object inDB, 
+			object isOstatkiUpdate, 
+			object isPriceUpdate,
+			object isTheMaximumPrice
+			)
 		{
 			bool chIsCreate = false;
 			int ch = 0;
@@ -32,13 +43,35 @@ namespace Остатки.Classes
 				var col = db.GetCollection<ApiKeys>("ApiKeyses");
 				var proverk = col.FindOne(x => x.ApiKey == apiKey);
 				if (proverk == null)
-					col.Insert(new ApiKeys() { Name = name, ClientId = clientId, ApiKey = apiKey, DateCreate = DateTime.Now, MaxCountTopProduct = ch, ItIsTop = (bool)itIsTop, InDB = (bool)inDB });
+					col.Insert(new ApiKeys() { 
+						Name = name, 
+						ClientId = clientId, 
+						ApiKey = apiKey, 
+						DateCreate = DateTime.Now, 
+						MaxCountTopProduct = ch, 
+						ItIsTop = (bool)itIsTop, 
+						InDB = (bool)inDB, 
+						IsOstatkiUpdate = (bool)isOstatkiUpdate, 
+						IsPriceUpdate = (bool)isPriceUpdate,
+						IsTheMaximumPrice = (bool)isTheMaximumPrice
+					});
 				
 					
 			}
 		}
 
-		public static void ReadctOldApi(string name, string clientId, string apiKey, string MaxCountTopProduct, object itIsTop, object inDB)
+		public static void ReadctOldApi
+			(
+			string name, 
+			string clientId, 
+			string apiKey, 
+			string MaxCountTopProduct, 
+			object itIsTop, 
+			object inDB, 
+			object isOstatkiUpdate, 
+			object isPriceUpdate,
+			object isTheMaximumPrice
+			)
 		{
 			bool chIsCreate = false;
 			int ch = 0;
@@ -57,6 +90,10 @@ namespace Остатки.Classes
 					proverk.MaxCountTopProduct = ch;
 					proverk.ItIsTop = (bool)itIsTop;
 					proverk.InDB = (bool)inDB;
+					proverk.IsOstatkiUpdate = (bool)isOstatkiUpdate;
+					proverk.IsPriceUpdate = (bool)isPriceUpdate; 
+					proverk.IsTheMaximumPrice = (bool)isTheMaximumPrice; 
+					
 					col.Update(proverk);
 				}
 			}

@@ -22,6 +22,7 @@ using Остатки.Classes.JobWhithApi.Ozon;
 using Остатки.Classes.Petrovich;
 using Остатки.Classes.JobWhithApi.Ozon.StockUpdate;
 using Остатки.Classes.JobWhithApi.Ozon.PriceUpdate;
+using Остатки.Classes.JobWhithApi.Ozon.ProductInfo;
 
 namespace Остатки
 {
@@ -198,14 +199,18 @@ namespace Остатки
             {
                 tmpFilterProduct = new ObservableCollection<Product>(ProductList1.Where(x => x.ArticleNumberProductId.Values.SelectMany(y => y).Where(z => z.ArticleOzon == myLong).Count() > 0));
             }
-            
+
+            if (tmpFilterProduct.Count == 0 && !isNumerical)
+            {
+                tmpFilterProduct = new ObservableCollection<Product>(ProductList1.Where(x => !String.IsNullOrEmpty(x.status) && x.status.Contains(FindingTextBox.Text)));
+            }
 
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
 
         private void Article_Click(object sender, RoutedEventArgs e)
         {
-            Stocks.GoUpdateStocks(ProductList1.ToList());
+            Остатки.Classes.JobWhithApi.Ozon.StockUpdate.Stocks.GoUpdateStocks(ProductList1.ToList());
         }
 
         private void PriceUpdate_Click(object sender, RoutedEventArgs e)
@@ -219,7 +224,7 @@ namespace Остатки
             thread.Join();
         }
         
-        public static Susseess PostRequestAsync(ApiKeys key,ProductsIdsss pageOzon)
+        public static Susseess PostRequestAsyncGoToArchive(ApiKeys key,ProductsIdsss pageOzon)
         {
             var jsort = JsonConvert.SerializeObject(pageOzon);
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/archive");
@@ -256,6 +261,45 @@ namespace Остатки
             
             
         }
+
+        public static Susseess PostRequestAsyncGoToUnArchive(ApiKeys key, ProductsIdsss pageOzon)
+        {
+            var jsort = JsonConvert.SerializeObject(pageOzon);
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/unarchive");
+            httpWebRequest.Headers.Add("Client-Id", key.ClientId);
+            httpWebRequest.Headers.Add("Api-Key", key.ApiKey.Replace(" ", ""));
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";
+
+            using (var requestStream = httpWebRequest.GetRequestStream())
+            using (var writer = new StreamWriter(requestStream))
+            {
+                writer.Write(jsort);
+            }
+            HttpWebResponse httpResponse = new HttpWebResponse();
+            try
+            {
+                httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    //ответ от сервера
+                    var result = streamReader.ReadToEnd();
+                    //Сериализация
+                    return JsonConvert.DeserializeObject<Susseess>(result);
+                }
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse exeps = (HttpWebResponse)ex.Response;
+                if (exeps.StatusCode == HttpStatusCode.BadRequest)
+                    return new Susseess() { message = exeps.StatusDescription, result = true };
+                else
+                    return new Susseess() { message = exeps.StatusDescription, result = false };
+            }
+
+
+        }
+
         private void GoArchiveOOO_Click(object sender, RoutedEventArgs e)
         {
             List<Product> allProducts = new List<Product>();
@@ -270,32 +314,35 @@ namespace Остатки
             }
             foreach (var keys in ApiKeysesJob.GetAllApiList())
             {
-                List<long> product = new List<long>();
-                foreach (var item in allProducts)
+                if (keys.IsOstatkiUpdate)
                 {
-                    if (product.Count <= 100)
-					{
-                        if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
+                    List<long> product = new List<long>();
+                    foreach (var item in allProducts)
+                    {
+                        if (product.Count <= 100)
                         {
-                            if ((item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite < 10 && item.RemainsWhite != item.RemainsBlack) ||
-                                (item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite == item.RemainsBlack && item.RemainsWhite < 10 && item.RemainsWhite > 0) ||
-                                (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1) ||
-                                (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 ||
-                                item.TypeOfShop == "petrovich" && item.ArticleNumberProductId.First().Value.Count > 2 && item.RemainsWhite <= 10))
+                            if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
                             {
-                                foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
+                                if ((item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite < 10 && item.RemainsWhite != item.RemainsBlack) ||
+                                    (item.TypeOfShop == "LeroyMerlen" && item.RemainsWhite == item.RemainsBlack && item.RemainsWhite < 10 && item.RemainsWhite > 0) ||
+                                    (item.TypeOfShop == "Леонардо" && item.RemainsWhite <= 1) ||
+                                    (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 ||
+                                    item.TypeOfShop == "petrovich" && item.ArticleNumberProductId.First().Value.Count > 2 && item.RemainsWhite <= 10))
                                 {
+                                    foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
+                                    {
                                         product.Add(valueOzonApi.ArticleOzon);
+                                    }
+                                    if (!countOfAPI.ContainsKey(item))
+                                        countOfAPI.Add(item, 1);
+                                    else
+                                        countOfAPI[item]++;
                                 }
-                                if (!countOfAPI.ContainsKey(item))
-                                    countOfAPI.Add(item, 1);
-                                else
-                                    countOfAPI[item]++;
                             }
                         }
                     }
+                    productAllDict.Add(keys, product);
                 }
-                productAllDict.Add(keys, product);
             }
             foreach (var item in countOfAPI)
             {
@@ -318,7 +365,7 @@ namespace Остатки
                 Susseess susseess = new Susseess();
                 foreach (var one in item.Value.product_id)
                 {
-                    susseess = PostRequestAsync(item.Key, new ProductsIdsss { product_id = new List<long>() { one } });
+                    susseess = PostRequestAsyncGoToArchive(item.Key, new ProductsIdsss { product_id = new List<long>() { one } });
                 }
                 Message.infoList.Add(susseess.message);
                 if (susseess.result)
@@ -338,60 +385,136 @@ namespace Остатки
                 Message.ShowAllToast();
             }
         }
+        private void GoUnArchive_Click(object sender, RoutedEventArgs e)
+        {
+            List<Product> allProducts = new List<Product>();
+
+            List<Product> ProductToUnArchive = new List<Product>();
+            Dictionary<ApiKeys, List<long>> productAllDict = new Dictionary<ApiKeys, List<long>>();
+            Dictionary<Product, int> countOfAPI = new Dictionary<Product, int>();
+            using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+            {
+                var col = db.GetCollection<Product>("Products");
+                allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
+            }
+            List<Product> goToUnAarchiveList = allProducts.Where(x => !String.IsNullOrEmpty(x.status) && x.status == "ARCHIVED").ToList();
+            foreach (var keys in ApiKeysesJob.GetAllApiList())
+            {
+                if (keys.IsOstatkiUpdate)
+                {
+                    List<long> product = new List<long>();
+                    foreach (var item in goToUnAarchiveList)
+                    {
+                        if (product.Count <= 498)
+                        {
+                            if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
+                            {
+                                if (item.RemainsWhite >= 7)
+                                {
+                                    foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
+                                    {
+                                        product.Add(valueOzonApi.ArticleOzon);
+                                    }
+                                    if (!countOfAPI.ContainsKey(item))
+                                        countOfAPI.Add(item, 1);
+                                    else
+                                        countOfAPI[item]++;
+                                }
+                            }
+                        }
+                    }
+                    productAllDict.Add(keys, product);
+                }
+            }
+            foreach (var item in countOfAPI)
+            {
+                ProductToUnArchive.Add(item.Key);
+            }
+            Dictionary<ApiKeys, ProductsIdsss> productsIdsss = new Dictionary<ApiKeys, ProductsIdsss>();
+
+            foreach (var item in productAllDict)
+            {
+                if (item.Value.Count != 0)
+                    productsIdsss.Add(item.Key, new ProductsIdsss { product_id = new List<long>(item.Value) });
+            }
+            int kolvoPost = 0;
+            foreach (var item in productsIdsss)
+            {
+                Message.infoList.Add($"Ключ: {item.Key.ClientId}, {item.Value.product_id.Count}");
+            }
+            foreach (var item in productsIdsss)
+            {
+                Susseess susseess = new Susseess();
+                foreach (var one in item.Value.product_id)
+                {
+                    susseess = PostRequestAsyncGoToUnArchive(item.Key, new ProductsIdsss { product_id = new List<long>() { one } });
+                }
+                Message.infoList.Add(susseess.message);
+                if (susseess.result)
+                {
+                    kolvoPost++;
+                }
+            }
+            Message.ShowAllToast();
+            if (kolvoPost == productsIdsss.Count())
+            { 
+                ProductToUnArchive.ForEach(x => x.status = "TO_SUPPLY");
+                DataBaseJob.UpdateList(ProductToUnArchive);
+                Message.infoList.Add($"Возвращено из архива. \n Кол-во: {kolvoPost}");
+                Message.ShowAllToast();
+            }
+        }
         private void GoToGetInfoProductFromOzon_Click(object sender, RoutedEventArgs e)
         {
-            Queue<Product> products = new Queue<Product>();
+            List<string> offerIdsToReq = new List<string>();
+
             using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
             {
                 var col = db.GetCollection<Product>("Products");
-                products = new Queue<Product>(col.Query().ToList());
-                while(products.Count != 0)
+                foreach (var OneKey in ApiKeysesJob.GetAllApiList())
                 {
-                    Product oneProduct = products.Dequeue();
-                    foreach (var keyValuePair in oneProduct.ArticleNumberProductId)
+                    List<Product> productsOnAccaunt = col.Query().ToList().Where(x => x.ArticleNumberProductId.ContainsKey(OneKey.ClientId)).ToList();
+                    foreach (var oneProductOnAccaunt in productsOnAccaunt)
                     {
-                        foreach (var articleNumberOneProduct in keyValuePair.Value)
+                        foreach (var articleNumberOneProduct in oneProductOnAccaunt.ArticleNumberProductId[OneKey.ClientId])
                         {
-                            //if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
-                            //    .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
-                           // {
-                                oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
-                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon =
-                                GetProductInfo.PostRequestAsync(keyValuePair.Key, ApiKeysesJob.GetApiByKey(keyValuePair.Key), articleNumberOneProduct.OurArticle);
-                           // }
+                            if (offerIdsToReq.Count >= 990 || oneProductOnAccaunt == productsOnAccaunt.Last())
+                            {
+                                if (oneProductOnAccaunt == productsOnAccaunt.Last())
+                                    offerIdsToReq.Add(articleNumberOneProduct.OurArticle);
+                                List<ResultQInfo> ManyProductInfoFromOzon = new List<ResultQInfo>();
+                                ManyProductInfoFromOzon.AddRange(GetProductInfo.PostRequestAsync(OneKey.ClientId, OneKey.ApiKey, offerIdsToReq).result.items);
+                                offerIdsToReq.Clear();
+
+                                //List<Product> productsToUp = new List<Product>(col.Query().ToList());
+                                foreach (var oneInfo in ManyProductInfoFromOzon)
+                                {
+                                    List<Product> finding = productsOnAccaunt.Where(x => x.ArticleNumberProductId.ContainsKey(OneKey.ClientId) && x.ArticleNumberProductId[OneKey.ClientId].Where(y => y.OurArticle == oneInfo.offer_id).ToList().Count() > 0).ToList();
+
+                                    productsOnAccaunt[productsOnAccaunt.IndexOf(finding.First())].ArticleNumberProductId[OneKey.ClientId]
+                                        [finding.First().ArticleNumberProductId[OneKey.ClientId].IndexOf(finding.First().ArticleNumberProductId[OneKey.ClientId].Find(x => x.OurArticle == oneInfo.offer_id))]
+                                        .productInfoFromOzon = oneInfo;
+
+                                }
+                            }
+                            else
+                            {
+                                if (articleNumberOneProduct.productInfoFromOzon == null)
+                                offerIdsToReq.Add(articleNumberOneProduct.OurArticle);
+                            }
                         }
+
                     }
-                    col.Update(oneProduct);
+                    foreach (var item in productsOnAccaunt)
+                    {
+                        col.Update(item);
+                    }
                 }
             }
         }
         private void GoToGetCommissionFromOzon_Click(object sender, RoutedEventArgs e)
         {
             GetProductPriceInfo.GetAndSaveProductPrice();
-            /*Queue<Product> products = new Queue<Product>();
-            using (var db = new LiteDatabase($@"{folder.Path}/ProductsDB.db"))
-            {
-                var col = db.GetCollection<Product>("Products");
-                products = new Queue<Product>(col.Query().ToList());
-                while(products.Count != 0)
-                {
-                    Product oneProduct = products.Dequeue();
-                    foreach (var keyValuePair in oneProduct.ArticleNumberProductId)
-                    {
-                        foreach (var articleNumberOneProduct in keyValuePair.Value)
-                        {
-                            if (oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
-                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon == null)
-                            {
-                                oneProduct.ArticleNumberProductId[keyValuePair.Key][oneProduct.ArticleNumberProductId[keyValuePair.Key]
-                                .IndexOf(articleNumberOneProduct)].productInfoFromOzon =
-                                GetProductInfo.PostRequestAsync(keyValuePair.Key, ApiKeysesJob.GetApiByKey(keyValuePair.Key), articleNumberOneProduct.OurArticle);
-                            }
-                        }
-                    }
-                    col.Update(oneProduct);
-                }
-            }*/
         }
 
         private void GetLeroyProducts_Click(object sender, RoutedEventArgs e)
@@ -474,7 +597,7 @@ namespace Остатки
                 //var wait = db.GetCollection<Product>("ProductsWait");
                 //var archive = db.GetCollection<Product>("ProductsArchive");
 
-                List<Product> Remains = col.Query().ToList();
+               // List<Product> Remains = col.Query().ToList();
                 //List<Product> WaitList = wait.Query().ToList();
                 //List<Product> ArchiveList = archive.Query().ToList();
 
@@ -654,7 +777,7 @@ namespace Остатки
                 //linksProductTXT = online.Query().ToList();
 
                 linksProductLeroy.AddRange(online.Query().Where(x => x.TypeOfShop == "LeroyMerlen").ToList());
-                linksProductPetrovich.AddRange(online.Query().Where(x => x.TypeOfShop == "petrovich").ToList());
+                linksProductPetrovich.AddRange(online.Query().Where(x => x.TypeOfShop == "petrovich" && x.DateHistoryRemains.Last().Date != DateTime.Now.Date).ToList());
 
                 //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо").ToList());
                 //linksProductLeonardo.AddRange(online.Query().Where(x => x.TypeOfShop == "Леонардо" && x.DateHistoryRemains.Last().Date.Minute <= DateTime.Now.Date.Minute - 5).ToList());
@@ -712,12 +835,13 @@ namespace Остатки
                 {
                     Product product = new Product();
                     ProductJobs.ocherPetrovich.TryDequeue(out product);
-                    ProductJobs.parsePetrovichUpdate(product);
+                    if (product.DateHistoryRemains.Last().Day != DateTime.Now.Day)
+                        ProductJobs.parsePetrovichUpdate(product);
                     UpdateProgress(kolvoToUpdateLeroy + kolvoToUpdateLeonardo + kolvoToUpdatePetrovich, ProductJobs.NewRemaintProduct.Count(), "Плучаем данные");
                 }
             };
 
-            Parallel.Invoke(action, action, action2, action2);
+            Parallel.Invoke(action, action, action2, action2, action2, action2);
             //Parallel.Invoke(action2, action2);
             UpdateProgress(0, 0, "Сохраняем данные");
             DataBaseJob.SaveNewRemains(ProductJobs.NewRemaintProduct);

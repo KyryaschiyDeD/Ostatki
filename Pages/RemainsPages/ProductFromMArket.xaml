@@ -4,13 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Остатки.Pages.RemainsPages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
-	mc:Ignorable="d"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls" xmlns:data="using:Остатки.Classes.ProductsClasses"
+    mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 	<Page.BottomAppBar>
 		<AppBar IsSticky="true">
 			<Grid HorizontalAlignment="Center">
-				<Grid.ColumnDefinitions>
+                
+                <Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
@@ -33,6 +34,31 @@
 		</AppBar>
 	</Page.BottomAppBar>
 	<Grid x:Name="MainGrid" >
+        <CommandBar
+			IsOpen="True"
+			IsSticky="True" 
+			DefaultLabelPosition="Right"
+			IsDynamicOverflowEnabled="False"
+			UseLayoutRounding="True"
+			Height="40">
+            <CommandBar.Content>
+                <TextBox Margin="4" VerticalAlignment="Center" Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
+            </CommandBar.Content>
+        </CommandBar>
+        <GridView ItemsSource="{x:Bind productFromMarletplaces}" x:Name="dataGridProduct" Margin="0,40,0,0">
+            <GridView.ItemTemplate>
+                <DataTemplate  x:DataType="data:ProductFromMarletplace">
+                    <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center">
+                        <TextBlock FontSize="18" Text="{x:Bind offer_id}" HorizontalAlignment="Right"> </TextBlock>
+                        <TextBlock FontSize="18" Text="{x:Bind productID_OfferID.ArticleOzon}" HorizontalAlignment="Right"> </TextBlock>
+                        <TextBlock FontSize="10" Text="{x:Bind dateTimeCreate }" HorizontalAlignment="Right"> </TextBlock>
+                        <TextBlock FontSize="10" Text="{x:Bind Key.ClientId }" HorizontalAlignment="Right"> </TextBlock>
+                        <TextBlock FontSize="10" Text="{x:Bind  status }" HorizontalAlignment="Right"> </TextBlock>
+                    </StackPanel>
 
-	</Grid>
+                </DataTemplate>
+
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
 </Page>

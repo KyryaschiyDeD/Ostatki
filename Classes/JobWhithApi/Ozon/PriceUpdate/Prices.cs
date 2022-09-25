@@ -62,121 +62,190 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
             }
         }
 
+        public static bool CheckNewPriceOfMaximumAndMax(int a, string str)
+        {
+            double b;
+            bool ctr = double.TryParse(str.Replace('.', ','), out b);
+
+            if (b <= (double)a)
+                return true;
+            else if ((b / (double)a - 1) <= 0.055)
+                return true;
+            return false;
+        }
+
         public static async void GoUpdatePrices(List<Product> products)
         {
             List<Price> prices = new List<Price>();
             int countToUpdatePrice = 0;
             List<RootResp> resp = new List<RootResp>();
+            List<ApiKeys> allApi = ApiKeysesJob.GetAllApiList();
+            List<ApiKeys> apiWhithMaxPrice = allApi.Where(x => x.IsTheMaximumPrice == true).ToList();
+            List<Product> NoInfoPrice = new List<Product>();
+            Dictionary<ApiKeys, List<Price>> updatePriceOnMaxApiAccaunt = new Dictionary<ApiKeys, List<Price>>();
 
-            foreach (var keys in ApiKeysesJob.GetAllApiList())
+            foreach (var keys in allApi)
             {
-                List<ArticleNumber> DellFromSale = new List<ArticleNumber>();
-                foreach (Product product in products)
+                if (keys.IsPriceUpdate)
                 {
-                    if (product.ArticleNumberProductId.ContainsKey(keys.ClientId) && product.ArticleNumberProductId[keys.ClientId].Count != 0)
+                    List<ArticleNumber> DellFromSale = new List<ArticleNumber>();
+                    foreach (Product product in products)
                     {
-                        if (product.Weight == 0)
-                            product.Weight = 5000;
-
-                        int kolKompl = 0;
-                        foreach (var item in product.ArticleNumberProductId[keys.ClientId])
+                        if (product.ArticleNumberProductId.ContainsKey(keys.ClientId) && product.ArticleNumberProductId[keys.ClientId].Count != 0)
                         {
-                            if (item.OurArticle.Contains("x10"))
-                                kolKompl = 10;
-                            else
-                            if (item.OurArticle.Contains("x5"))
-                                kolKompl = 5;
-                            else
-                            if (item.OurArticle.Contains("x3"))
-                                kolKompl = 3;
-                            else
-                            if (item.OurArticle.Contains("x2"))
-                                kolKompl = 2;
-                            else
-                                kolKompl = 1;
+                            if (product.Weight == 0)
+                                product.Weight = 5000;
 
-                            int newPrice = 0;
-                            double koef = 0;
+                            int kolKompl = 0;
+                            foreach (var item in product.ArticleNumberProductId[keys.ClientId])
+                            {
+                                if (item.OurArticle.Contains("x10"))
+                                    kolKompl = 10;
+                                else
+                                if (item.OurArticle.Contains("x5"))
+                                    kolKompl = 5;
+                                else
+                                if (item.OurArticle.Contains("x3"))
+                                    kolKompl = 3;
+                                else
+                                if (item.OurArticle.Contains("x2"))
+                                    kolKompl = 2;
+                                else
+                                    kolKompl = 1;
 
-                            if (product.NowPrice * kolKompl < 100)
-                            {
-                                koef = 2;
-                            }
-                            else
-                            if (product.NowPrice * kolKompl < 200)
-                            {
-                                koef = 1.5;
-                            }
-                            else
-                            if (product.NowPrice * kolKompl < 500)
-                            {
-                                koef = 1.25;
-                            }
-                            else
-                            if (product.NowPrice * kolKompl < 1000)
-                            {
-                                koef = 1.1;
-                            }
-                            else
-                                koef = 1;
+                                int newPrice = 0;
+                                double koef = 0;
 
-                            bool ItIsNewPrice = false;
-
-                            if (item.productInfoPriceFromOzon != null)
-                            {
-                                if (item.productInfoPriceFromOzon.sales_percent == 0)
+                                if (product.NowPrice * kolKompl < 40)
                                 {
-                                    Thread.Sleep(500);
-                                    RootInfoPrices rootInfoPrices = GetProductPriceInfo.PostRequestAsyncWhithList(keys.ClientId, keys.ApiKey, "", 1, new List<string>() { item.OurArticle });
-                                    if (rootInfoPrices.result.items.Count != 0)
+                                    koef = 3;
+                                }
+                                else
+                                if (product.NowPrice * kolKompl < 100)
+                                {
+                                    koef = 2.2;
+                                }
+                                else
+                                if (product.NowPrice * kolKompl < 200)
+                                {
+                                    koef = 1.7;
+                                }
+                                else
+                                if (product.NowPrice * kolKompl < 500)
+                                {
+                                    koef = 1.35;
+                                }
+                                else
+                                if (product.NowPrice * kolKompl < 1000)
+                                {
+                                    koef = 1.2;
+                                }
+                                else
+                                    koef = 1;
+
+                                bool ItIsNewPrice = false;
+
+                                if (item.productInfoPriceFromOzon != null)
+                                {
+                                    if (item.productInfoPriceFromOzon.sales_percent == 0)
                                     {
-                                        newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.15 +
-                                        (rootInfoPrices.result.items.First().commissions.fbs_first_mile_max_amount + rootInfoPrices.result.items.First().commissions.fbs_direct_flow_trans_max_amount
-                                        + rootInfoPrices.result.items.First().commissions.fbs_deliv_to_customer_amount)) * 1.05 / (100 - rootInfoPrices.result.items.First().commissions.sales_percent) * 100) / 10 * 10;
+                                        NoInfoPrice.Add(product);
+                                        continue;
+                                        /*Thread.Sleep(500);
+                                        RootInfoPrices rootInfoPrices = GetProductPriceInfo.PostRequestAsyncWhithList(keys.ClientId, keys.ApiKey, "", 1, new List<string>() { item.OurArticle });
+                                        if (rootInfoPrices.result.items.Count != 0)
+                                        {
+                                            newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.15 +
+                                            (rootInfoPrices.result.items.First().commissions.fbs_first_mile_max_amount + rootInfoPrices.result.items.First().commissions.fbs_direct_flow_trans_max_amount
+                                            + rootInfoPrices.result.items.First().commissions.fbs_deliv_to_customer_amount)) * 1.05 / (100 - rootInfoPrices.result.items.First().commissions.sales_percent) * 100) / 10 * 10;
+                                            ItIsNewPrice = true;
+                                        }*/
+                                    }
+                                    else
+                                    {
+                                        newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.20 / 93 * 100 +
+                                            (item.productInfoPriceFromOzon.fbs_first_mile_max_amount + item.productInfoPriceFromOzon.fbs_direct_flow_trans_max_amount
+                                            + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100) / 10 * 10;
                                         ItIsNewPrice = true;
+                                    }
+                                }
+                                foreach (var keyMaxPrice in apiWhithMaxPrice)
+                                {
+                                    if (product.ArticleNumberProductId.ContainsKey(keyMaxPrice.ClientId))
+                                    {
+                                        foreach (var oneMaxProduct in product.ArticleNumberProductId[keyMaxPrice.ClientId])
+                                        {
+                                            if (
+                                                CheckNewPriceOfMaximumAndMax
+                                                    (
+                                                    newPrice,
+                                                    oneMaxProduct.productInfoFromOzon.price
+                                                    )
+                                                )
+                                            {
+                                                if (!updatePriceOnMaxApiAccaunt.ContainsKey(keyMaxPrice))
+                                                {
+                                                    updatePriceOnMaxApiAccaunt.Add(keyMaxPrice, new List<Price>());
+                                                }
+
+                                                updatePriceOnMaxApiAccaunt[keyMaxPrice].Add
+                                                    (
+                                                    new Price()
+                                                    {
+                                                        product_id = (int)oneMaxProduct.ArticleOzon,
+                                                        price = (newPrice * 1.1).ToString(),
+                                                        old_price = (newPrice * 1.5).ToString()
+                                                    }
+                                                    );
+                                            }
+
+                                        }
+                                    }
+                                }
+                                if (ItIsNewPrice)
+                                {
+                                    if (ChechNewPriceOfFiveProcent(newPrice, item.productInfoFromOzon.price))
+                                    {
+                                        prices.Add(new Price() { product_id = (int)item.ArticleOzon, price = newPrice.ToString(), old_price = (newPrice * 1.4).ToString() });
+                                        countToUpdatePrice++;
                                     }
                                 }
                                 else
                                 {
-                                    newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.15 +
-                                        (item.productInfoPriceFromOzon.fbs_first_mile_max_amount + item.productInfoPriceFromOzon.fbs_direct_flow_trans_max_amount
-                                        + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100) / 10 * 10;
-                                    ItIsNewPrice = true;
+                                    DellFromSale.Add(item);
                                 }
-                            }
-                            
-                            //newPrice = (int)(Convert.ToInt32(Convert.ToDouble(product.NowPrice) * kolKompl + 45 + product.Weight / 1000 * 20 + 50) * 1.075 * 1.1 * 1.25 * 1.1 + 5) / 10 * 10;
 
-                            if(ItIsNewPrice)
-                            {
-                                if (ChechNewPriceOfFiveProcent(newPrice, item.productInfoFromOzon.result.price))
+                                if (countToUpdatePrice >= 990)
                                 {
-                                    prices.Add(new Price() { product_id = (int)item.ArticleOzon, price = newPrice.ToString(), old_price = (newPrice * 1.4).ToString() });
-                                    countToUpdatePrice++;
+                                    countToUpdatePrice = 0;
+                                    resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, prices));
+                                    foreach (var oneMaxUpdate in updatePriceOnMaxApiAccaunt)
+                                    {
+                                        resp.Add(SendReqwest(oneMaxUpdate.Key.ClientId, oneMaxUpdate.Key.ApiKey, oneMaxUpdate.Value));
+                                    }
+                                    updatePriceOnMaxApiAccaunt.Clear();
+                                    prices.Clear();
                                 }
-                            }
-                            else
-                            {
-                                DellFromSale.Add(item);
-                            }
-
-                            if (countToUpdatePrice >= 990)
-                            {
-                                countToUpdatePrice = 0;
-                                resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, prices));
-                                prices = new List<Price>();
                             }
                         }
                     }
+
+                    Stocks.GoUpdateStocksToNull(DellFromSale, keys);
+                    countToUpdatePrice = 0;
+                    DellFromSale.Clear();
+
+                    foreach (var oneMaxUpdate in updatePriceOnMaxApiAccaunt)
+                    {
+                        resp.Add(SendReqwest(oneMaxUpdate.Key.ClientId, oneMaxUpdate.Key.ApiKey, oneMaxUpdate.Value));
+                    }
+                    updatePriceOnMaxApiAccaunt.Clear();
+                    prices.Clear();
+
                 }
-
-                Stocks.GoUpdateStocksToNull(DellFromSale, keys);
-                countToUpdatePrice = 0;
-                DellFromSale.Clear();
-
-                resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, prices));
-                prices = new List<Price>();
             }
+
+            
+
             string str = "";
             int kolErrors = 0;
             List<string> errorsOfferID = new List<string>();

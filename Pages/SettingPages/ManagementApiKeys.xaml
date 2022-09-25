@@ -10,8 +10,8 @@
 
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition />
-			<ColumnDefinition />
+            <ColumnDefinition Width="0.5*" />
+            <ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 		<StackPanel Grid.Column="0" MinWidth="400" Margin="0,100,0,0">
 			<TextBox x:Name="NameInBase" PlaceholderText="Наименование" Margin="10" HorizontalAlignment="Center" MinWidth="300" />
@@ -20,6 +20,9 @@
             <TextBox x:Name="MaxCountTopProduct" PlaceholderText="Количество топа" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
             <CheckBox x:Name="ItIsTop" Content="Действует топ?" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
             <CheckBox x:Name="InDB" Content="Действует проверка на ДБ?" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
+            <CheckBox x:Name="IsOstatkiUpdate" Content="Остатки?" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
+            <CheckBox x:Name="IsPriceUpdate" Content="Цены?" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
+            <CheckBox x:Name="IsTheMaximumPrice" Content="Цена выше всех?" Margin="10" HorizontalAlignment="Center" MinWidth="300"/>
 			<Button x:Name="AddNewApiKey" Content="Добавить" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="AddNewApiKey_Click"/>
             <Button x:Name="ReadctOldApi" Content="Редактировать" Margin="10"  HorizontalAlignment="Center" MinWidth="300" Click="ReadctOldApiKey_Click"/>
 		</StackPanel>
@@ -35,34 +38,44 @@
 						   ItemsSource="{x:Bind ApiList}" 
 						   >
 			<controls:DataGrid.Columns>
-				<controls:DataGridTextColumn 
+                <controls:DataGridTextColumn 
 						Header="Наименование"
-						Width="250"
+						Width="150"
 						Binding="{Binding Name}" 
 						FontSize="20" />
-				<controls:DataGridTextColumn 
-						Header="Дата создания"
-						Width="250"
-						Binding="{Binding DateCreate}" 
-						FontSize="20" />
-				<controls:DataGridTextColumn 
+                <controls:DataGridTextColumn 
 						Header="ClientId"
-						Width="250"
+						Width="100"
 						Binding="{Binding ClientId}" 
 						FontSize="20" />
 				<controls:DataGridCheckBoxColumn 
 						Header="ItIsTop"
-						Width="250"
+						Width="50"
 						Binding="{Binding ItIsTop}" 
 						 />
                 <controls:DataGridCheckBoxColumn 
 						Header="InDB"
-						Width="250"
+						Width="50"
 						Binding="{Binding InDB}" 
+						 />
+                <controls:DataGridCheckBoxColumn 
+						Header="Остатки?"
+						Width="75"
+						Binding="{Binding IsOstatkiUpdate}" 
+						 />
+                <controls:DataGridCheckBoxColumn 
+						Header="Цены?"
+						Width="75"
+						Binding="{Binding IsPriceUpdate}" 
+						 />
+                <controls:DataGridCheckBoxColumn 
+						Header="MaxPrice?"
+						Width="75"
+						Binding="{Binding IsTheMaximumPrice}" 
 						 />
                 <controls:DataGridTextColumn 
 						Header="MaxCountTopProduct"
-						Width="250"
+						Width="75"
 						Binding="{Binding MaxCountTopProduct}" 
 						FontSize="20" />
 			</controls:DataGrid.Columns>

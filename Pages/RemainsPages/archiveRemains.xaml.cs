@@ -162,6 +162,12 @@ namespace Остатки
                 tmpFilterProduct = new ObservableCollection<Product>(from item in ProductListArchive
                                                                      where item.ArticleNumberInShop == myLong.ToString()
                                                                      select item);
+
+            if (tmpFilterProduct.Count == 0 && isNumerical)
+            {
+                tmpFilterProduct = new ObservableCollection<Product>(ProductListArchive.Where(x => x.ArticleNumberProductId.Values.SelectMany(y => y).Where(z => z.ArticleOzon == myLong).Count() > 0));
+            }
+
             dataGridProduct.ItemsSource = tmpFilterProduct;
         }
 

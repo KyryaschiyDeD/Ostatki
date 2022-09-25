@@ -47,6 +47,7 @@ namespace Остатки.Pages
                 myFrame.Navigate(typeof(BestStore));
                 TitleTextBlock.Text = "Лучшие продажи гена";
             }
+            
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)

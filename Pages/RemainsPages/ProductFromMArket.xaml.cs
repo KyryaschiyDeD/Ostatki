@@ -21,25 +21,32 @@ namespace Остатки.Pages.RemainsPages
 	/// </summary>
 	public sealed partial class ProductFromMArket : Page
 	{
-		static DataGrid products = new DataGrid();
+		//static DataGrid products = new DataGrid();
+		ObservableCollection<ProductFromMarletplace> productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>();
 		public ProductFromMArket()
 		{
 			this.InitializeComponent();
-			ObservableCollection<ProductFromMarletplace> productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>();
-			products.Name = "DataGridProduct";
-			products.IsReadOnly = true;
-			products.ItemsSource = productFromMarletplaces;
-			products.SelectionMode = DataGridSelectionMode.Single;
+			/*	GC.GetTotalMemory(true);
+				GC.Collect();
+				GC.WaitForPendingFinalizers(); 
+
+				products.Name = "DataGridProduct";
+				products.IsReadOnly = true;
+				products.ItemsSource = productFromMarletplaces;
+				products.SelectionMode = DataGridSelectionMode.Single;
+
 			
+			products.ItemsSource = productFromMarletplaces;*/
+
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
-            {
-                var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
+			{
+				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> productFromMarletplacesTMP = col.Query().ToList();
 				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(productFromMarletplacesTMP);
 			}
-			products.ItemsSource = productFromMarletplaces;
-			MainGrid.Children.Clear();
-			MainGrid.Children.Add(products);
+			//MainGrid.Children.Clear();
+			//MainGrid.SetBinding(productFromMarletplaces);
+
 		}
 		public static string getLink(string lnk)
 		{
@@ -103,6 +110,7 @@ namespace Остатки.Pages.RemainsPages
 			int offer = -1;
 			allProductsToAdd.Reverse();
 			List<ProductFromMarletplace> tovar = new List<ProductFromMarletplace>(allProductsToAdd.Where(x => x.offer_id.Contains("pv-")));
+			allProductsToAdd.Clear();
 			List<Product> productList = new List<Product>();
 			int countError = 0;
 
@@ -268,35 +276,6 @@ namespace Остатки.Pages.RemainsPages
 							isFindDB = true;
 							findProductInDB = finding.First();
 						}
-						
-						/*foreach (var ourProduct in allProducts)
-						{
-							List<ArticleNumber> newLst = ourProduct.ArticleNumberProductId.GetValueOrDefault(item.Key.ClientId);
-							foreach (var oneKeyOffFrom in Keyses)
-							{
-								newLst.AddRange(ourProduct.ArticleNumberProductId.GetValueOrDefault(oneKeyOffFrom.ClientId));
-							}
-
-							if (string.Compare(ourProduct.ArticleNumberInShop, article) == 0)
-                            {
-								isFindDB = true;
-								findProductInDB = ourProduct;
-								break;
-							}
-
-							if (newLst != null && newLst.Count > 0)
-								foreach (var oneArt in newLst)
-								{
-									//if (isFindDB)
-									//	break;
-									if (oneArt.OurArticle.Contains(article))
-									{
-										isFindDB = true;
-										findProductInDB = ourProduct;
-										break;
-									}
-								} 
-						}*/
 
 						if (isFindDB)
 						{
@@ -330,82 +309,91 @@ namespace Остатки.Pages.RemainsPages
 								Thread.Sleep(5000);
 								productRoot = PetrovichJobsWithCatalog.GetProduct(article);
 							}
+
 							if (productRoot != null)
 							{
-								Classes.JobWhithApi.PetrovichJobs.Product ProductPetrovich = productRoot.data.product;
+								if ((item.status == "ARCHIVED" && productRoot.data.product.remains.total >= 7) || item.status != "ARCHIVED")
+                                {
+									Classes.JobWhithApi.PetrovichJobs.Product ProductPetrovich = productRoot.data.product;
 
+									Classes.Product newProduct = new Classes.Product();
+									newProduct.Name = ProductPetrovich.title;
+									newProduct.NowPrice = ProductPetrovich.price.retail;
+									newProduct.RemainsWhite = ProductPetrovich.remains.total;
+									newProduct.RemainsBlack = PetrovichJobsWithCatalog.GetRemainsBlack(ProductPetrovich.remains);
 
-								Classes.Product newProduct = new Classes.Product();
-								newProduct.Name = ProductPetrovich.title;
-								newProduct.NowPrice = ProductPetrovich.price.retail;
-								newProduct.RemainsWhite = ProductPetrovich.remains.total;
-								newProduct.RemainsBlack = PetrovichJobsWithCatalog.GetRemainsBlack(ProductPetrovich.remains);
+									newProduct.status = item.status;
+									newProduct.ProductLink = @"https://moscow.petrovich.ru/catalog/" + ProductPetrovich.breadcrumbs[0].code + "/" + ProductPetrovich.code;
+									newProduct.ArticleNumberInShop = ProductPetrovich.code.ToString();
+									newProduct.ArticleNumberUnicList = new List<string>();
+									newProduct.TypeOfShop = "petrovich";
+									newProduct.Weight = ProductPetrovich.weight;
+									newProduct.DateHistoryRemains.Add(DateTime.Now);
 
-								newProduct.ProductLink = @"https://moscow.petrovich.ru/catalog/" + ProductPetrovich.breadcrumbs[0].code + "/" + ProductPetrovich.code;
-								newProduct.ArticleNumberInShop = ProductPetrovich.code.ToString();
-								newProduct.ArticleNumberUnicList = new List<string>();
-								newProduct.TypeOfShop = "petrovich";
-								newProduct.Weight = ProductPetrovich.weight;
-								newProduct.DateHistoryRemains.Add(DateTime.Now);
-
-								if (newProduct != null)
-								{
-									if (!newProduct.Name.Equals("error"))
+									if (newProduct != null)
 									{
-										newProduct.ArticleNumberUnicList = new List<string>();
-										newProduct.ArticleNumberUnicList.Add(item.offer_id);
-										newProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
-
-										if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
-											newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
-										if (!newProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
-											newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
-
-										foreach (var OneAnalogitem in analog)
+										if (!newProduct.Name.Equals("error"))
 										{
-											if (!newProduct.ArticleNumberProductId.ContainsKey(OneAnalogitem.Key.ClientId))
-												newProduct.ArticleNumberProductId.Add(OneAnalogitem.Key.ClientId, new List<ArticleNumber>());
+											newProduct.ArticleNumberUnicList = new List<string>();
 
-											if (!newProduct.ArticleNumberUnicList.Contains(OneAnalogitem.productID_OfferID.OurArticle))
-												newProduct.ArticleNumberUnicList.Add(OneAnalogitem.productID_OfferID.OurArticle);
+											newProduct.ArticleNumberUnicList.Add(item.offer_id);
+											newProduct.ArticleNumberProductId = new Dictionary<string, List<ArticleNumber>>();
 
-											if (!ArticleNumberProductId(newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId], OneAnalogitem.productID_OfferID))
-												newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId].Add(OneAnalogitem.productID_OfferID);
+											if (!newProduct.ArticleNumberProductId.ContainsKey(item.Key.ClientId))
+												newProduct.ArticleNumberProductId.Add(item.Key.ClientId, new List<ArticleNumber>());
+											if (!newProduct.ArticleNumberProductId[item.Key.ClientId].Contains(item.productID_OfferID))
+												newProduct.ArticleNumberProductId[item.Key.ClientId].Add(item.productID_OfferID);
 
-											tovar.Remove(OneAnalogitem);
+											foreach (var OneAnalogitem in analog)
+											{
+												if (!newProduct.ArticleNumberProductId.ContainsKey(OneAnalogitem.Key.ClientId))
+													newProduct.ArticleNumberProductId.Add(OneAnalogitem.Key.ClientId, new List<ArticleNumber>());
+
+												if (!newProduct.ArticleNumberUnicList.Contains(OneAnalogitem.productID_OfferID.OurArticle))
+													newProduct.ArticleNumberUnicList.Add(OneAnalogitem.productID_OfferID.OurArticle);
+
+												if (!ArticleNumberProductId(newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId], OneAnalogitem.productID_OfferID))
+													newProduct.ArticleNumberProductId[OneAnalogitem.Key.ClientId].Add(OneAnalogitem.productID_OfferID);
+
+												tovar.Remove(OneAnalogitem);
+											}
+
+
+											using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+											{
+												var col = db.GetCollection<Product>("Products");
+												col.Insert(newProduct);
+											}
+
 										}
-
-										using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+										else
 										{
-											var col = db.GetCollection<Product>("Products");
-											col.Insert(newProduct);
+											using (var db = new LiteDatabase($@"{Global.folder.Path}/ErrorArticle.db"))
+											{
+												var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
+												if (col.FindById(item.Id) == null)
+													col.Insert(item);
+											}
 										}
 									}
 									else
 									{
-										using (var db = new LiteDatabase($@"{Global.folder.Path}/ErrorArticle.db"))
+										//tovar.Enqueue(item);
+										Thread.Sleep(3000);
+
+										if (countError == 3)
 										{
-											var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
-											if (col.FindById(item.Id) == null)
-												col.Insert(item);
+											Thread.Sleep(5000);
+											countError = 0;
+										}
+										else
+										{
+											countError++;
 										}
 									}
 								}
-								else
-								{
-									//tovar.Enqueue(item);
-									Thread.Sleep(3000);
+								
 
-									if (countError == 3)
-									{
-										Thread.Sleep(5000);
-										countError = 0;
-									}
-									else
-									{
-										countError++;
-									}
-								}
 							}
 							else
 							{
@@ -783,7 +771,7 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "VISIBLE").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
 		
@@ -793,7 +781,7 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "MODERATED").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
 		private void DisabledProduct_Click(object sender, RoutedEventArgs e)
@@ -802,7 +790,7 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "DISABLED").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
 		private void In_SaleProduct_Click(object sender, RoutedEventArgs e)
@@ -811,7 +799,7 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "IN_SALE").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
 		private void Removed_From_SaleProduct_Click(object sender, RoutedEventArgs e)
@@ -820,7 +808,7 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "REMOVED_FROM_SALE").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
 		}
 		private void ArchivedProduct_Click(object sender, RoutedEventArgs e)
@@ -829,8 +817,33 @@ namespace Остатки.Pages.RemainsPages
 			{
 				var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
 				List<ProductFromMarletplace> allProducts = col.Query().Where(x => x.status == "ARCHIVED").ToList();
-				products.ItemsSource = new ObservableCollection<ProductFromMarletplace>(allProducts);
+				productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(allProducts);
 			}
+		}
+
+		private void rankLowFilter_Click(object sender, RoutedEventArgs e)
+		{
+			ObservableCollection<ProductFromMarletplace> tmpFilterProduct = new ObservableCollection<ProductFromMarletplace>();
+			long myLong;
+			bool isNumerical = long.TryParse(FindingTextBox.Text, out myLong);
+			if (tmpFilterProduct.Count == 0 && isNumerical)
+				tmpFilterProduct = new ObservableCollection<ProductFromMarletplace>(from item in productFromMarletplaces
+																					where item.productID_OfferID.OurArticle.Contains(myLong.ToString())
+																					select item);
+
+			if (tmpFilterProduct.Count == 0 && isNumerical)
+			{
+				tmpFilterProduct = new ObservableCollection<ProductFromMarletplace>(productFromMarletplaces.Where(x => x.productID_OfferID.ArticleOzon == myLong));
+			}
+
+			if (tmpFilterProduct.Count == 0 && !isNumerical)
+            {
+				tmpFilterProduct = new ObservableCollection<ProductFromMarletplace>(from item in productFromMarletplaces
+																					where item.productID_OfferID.OurArticle.Contains(FindingTextBox.Text)
+																					select item);
+			}
+			
+			dataGridProduct.ItemsSource = tmpFilterProduct;
 		}
 	}
 }

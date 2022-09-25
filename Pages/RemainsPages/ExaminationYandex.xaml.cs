@@ -162,7 +162,7 @@ namespace Остатки.Pages.RemainsPages
 							if (string.Compare(articleNumber.OurArticle, item) == 0)
                             {
 								double newPrice = 0;
-								if (double.TryParse(articleNumber.productInfoFromOzon.result.price.Replace(".",","), out newPrice))
+								if (double.TryParse(articleNumber.productInfoFromOzon.price.Replace(".",","), out newPrice))
                                 {
 									productToAdd.Add(item);
 									PriceToUpdate.Add((newPrice).ToString());

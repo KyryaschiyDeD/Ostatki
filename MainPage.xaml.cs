@@ -5,6 +5,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
 using Остатки.Pages;
+using Остатки.Pages.Statistics;
 
 // Документацию по шаблону элемента "Пустая страница" см. по адресу https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x419
 
@@ -53,6 +54,11 @@ namespace Остатки
             {
                 myFrame.Navigate(typeof(EditingBalancesAndPrices));
                 TitleTextBlock.Text = "Обновление остатков и цены";
+            }
+            else if (PostingsJobPage.IsSelected)
+            {
+                myFrame.Navigate(typeof(PostingsJobPage));
+                TitleTextBlock.Text = "Отправления";
             }
         }
 

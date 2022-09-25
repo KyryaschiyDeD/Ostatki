@@ -40,68 +40,42 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
             List<RootResp> resp = new List<RootResp>();
             foreach (var keys in ApiKeysesJob.GetAllApiList())
             {
-                /*List<ProductFromMarletplace> products1 = new List<ProductFromMarletplace>(); 
-                using (var db = new LiteDatabase($@"{Global.folder.Path}/ArticlePRoductFromMarket.db"))
+                if (keys.IsOstatkiUpdate && keys.ClientId != "181882")
                 {
-                    var col = db.GetCollection<ProductFromMarletplace>("ProductsFromMarletplace");
-                    List<ProductFromMarletplace> productFromMarletplacesTMP = col.Query().ToList();
-                    products1 = new List<ProductFromMarletplace>(productFromMarletplacesTMP);
-                }
-                foreach (var product in products1)
-                {
-                    Stock stock = new Stock();
-                    stock.stock = 0;
-                    stock.product_id = (int)product.product_id;
-                    stock.offer_id = product.offer_id;
-
-                    stocks.Add(stock);
-                    countToUpdateStock++;
-
-                    if (countToUpdateStock >= 450)
+                    foreach (var product in products)
                     {
-                        countToUpdateStock = 0;
-                        SendReqwest(keys.ClientId, keys.ApiKey, stocks);
-                        stocks = new List<Stock>();
-                    }
-                }*/
-                foreach (var product in products)
-                {
-                    if (product.RemainsWhite >= 5)
-                    {
-                        if (product.ArticleNumberProductId.ContainsKey(keys.ClientId) && product.ArticleNumberProductId[keys.ClientId].Count != 0)
+                        if (product.RemainsWhite >= 5)
                         {
-                            foreach (var articleNumber in product.ArticleNumberProductId[keys.ClientId])
+                            if (product.ArticleNumberProductId.ContainsKey(keys.ClientId) && product.ArticleNumberProductId[keys.ClientId].Count != 0)
                             {
-                                Stock stock = new Stock();
-                                stock.stock = 25;
-                                stock.product_id = (int)articleNumber.ArticleOzon;
-                                stock.offer_id = articleNumber.OurArticle;
-
-                                stocks.Add(stock);
-                                countToUpdateStock++;
-
-                                if (countToUpdateStock >= 450)
+                                foreach (var articleNumber in product.ArticleNumberProductId[keys.ClientId])
                                 {
-                                    countToUpdateStock = 0;
-                                    if (!keys.ClientId.Contains("181882"))
+                                    Stock stock = new Stock();
+                                    stock.stock = 25;
+                                    stock.product_id = (int)articleNumber.ArticleOzon;
+                                    stock.offer_id = articleNumber.OurArticle;
+
+                                    stocks.Add(stock);
+                                    countToUpdateStock++;
+
+                                    if (countToUpdateStock >= 95)
                                     {
+                                        countToUpdateStock = 0;
                                         resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
+                                        stocks = new List<Stock>();
                                     }
-
-                                    stocks = new List<Stock>();
                                 }
-                            }
 
+                            }
                         }
                     }
-                }
-                countToUpdateStock = 0;
-                stocks = new List<Stock>();
-                string str = "";
-                int kolErrors = 0;
+                    countToUpdateStock = 0;
+                    stocks = new List<Stock>();
+                    string str = "";
+                    int kolErrors = 0;
 
                     resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));
-                    
+
                     foreach (var result in resp)
                     {
                         foreach (var oneResult in result.result)
@@ -121,18 +95,18 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                         }
                     }
 
-
-                   
-                if (kolErrors > 0)
-                {
-                    FolderPicker folderPicker = new FolderPicker();
-                    folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-                    folderPicker.FileTypeFilter.Add("*");
-                    StorageFolder fileWithLinks = await folderPicker.PickSingleFolderAsync();
-                    await fileWithLinks.CreateFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt", CreationCollisionOption.ReplaceExisting);
-                    StorageFile myFile = await fileWithLinks.GetFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt");
-                    await FileIO.WriteTextAsync(myFile, str);
+                    if (kolErrors > 0)
+                    {
+                        FolderPicker folderPicker = new FolderPicker();
+                        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                        folderPicker.FileTypeFilter.Add("*");
+                        StorageFolder fileWithLinks = await folderPicker.PickSingleFolderAsync();
+                        await fileWithLinks.CreateFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt", CreationCollisionOption.ReplaceExisting);
+                        StorageFile myFile = await fileWithLinks.GetFileAsync($"Ошибка обновления остатков {keys.ClientId}.txt");
+                        await FileIO.WriteTextAsync(myFile, str);
+                    }
                 }
+                
             }
 
            
@@ -140,7 +114,6 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
 
         private static RootResp SendReqwest(string clientId, string apiKey, List<Stock> stocks)
         {
-           
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v1/product/import/stocks");
                 httpWebRequest.Headers.Add("Client-Id", clientId);
                 httpWebRequest.Headers.Add("Api-Key", apiKey);
@@ -154,7 +127,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                 var jsort = JsonConvert.SerializeObject(rootRequest);
                 using (var requestStream = httpWebRequest.GetRequestStream())
                 using (var writer = new StreamWriter(requestStream))
-                {
+                {  
                     writer.Write(jsort);
                 }
                 Thread.Sleep(500);
@@ -187,7 +160,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon.StockUpdate
                 stocks.Add(stock);
                 countToUpdateStock++;
 
-                if (countToUpdateStock >= 450)
+                if (countToUpdateStock >= 95)
                 {
                     countToUpdateStock = 0;
                     resp.Add(SendReqwest(keys.ClientId, keys.ApiKey, stocks));

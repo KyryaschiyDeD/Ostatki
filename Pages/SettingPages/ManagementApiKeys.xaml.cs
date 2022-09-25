@@ -21,13 +21,35 @@ namespace Остатки.Pages.SettinPages
 
 		private void AddNewApiKey_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
 		{
-			ApiKeysesJob.CreateNewApi(NameInBase.Text, ClientId.Text, APIKey.Text, MaxCountTopProduct.Text, ItIsTop.IsChecked, InDB.IsChecked);
+			ApiKeysesJob.CreateNewApi
+				(
+				NameInBase.Text,
+				ClientId.Text,
+				APIKey.Text,
+				MaxCountTopProduct.Text,
+				ItIsTop.IsChecked,
+				InDB.IsChecked,
+				IsOstatkiUpdate.IsChecked,
+				IsPriceUpdate.IsChecked,
+				IsTheMaximumPrice.IsChecked
+				);
 			ApiList = new ObservableCollection<ApiKeys>(ApiKeysesJob.GetAllApiList());
 		}
 
 		private void ReadctOldApiKey_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
 		{
-			ApiKeysesJob.ReadctOldApi(NameInBase.Text, ClientId.Text, APIKey.Text, MaxCountTopProduct.Text, ItIsTop.IsChecked, InDB.IsChecked);
+			ApiKeysesJob.ReadctOldApi
+				(
+				NameInBase.Text, 
+				ClientId.Text, 
+				APIKey.Text, 
+				MaxCountTopProduct.Text,
+				ItIsTop.IsChecked, 
+				InDB.IsChecked, 
+				IsOstatkiUpdate.IsChecked, 
+				IsPriceUpdate.IsChecked,
+				IsTheMaximumPrice.IsChecked
+				);
 			ApiList = new ObservableCollection<ApiKeys>(ApiKeysesJob.GetAllApiList());
 		}
 	}

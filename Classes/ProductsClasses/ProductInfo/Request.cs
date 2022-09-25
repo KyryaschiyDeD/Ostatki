@@ -8,6 +8,8 @@ namespace Остатки.Classes.JobWhithApi.Ozon.ProductInfo
 {
     public class Request
     {
-        public string offer_id { get; set; }
+        public List<string> offer_id { get; set; }
+        public List<object> product_id { get; set; }
+        public List<object> sku { get; set; }
     }
 }

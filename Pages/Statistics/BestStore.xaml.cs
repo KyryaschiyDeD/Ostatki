@@ -88,7 +88,7 @@ namespace Остатки.Pages.Statistics
 
                         do
                         {
-                            PostsRoot = (Classes.JobWhithApi.Ozon.Postings.Response.Root)PostRequestAsync(oneKey.ClientId, oneKey.ApiKey, offset, limit, filter, with, false);
+                            PostsRoot = (Classes.JobWhithApi.Ozon.Postings.Response.Root)PostingSaveJob.GetPostings(oneKey.ClientId, oneKey.ApiKey, offset, limit, filter, with, false);
                                 
                             if (PostsRoot.result.postings.Count != 0)
                             {
@@ -105,15 +105,15 @@ namespace Остатки.Pages.Statistics
                         {
                             filter.since = Convert.ToDateTime("2022-04-21T21:00:00.000Z");
                             filter.to = Convert.ToDateTime("2022-05-23T21:00:00.000Z");
-                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostRequestAsync(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
+                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostingSaveJob.GetPostings(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
 
                             filter.since = Convert.ToDateTime("2022-05-23T21:00:00.000Z");
                             filter.to = Convert.ToDateTime("2022-06-23T21:00:00.000Z");
-                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostRequestAsync(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
+                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostingSaveJob.GetPostings(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
 
                             filter.since = Convert.ToDateTime("2022-06-23T21:00:00.000Z");
                             filter.to = Convert.ToDateTime("2022-07-23T21:00:00.000Z");
-                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostRequestAsync(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
+                            PostsRootFBOList.Add((Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root)PostingSaveJob.GetPostings(oneKey.ClientId, oneKey.ApiKey, 0, 1000, filter, with, true));
 
                             foreach (var PostsRootFBO in PostsRootFBOList)
                             {
@@ -377,94 +377,6 @@ namespace Остатки.Pages.Statistics
                         productFromMarletplaces = new ObservableCollection<ProductFromMarletplace>(productFromMarletplacesTMP);
                     }
 
-                    List<long> longsToDel = new List<long>();
-
-                    /*foreach (var item in productFromMarletplaces)
-                    {
-                        string article = "";
-                        if (item.offer_id.Contains("x10"))
-                        {
-                            article = item.offer_id.Substring(0, item.offer_id.Length - 4).Replace("lm-", "");
-                        }
-                        else
-                        if (item.offer_id.Contains("x"))
-                        {
-                            article = item.offer_id.Substring(0, item.offer_id.Length - 3).Replace("lm-", "");
-                        }
-                        else
-                        {
-                            article = item.offer_id;
-                        }
-
-                        var finding = longsPost.Where(x => x.offer_id.Contains(article));
-                        if (finding.Count() == 0 && !item.offer_id.Contains("pv") && item.Key.ClientId == oneKey.ClientId)
-                        {
-                            // longsToDel.Add(item.productID_OfferID.ArticleOzon);
-                            if ((!item.offer_id.Contains("683512"))
-                            && (!item.offer_id.Contains("640719"))
-                            && (!item.offer_id.Contains("82671770"))
-                            && (!item.offer_id.Contains("127618"))
-                            && (!item.offer_id.Contains("13818186"))
-                            && (!item.offer_id.Contains("18711863"))
-                            && (!item.offer_id.Contains("127612"))
-                            && (!item.offer_id.Contains("13818186"))
-                            && (!item.offer_id.Contains("107818"))
-                            && (!item.offer_id.Contains("82671770"))
-                            && (!item.offer_id.Contains("127620"))
-                            && (!item.offer_id.Contains("82671770"))
-                            && (!item.offer_id.Contains("82223421"))
-                            && (!item.offer_id.Contains("13818186"))
-                            && (!item.offer_id.Contains("83275844"))
-                            && (!item.offer_id.Contains("13818186"))
-                            && (!item.offer_id.Contains("82223420"))
-                            && (!item.offer_id.Contains("109192"))
-                            && (!item.offer_id.Contains("18711863"))
-                            && (!item.offer_id.Contains("82610942"))
-                            && (!item.offer_id.Contains("109190"))
-                            && (!item.offer_id.Contains("134501"))
-                            && (!item.offer_id.Contains("12855540"))
-                            && (!item.offer_id.Contains("82223428"))
-                            && (!item.offer_id.Contains("82422816"))
-                            && (!item.offer_id.Contains("18551054"))
-                            && (!item.offer_id.Contains("82223427"))
-                            && (!item.offer_id.Contains("82223417"))
-                            && (!item.offer_id.Contains("82554492"))
-                            && (!item.offer_id.Contains("18264371"))
-                            && (!item.offer_id.Contains("84856962"))
-                            && (!item.offer_id.Contains("109191"))
-                            && (!item.offer_id.Contains("640587"))
-                            && (!item.offer_id.Contains("82554490"))
-                            && (!item.offer_id.Contains("82422817"))
-                            && (!item.offer_id.Contains("109190"))
-                            && (!item.offer_id.Contains("18549536"))
-                            && (!item.offer_id.Contains("18551054"))
-                            && (!item.offer_id.Contains("18580381"))
-                            && (!item.offer_id.Contains("82223426"))
-                            && (!item.offer_id.Contains("152199"))
-                            && (!item.offer_id.Contains("13818186"))
-                            && (!item.offer_id.Contains("200620211602"))
-                            && (!item.offer_id.Contains("82794844"))
-                            && (!item.offer_id.Contains("640782"))
-                            && (!item.offer_id.Contains("640775"))
-                            && (!item.offer_id.Contains("140796"))
-                            && (!item.offer_id.Contains("152201"))
-                            && (!item.offer_id.Contains("157856"))
-                            && (!item.offer_id.Contains("679869"))
-                            && (!item.offer_id.Contains("82232842"))
-                            && (!item.offer_id.Contains("18264434"))
-                            && (!item.offer_id.Contains("152202"))
-                            && (!item.offer_id.Contains("12627994"))
-                            && (!item.offer_id.Contains("82223416"))
-                            && (!item.offer_id.Contains("18864931"))
-                            && (!item.offer_id.Contains("640771")))
-                                remains2.PostRequestAsync(oneKey, new ProductsIdsss { product_id = new List<long>() { item.productID_OfferID.ArticleOzon } });
-                        } 
-
-                }*/
-
-                    /* remains2.PostRequestAsync(oneKey, new ProductsIdsss { product_id = longsToDel });
-                     longsToDel.Clear(); */
-
                     var savePicker = new FileSavePicker();
                     // место для сохранения по умолчанию
                     savePicker.SuggestedStartLocation = PickerLocationId.Downloads;
@@ -486,51 +398,7 @@ namespace Остатки.Pages.Statistics
 
         }
 
-        private static object PostRequestAsync(string clientId, string apiKey, int offset, int limit,
-            Classes.JobWhithApi.Ozon.Postings.Request.Filter filter, Classes.JobWhithApi.Ozon.Postings.Request.With with, bool IsFBO)
-        {
-            HttpWebRequest httpWebRequest = null;
-            if (!IsFBO)
-                httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v3/posting/fbs/list");
-            else
-                httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api-seller.ozon.ru/v2/posting/fbo/list");
-
-            httpWebRequest.Headers.Add("Client-Id", clientId);
-            httpWebRequest.Headers.Add("Api-Key", apiKey);
-            httpWebRequest.ContentType = "application/json";
-            httpWebRequest.Method = "POST";
-            Classes.JobWhithApi.Ozon.Postings.Request.Root rootRequest = new Classes.JobWhithApi.Ozon.Postings.Request.Root();
-
-            rootRequest.offset = offset;
-            rootRequest.limit = limit;
-            rootRequest.translit = true;
-
-
-            rootRequest.dir = "ASC";
-            rootRequest.filter = filter;
-            rootRequest.with = with;
-
-
-            var jsort = JsonConvert.SerializeObject(rootRequest);
-            using (var requestStream = httpWebRequest.GetRequestStream())
-            using (var writer = new StreamWriter(requestStream))
-            {
-                writer.Write(jsort);
-            }
-            Thread.Sleep(500);
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                //ответ от сервера
-                var result = streamReader.ReadToEnd();
-
-                //Сериализация
-                if (!IsFBO)
-                    return JsonConvert.DeserializeObject<Classes.JobWhithApi.Ozon.Postings.Response.Root>(result);
-                else
-                    return JsonConvert.DeserializeObject<Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root>(result);
-            }
-        }
+        
     }
 
 }

@@ -12,7 +12,7 @@ namespace Остатки.Classes
 	{
 		public string OurArticle { get; set; }
 		public long ArticleOzon { get; set; }
-		public ProductInfoFromOzon productInfoFromOzon { get; set; }
+		public ResultQInfo productInfoFromOzon { get; set; }
 		public CommissionsInfoPrice productInfoPriceFromOzon { get; set; }
 		public string PriceOnOzon { get; set; }
 	}
@@ -53,6 +53,7 @@ namespace Остатки.Classes
 		public List<int> HistoryRemainsBlack { get; set; } = new List<int>();// История Остальные остатки
 		public double NowPrice { get; set; } // Цена магазина сейчас
 		public bool PriceIsChanged { get; set; } // Изменилась ли цена?
+		public string status { get; set; } 
 		public double OldPriceCh
 		{
 			get
@@ -151,10 +152,17 @@ namespace Остатки.Classes
 			}
 
 			data += $"-------\t-------\t-------\n";
+
+			if (String.IsNullOrEmpty(status))
+				data += $"Статус: неизвестен\n";
+			else
+				data += $"Статус: {status}\n";
+
+			data += $"-------\t-------\t-------\n";
 			data += $"Инфа с озона: \n";
 			if (ArticleNumberProductId.First().Value.First().productInfoFromOzon != null)
 			{
-				ResultQInfo articleNumberContent = ArticleNumberProductId.First().Value.First().productInfoFromOzon.result;
+				ResultQInfo articleNumberContent = ArticleNumberProductId.First().Value.First().productInfoFromOzon;
 
 				data += $"{articleNumberContent.name} \n" +
 					$"Цены и комиссии: \n";
@@ -167,7 +175,7 @@ namespace Остатки.Classes
 							$"<------\t------>\n";
 						foreach (var item in ArticleNumberProductId[key.ClientId])
 						{
-							ResultQInfo infoFromOzon = item.productInfoFromOzon.result;
+							ResultQInfo infoFromOzon = item.productInfoFromOzon;
 
 							data += $"Артикул: {item.OurArticle}\n";
 							data += $"Цена с учётом акций: {articleNumberContent.marketing_price}\n";
