@@ -50,11 +50,11 @@ namespace Остатки
                 myFrame.Navigate(typeof(SettingsMenu));
                 TitleTextBlock.Text = "Настройки";
             }
-            else if (EditingBalancesAndPrices.IsSelected)
+            /*else if (EditingBalancesAndPrices.IsSelected)
             {
                 myFrame.Navigate(typeof(EditingBalancesAndPrices));
                 TitleTextBlock.Text = "Обновление остатков и цены";
-            }
+            }*/
             else if (PostingsJobPage.IsSelected)
             {
                 myFrame.Navigate(typeof(PostingsJobPage));

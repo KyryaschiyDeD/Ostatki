@@ -64,36 +64,15 @@ namespace Остатки.Classes
 			(
 			string name, 
 			string clientId, 
-			string apiKey, 
-			string MaxCountTopProduct, 
-			object itIsTop, 
-			object inDB, 
-			object isOstatkiUpdate, 
-			object isPriceUpdate,
-			object isTheMaximumPrice
+			string apiKey
 			)
 		{
-			bool chIsCreate = false;
-			int ch = 0;
-			if (MaxCountTopProduct.Length != 0)
-			{
-				if (int.TryParse(MaxCountTopProduct, out ch))
-					chIsCreate = true;
-			}
-
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
 			{
 				var col = db.GetCollection<ApiKeys>("ApiKeyses");
 				var proverk = col.FindOne(x => x.ClientId == clientId);
 				if (proverk != null)
                 {
-					proverk.MaxCountTopProduct = ch;
-					proverk.ItIsTop = (bool)itIsTop;
-					proverk.InDB = (bool)inDB;
-					proverk.IsOstatkiUpdate = (bool)isOstatkiUpdate;
-					proverk.IsPriceUpdate = (bool)isPriceUpdate; 
-					proverk.IsTheMaximumPrice = (bool)isTheMaximumPrice; 
-					
 					col.Update(proverk);
 				}
 			}
@@ -105,6 +84,14 @@ namespace Остатки.Classes
 			{
 				var col = db.GetCollection<ApiKeys>("ApiKeyses");
 				col.DeleteAll();
+			}
+		}
+		public static void UpdateOneApi(ApiKeys newApi)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<ApiKeys>("ApiKeyses");
+				col.Update(newApi);
 			}
 		}
 		public static List<string> GetNames()

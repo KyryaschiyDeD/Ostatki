@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Toolkit.Uwp.UI.Controls;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
@@ -17,6 +18,7 @@ namespace Остатки.Pages.SettinPages
 		{
 			this.InitializeComponent();
 			ApiList = new ObservableCollection<ApiKeys>(ApiKeysesJob.GetAllApiList());
+			//dataGridWhiteOrBlackShop.DataContext = ApiList;
 		}
 
 		private void AddNewApiKey_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -42,15 +44,30 @@ namespace Остатки.Pages.SettinPages
 				(
 				NameInBase.Text, 
 				ClientId.Text, 
-				APIKey.Text, 
-				MaxCountTopProduct.Text,
-				ItIsTop.IsChecked, 
-				InDB.IsChecked, 
-				IsOstatkiUpdate.IsChecked, 
-				IsPriceUpdate.IsChecked,
-				IsTheMaximumPrice.IsChecked
+				APIKey.Text
 				);
 			ApiList = new ObservableCollection<ApiKeys>(ApiKeysesJob.GetAllApiList());
+		}
+		private void SaveUpdate_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+		{
+			List<ApiKeys> apiKeysOld = new List<ApiKeys>(ApiKeysesJob.GetAllApiList());
+			List<ApiKeys> apiKeysNew = new List<ApiKeys>();
+            foreach (var item in ApiList)
+            {
+				apiKeysNew.Add(item);
+			}
+            foreach (var newApi in apiKeysNew)
+            {
+				if (newApi != apiKeysOld.Find(x => x.Id == newApi.Id))
+                {
+					ApiKeysesJob.UpdateOneApi(newApi);
+				}
+            }
+			SaveUpdate.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+		}
+		private void dataGridWhiteOrBlackShop_BeginningEdit( object sender, DataGridBeginningEditEventArgs e)
+		{
+			SaveUpdate.Visibility = Windows.UI.Xaml.Visibility.Visible;
 		}
 	}
 }

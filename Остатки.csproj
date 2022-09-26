@@ -144,7 +144,9 @@
     <Compile Include="Classes\JobWhithApi\Ozon\GetProductPriceInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Answer\Posting.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Filter.cs" />
-    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingSave.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\OurProductAndPriceSale.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\OzonProductAndOurProduct.cs" />
+    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\PostingSave.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingSaveJob.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Filter.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Root.cs" />
@@ -194,6 +196,15 @@
     <Compile Include="Pages\AddJobProductMenu.xaml.cs">
       <DependentUpon>AddJobProductMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Postings\FFJob.xaml.cs">
+      <DependentUpon>FFJob.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Postings\Main.xaml.cs">
+      <DependentUpon>Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Postings\PostingMainAccaunt.xaml.cs">
+      <DependentUpon>PostingMainAccaunt.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\RemainsPages\archiveRemains.xaml.cs">
       <DependentUpon>archiveRemains.xaml</DependentUpon>
     </Compile>
@@ -236,9 +247,6 @@
     <Compile Include="Classes\ShopWhiteOrBlackJob.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\EditingBalancesAndPrices.xaml.cs">
-      <DependentUpon>EditingBalancesAndPrices.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\RemainsPages\BlackProduct.xaml.cs">
       <DependentUpon>BlackProduct.xaml</DependentUpon>
@@ -351,6 +359,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\Postings\FFJob.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Postings\Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Postings\PostingMainAccaunt.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\RemainsPages\archiveRemains.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -358,10 +378,6 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Pages\EditingBalancesAndPrices.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\RemainsPages\BlackProduct.xaml">
       <SubType>Designer</SubType>
