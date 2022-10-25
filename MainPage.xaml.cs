@@ -1,6 +1,9 @@
 ﻿using LiteDB;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Остатки.Classes;
@@ -19,14 +22,17 @@ namespace Остатки
         public MainPage()
         {
             this.InitializeComponent();
-
             Global.GetWhiteBlackShopsLeroy();
             Global.GetWhiteBlackShopsLeonardo();
             Global.WebHosting = WebHostingsJob.GetHostsList();
+           
+            //ApiKeysesJob.DeleteOneApi("181882");
 
             myFrame.Navigate(typeof(StatisticsMenu));
             TitleTextBlock.Text = "Статка";
+
         }
+
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -58,7 +64,12 @@ namespace Остатки
             else if (PostingsJobPage.IsSelected)
             {
                 myFrame.Navigate(typeof(PostingsJobPage));
-                TitleTextBlock.Text = "Отправления";
+                TitleTextBlock.Text = "Работа с отправлениями";
+            }
+            else if (TaxationMenu.IsSelected)
+            {
+                myFrame.Navigate(typeof(TaxationMenu));
+                TitleTextBlock.Text = "Налоги";
             }
         }
 

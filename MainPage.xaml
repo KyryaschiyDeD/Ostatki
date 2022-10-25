@@ -48,16 +48,22 @@
 							<TextBlock FontSize="24" Text="Настройки" Margin="10 0 0 0" />
 						</StackPanel>
 					</ListBoxItem>
-					<ListBoxItem Name="EditingBalancesAndPrices">
+					<!--<ListBoxItem Name="EditingBalancesAndPrices">
 						<StackPanel Orientation="Horizontal">
 							<TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xED63;" />
 							<TextBlock FontSize="24" Text="Цены и остатки" Margin="10 0 0 0" />
 						</StackPanel>
-					</ListBoxItem>
+					</ListBoxItem> -->
                     <ListBoxItem Name="PostingsJobPage">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xED39;" />
                             <TextBlock FontSize="24" Text="Отправления" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Name="TaxationMenu">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="36" FontFamily="Segoe MDL2 Assets" Text="&#xE762;" />
+                            <TextBlock FontSize="24" Text="Налоги" Margin="10 0 0 0" />
                         </StackPanel>
                     </ListBoxItem>
 				</ListBox>

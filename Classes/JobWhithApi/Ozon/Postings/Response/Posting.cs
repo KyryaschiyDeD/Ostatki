@@ -9,6 +9,8 @@ namespace Остатки.Classes.JobWhithApi.Ozon.Postings.Response
 {
     public class Posting
     {
+        public Guid Id { get; set; }   
+
         [JsonProperty("posting_number")]
         public string posting_number { get; set; }
         [JsonProperty("order_id")]
@@ -48,5 +50,6 @@ namespace Остатки.Classes.JobWhithApi.Ozon.Postings.Response
         [JsonProperty("requirements")]
         public Requirements requirements { get; set; }
 
+        
     }
 }

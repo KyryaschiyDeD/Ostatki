@@ -248,7 +248,16 @@ namespace Остатки.Classes
 				col.Update(proverk);
 			}
 		}
-		public static void SaveNewRemains(ConcurrentQueue<Product> NewRemaintProductLerya)
+
+		public static void FullUpdateOneProduct(Product product)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/ProductsDB.db"))
+			{
+				var col = db.GetCollection<Product>("Products");
+				col.Update(product);
+			}
+		}
+			public static void SaveNewRemains(ConcurrentQueue<Product> NewRemaintProductLerya)
 		{
 			Dictionary<string, int> CountOfUpdate = new Dictionary<string, int>();
 			List<Product> lstPr = new List<Product>();

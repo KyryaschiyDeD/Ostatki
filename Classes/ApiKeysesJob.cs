@@ -86,6 +86,18 @@ namespace Остатки.Classes
 				col.DeleteAll();
 			}
 		}
+		public static void DeleteOneApi(string clientId)
+		{
+			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))
+			{
+				var col = db.GetCollection<ApiKeys>("ApiKeyses");
+				var proverk = col.FindOne(x => x.ClientId == clientId);
+				if (proverk != null)
+				{
+					col.Delete(proverk.Id);
+				}
+			}
+		}
 		public static void UpdateOneApi(ApiKeys newApi)
 		{
 			using (var db = new LiteDatabase($@"{Global.folder.Path}/Globals.db"))

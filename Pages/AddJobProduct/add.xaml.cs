@@ -112,6 +112,7 @@ namespace Остатки
 
 
 			ToastNotificationManager.CreateToastNotifier().Show(toast);
+
 			ochered = new Queue<string>(await FileIO.ReadLinesAsync(file));
 			Task[] tasks2 = new Task[ochered.Count];
 

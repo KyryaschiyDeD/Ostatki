@@ -71,7 +71,9 @@
 			UseLayoutRounding="True"
 			Height="40">
 			<CommandBar.Content>
-				<TextBox Margin="4" VerticalAlignment="Center" Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="4" VerticalAlignment="Center" Width="300" x:Name="FindingTextBox" TextChanged="rankLowFilter_Click" Background="Black"></TextBox>
+                </StackPanel>
 			</CommandBar.Content>
             <AppBarButton Click="PriceUpdate_Click">
                 <Image Source="../../Resources/Icons/dollar.svg"/>
@@ -105,70 +107,60 @@
 						   >
 			
 			<controls:DataGrid.Columns>
-				<controls:DataGridTextColumn 
+                <controls:DataGridTextColumn 
             Header="Наименование" 
             Width="360"
             Binding="{Binding Name}" 
             FontSize="20" 
 					Tag="Name">
 
-				</controls:DataGridTextColumn>
-
-
-				<controls:DataGridTextColumn 
+                </controls:DataGridTextColumn>
+                <controls:DataGridTextColumn 
             Header="Цена" 
             Width="SizeToHeader"
             Binding="{Binding NowPrice}" 
             FontSize="20" 
 					Tag="NowPrice">
-					<controls:DataGridTextColumn.ElementStyle>
-						<Style TargetType="TextBlock">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridTextColumn.ElementStyle>
-				</controls:DataGridTextColumn>
-
-
-				<controls:DataGridTextColumn 
+                    <controls:DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </controls:DataGridTextColumn.ElementStyle>
+                </controls:DataGridTextColumn>
+                <controls:DataGridTextColumn 
             Header="Старая цена"
 			Width="SizeToHeader"
             Binding="{Binding OldPriceCh}" 
 					Tag="OldPrice">
-					<controls:DataGridTextColumn.ElementStyle>
-						<Style TargetType="TextBlock">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridTextColumn.ElementStyle>
-				</controls:DataGridTextColumn>
-
-
-				<controls:DataGridTextColumn 
+                    <controls:DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </controls:DataGridTextColumn.ElementStyle>
+                </controls:DataGridTextColumn>
+                <controls:DataGridTextColumn 
             Header="Артикул" 
             Width="SizeToHeader"
             Binding="{Binding ArticleNumberInShop}" 
 					 Tag="ArticleNumberInShop">
-					<controls:DataGridTextColumn.ElementStyle>
-						<Style TargetType="TextBlock">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridTextColumn.ElementStyle>
-				</controls:DataGridTextColumn>
-
-
-				<controls:DataGridTextColumn 
+                    <controls:DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </controls:DataGridTextColumn.ElementStyle>
+                </controls:DataGridTextColumn>
+                <controls:DataGridTextColumn 
             Header="Отстаки" 
             Width="SizeToHeader"
             Binding="{Binding RemainsWhite}" 
 					 Tag="RemainsWhite">
-					<controls:DataGridTextColumn.ElementStyle>
-						<Style TargetType="TextBlock">
-							<Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-						</Style>
-					</controls:DataGridTextColumn.ElementStyle>
-				</controls:DataGridTextColumn>
-
-
-				<controls:DataGridTextColumn 
+                    <controls:DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </controls:DataGridTextColumn.ElementStyle>
+                </controls:DataGridTextColumn>
+                <controls:DataGridTextColumn 
             Header="Отстаки в Жопе" 
             Width="SizeToHeader"
             Binding="{Binding RemainsBlack}" 

@@ -1,0 +1,21 @@
+﻿<Page
+    x:Class="Остатки.Pages.Taxation.AddTaxJob"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Остатки.Pages.Taxation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel x:Name="Customer" Margin="20" HorizontalAlignment="Center">
+                <TextBox  TextAlignment="Center" CornerRadius="15" Width="auto" MinWidth="400" x:Name="link" PlaceholderText="Код" Margin="0,0,0,0" HorizontalAlignment="Left" />
+                <Button Content="Добавить" CornerRadius="15" Width="400" x:Name="addTaxCode" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="addTaxCode_Click"/>
+                <Button Content="Добавить .txt" CornerRadius="15" Width="400" x:Name="addTaxTxtWhithCode" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="addTaxTxtWhithCode_Click"/>
+                <Button Content="Добавить .eml" CornerRadius="15" Width="400" x:Name="addTaxEmlWhithCode" VerticalAlignment="Center" Margin="0,10,0,0" HorizontalAlignment="Center" Click="addTaxEmlWhithCode_Click"/>
+            </StackPanel>
+        </RelativePanel>
+    </Grid>
+</Page>

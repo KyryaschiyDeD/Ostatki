@@ -230,6 +230,7 @@ namespace Остатки.Pages
 					}
 				foreach (var itemKey in item.ArticleNumberProductId)
 				{
+					if (itemKey.Key != "181882")
 					satisticGl.AllProductsPetrovichPos[itemKey.Key] += itemKey.Value.Count();
 				}
 

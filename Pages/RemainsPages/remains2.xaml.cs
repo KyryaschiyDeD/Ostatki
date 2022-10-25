@@ -312,14 +312,37 @@ namespace Остатки
                 var col = db.GetCollection<Product>("Products");
                 allProducts = col.Query().OrderBy(x => x.RemainsWhite).ToList();
             }
-            foreach (var keys in ApiKeysesJob.GetAllApiList())
+            List<ApiKeys> apiKeys = ApiKeysesJob.GetAllApiList();
+            foreach (var keys in apiKeys)
             {
                 if (keys.IsOstatkiUpdate)
                 {
                     List<long> product = new List<long>();
                     foreach (var item in allProducts)
                     {
-                        if (product.Count <= 100)
+                        bool goToDel = false;
+                        string keyIdToDel = "";
+                        foreach (var oneKeyOnItem in item.ArticleNumberProductId.Keys)
+                        {
+                            if (apiKeys.Where(x => string.Compare(x.ClientId, oneKeyOnItem) == 0  ).Count() == 0)
+                            {
+                                goToDel = true;
+                                keyIdToDel = oneKeyOnItem; 
+                            } 
+                        }
+                        
+                        if (goToDel)
+                        {
+                            item.ArticleNumberProductId.Remove(keyIdToDel);
+                            DataBaseJob.FullUpdateOneProduct(item);
+                            if (item.ArticleNumberProductId.Count() == 0)
+                            {
+                                DataBaseJob.RemainsToArchive(item);
+                                ProductList1.Remove(item);
+                            }
+                        }
+
+                        if (product.Count <= 400)
                         {
                             if (item.ArticleNumberProductId.ContainsKey(keys.ClientId) && item.ArticleNumberProductId[keys.ClientId].Count != 0)
                             {
@@ -329,6 +352,7 @@ namespace Остатки
                                     (item.TypeOfShop == "petrovich" && item.RemainsWhite <= 5 ||
                                     item.TypeOfShop == "petrovich" && item.ArticleNumberProductId.First().Value.Count > 2 && item.RemainsWhite <= 10))
                                 {
+
                                     foreach (var valueOzonApi in item.ArticleNumberProductId[keys.ClientId])
                                     {
                                         product.Add(valueOzonApi.ArticleOzon);

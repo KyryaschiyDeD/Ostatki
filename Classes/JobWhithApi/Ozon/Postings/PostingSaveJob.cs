@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LiteDB;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -47,14 +48,31 @@ namespace Остатки.Classes.JobWhithApi.Ozon.Postings
             var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
             {
-                //ответ от сервера
                 var result = streamReader.ReadToEnd();
-
-                //Сериализация
                 if (!IsFBO)
                     return JsonConvert.DeserializeObject<Classes.JobWhithApi.Ozon.Postings.Response.Root>(result);
                 else
                     return JsonConvert.DeserializeObject<Classes.JobWhithApi.Ozon.Postings.ResponseFBO.Root>(result);
+            }
+        }
+
+        public static void SaveNewPostings(List<PostingSave> postings, string ClientId)
+        {
+            using (var db = new LiteDatabase($@"{Global.folder.Path}/Postings.db"))
+            {
+                var posting = db.GetCollection<PostingSave>(ClientId);
+                posting.InsertBulk(postings);
+            }
+        }
+        public static void UpdatePostings(List<PostingSave> postings, string ClientId)
+        {
+            using (var db = new LiteDatabase($@"{Global.folder.Path}/Postings.db"))
+            {
+                var postingData = db.GetCollection<PostingSave>(ClientId);
+                foreach (var posting in postings)
+                {
+                    postingData.Update(posting);
+                }
             }
         }
     }

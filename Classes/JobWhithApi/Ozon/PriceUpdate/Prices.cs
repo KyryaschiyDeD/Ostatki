@@ -116,6 +116,16 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                                 int newPrice = 0;
                                 double koef = 0;
 
+                                if (product.NowPrice * kolKompl <= 10)
+                                {
+                                    koef = 5;
+                                }
+                                else
+                                if (product.NowPrice * kolKompl <= 20)
+                                {
+                                    koef = 4;
+                                }
+                                else
                                 if (product.NowPrice * kolKompl < 40)
                                 {
                                     koef = 3;
@@ -165,7 +175,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon.PriceUpdate
                                     {
                                         newPrice = Convert.ToInt32((Convert.ToDouble(product.NowPrice) * kolKompl * koef * 1.20 / 93 * 100 +
                                             (item.productInfoPriceFromOzon.fbs_first_mile_max_amount + item.productInfoPriceFromOzon.fbs_direct_flow_trans_max_amount
-                                            + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100) / 10 * 10;
+                                            + item.productInfoPriceFromOzon.fbs_deliv_to_customer_amount)) * 1.05 / (100 - item.productInfoPriceFromOzon.sales_percent) * 100 + 25) / 10 * 10;
                                         ItIsNewPrice = true;
                                     }
                                 }

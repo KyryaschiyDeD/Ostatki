@@ -10,7 +10,7 @@ namespace Остатки.Classes.JobWhithApi.Ozon.Postings.Answer
     {
         public string offer_id { get; set; }  
         public string name { get; set; }  
-        public int quantity { get; set; } 
+        public double quantity { get; set; } 
         public int sku { get; set; } 
         public bool itIsFBO { get; set; }
         public int FBOQuantity { get; set; }

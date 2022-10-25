@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Остатки.Classes.JobWhithApi.Ozon.Postings
 {
-    public class OurProductAndPriceSale
+    public class OurProductAndPriceSale // Класс под расширение
     {
-        public Product OurProducts { get; set; }
+        public Product OurProduct { get; set; } // Наш продукты
     }
 }

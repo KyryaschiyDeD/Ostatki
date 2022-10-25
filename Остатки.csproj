@@ -11,7 +11,7 @@
     <AssemblyName>Остатки</AssemblyName>
     <DefaultLanguage>ru-RU</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.22000.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -144,9 +144,9 @@
     <Compile Include="Classes\JobWhithApi\Ozon\GetProductPriceInfo.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Answer\Posting.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Filter.cs" />
-    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\OurProductAndPriceSale.cs" />
-    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\OzonProductAndOurProduct.cs" />
-    <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingAndProduct\PostingSave.cs" />
+    <Compile Include="Classes\ProductsClasses\PostingAndProduct\OurProductAndPriceSale.cs" />
+    <Compile Include="Classes\ProductsClasses\PostingAndProduct\OzonProductAndOurProduct.cs" />
+    <Compile Include="Classes\ProductsClasses\PostingAndProduct\PostingSave.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\PostingSaveJob.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Filter.cs" />
     <Compile Include="Classes\JobWhithApi\Ozon\Postings\Request\Root.cs" />
@@ -186,6 +186,12 @@
     <Compile Include="Classes\JobWhithApi\Ozon\StockUpdate\Stocks.cs" />
     <Compile Include="Classes\ProductsClasses\FulterStatuses.cs" />
     <Compile Include="Classes\ProductsClasses\ProductFromMarletplace.cs" />
+    <Compile Include="Classes\Taxation\Proverkacheka.cs" />
+    <Compile Include="Classes\Taxation\TaxationJobClass.cs" />
+    <Compile Include="Classes\Taxation\TaxClasses\Item.cs" />
+    <Compile Include="Classes\Taxation\TaxClasses\Metadata.cs" />
+    <Compile Include="Classes\Taxation\TaxClasses\Receipt.cs" />
+    <Compile Include="Classes\Taxation\TaxClasses\ReceiptOnDB.cs" />
     <Compile Include="Classes\WebHostingsJob.cs" />
     <Compile Include="Pages\AddJobProduct\add.xaml.cs">
       <DependentUpon>add.xaml</DependentUpon>
@@ -196,6 +202,9 @@
     <Compile Include="Pages\AddJobProductMenu.xaml.cs">
       <DependentUpon>AddJobProductMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\PostingsJobMenu.xaml.cs">
+      <DependentUpon>PostingsJobMenu.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Postings\FFJob.xaml.cs">
       <DependentUpon>FFJob.xaml</DependentUpon>
     </Compile>
@@ -204,6 +213,9 @@
     </Compile>
     <Compile Include="Pages\Postings\PostingMainAccaunt.xaml.cs">
       <DependentUpon>PostingMainAccaunt.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\TaxationMenu.xaml.cs">
+      <DependentUpon>TaxationMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\RemainsPages\archiveRemains.xaml.cs">
       <DependentUpon>archiveRemains.xaml</DependentUpon>
@@ -305,7 +317,7 @@
     <Compile Include="Pages\AddJobProduct\StealProducts.xaml.cs">
       <DependentUpon>StealProducts.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Statistics\PostingsJobPage.xaml.cs">
+    <Compile Include="Pages\Postings\PostingsJobPage.xaml.cs">
       <DependentUpon>PostingsJobPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Statistics\TestFinansy.xaml.cs">
@@ -313,6 +325,18 @@
     </Compile>
     <Compile Include="Pages\StealProducts_2_0.xaml.cs">
       <DependentUpon>StealProducts_2_0.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Taxation\AddTaxJob.xaml.cs">
+      <DependentUpon>AddTaxJob.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Taxation\StatisticTaxation.xaml.cs">
+      <DependentUpon>StatisticTaxation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Taxation\TaxationJob.xaml.cs">
+      <DependentUpon>TaxationJob.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Taxation\ViewPostingsAndTaxText.xaml.cs">
+      <DependentUpon>ViewPostingsAndTaxText.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pages\RemainsPages\remains2.xaml.cs">
@@ -359,6 +383,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\PostingsJobMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Postings\FFJob.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -368,6 +396,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Postings\PostingMainAccaunt.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\TaxationMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -455,7 +487,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\Statistics\PostingsJobPage.xaml">
+    <Page Include="Pages\Postings\PostingsJobPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -472,6 +504,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\RemainsPages\waitRemains.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Taxation\AddTaxJob.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Taxation\StatisticTaxation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Taxation\TaxationJob.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Taxation\ViewPostingsAndTaxText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -511,7 +559,9 @@
   <ItemGroup>
     <None Include="Остатки_TemporaryKey.pfx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Classes\Taxation\PostingsClasses\" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

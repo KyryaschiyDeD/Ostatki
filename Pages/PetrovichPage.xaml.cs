@@ -227,7 +227,9 @@ namespace Остатки.Pages
 									if (!StandardNamesOfXaract.Contains(xaract.title))
 									{
 										StandardNamesOfXaract.Add(xaract.title);
-										specificationsDict.Add(xaract.title, "");
+										if (!specificationsDict.ContainsKey(xaract.title))
+											specificationsDict.Add(xaract.title, "");
+
 										for (int k = 0; k < addCountProduct; k++)
 										{
 											for (int j = 0; j < countOfComplect.Count; j++)
